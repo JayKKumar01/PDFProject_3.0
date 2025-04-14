@@ -7,7 +7,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pdfproject.Config;
 import pdfproject.models.InputData;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +29,7 @@ public class InputDataProvider {
      */
     public static List<InputData> load() {
         List<InputData> list = new ArrayList<>();
-        Iterator<Row> itr = getRowIterator(Config.INPUT_PATH);
+        Iterator<Row> itr = getRowIterator();
 
         // Check if the iterator is null
         if (itr == null) {
@@ -63,12 +62,6 @@ public class InputDataProvider {
             if (strPath1 == null || strPath2 == null) {
                 continue;
             }
-
-//            // Validate the range format for range1 and range2
-//            if (InvalidRangeFormat(range1) || InvalidRangeFormat(range2)) {
-//                System.out.println(new File(strPath1).getName() + ": Wrong Range Pattern!");
-//                continue;
-//            }
 
             // Create a DataModel object and add it to the list
             InputData dataModel = new InputData(strPath1, strPath2,
@@ -107,14 +100,11 @@ public class InputDataProvider {
         return Integer.parseInt(pages[0]) > Integer.parseInt(pages[1]);
     }
 
-    private static Iterator<Row> getRowIterator(String path) {
-        if (path == null || path.isEmpty()){
-            return null;
-        }
+    private static Iterator<Row> getRowIterator() {
         FileInputStream fis;
         XSSFWorkbook wb = null;
         try {
-            fis = new FileInputStream(path);
+            fis = new FileInputStream(Config.INPUT_PATH);
             wb = new XSSFWorkbook(fis);
             fis.close();
         } catch (IOException e) {

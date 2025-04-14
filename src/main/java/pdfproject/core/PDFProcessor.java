@@ -3,11 +3,14 @@ package pdfproject.core;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.Config;
+import pdfproject.constants.AppPaths;
+import pdfproject.constants.FileTypes;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.parsers.RangeParser;
 import pdfproject.utils.ImageUtils;
 import pdfproject.utils.WordToPdfConverter;
+import pdfproject.validators.AlignmentValidator;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,7 +23,7 @@ public class PDFProcessor {
 
     // 🔁 Updated: return a list of MapModel (one per row)
     public List<MapModel> processAll(List<InputData> dataList) {
-        output_image_path = Config.OUTPUT_IMAGES_PATH + "/Result - "+System.currentTimeMillis();
+        output_image_path = AppPaths.OUTPUT_IMAGES_BASE + "/Result - "+System.currentTimeMillis();
         List<MapModel> resultList = new ArrayList<>();
 
         for (int rowIndex = 0; rowIndex < dataList.size(); rowIndex++) {
@@ -55,31 +58,23 @@ public class PDFProcessor {
             if (range1.size() != range2.size())
                 throw new IllegalArgumentException("Mismatch in page range counts.");
 
-            PDFRenderer renderer1 = new PDFRenderer(doc1);
-            PDFRenderer renderer2 = new PDFRenderer(doc2);
+            // Perform alignment validation
+            AlignmentValidator alignmentValidator = new AlignmentValidator();
+            List<String> alignmentRow = alignmentValidator.validateAlignment(doc1, doc2, range1, range2, rowIndex);
 
-            List<String> alignmentRow = new ArrayList<>();
-
-            for (int i = 0; i < range1.size(); i++) {
-                int p1 = range1.get(i) - 1;
-                int p2 = range2.get(i) - 1;
-
-                BufferedImage img1 = renderer1.renderImageWithDPI(p1, 200);
-                BufferedImage img2 = renderer2.renderImageWithDPI(p2, 200);
-                BufferedImage diff = ImageUtils.generateDiffImage(img1, img2);
-
-                String[] paths = saveImages(rowIndex, i + 1, img1, img2, diff);
-                alignmentRow.add(paths[0]); // img1 path
-                alignmentRow.add(paths[1]); // img2 path
-                alignmentRow.add(paths[2]); // diff path
-            }
+            // Perform content validation
+            ContentValidator contentValidator = new ContentValidator();
+            List<String> contentValidationResults = contentValidator.validateContent(doc1, doc2, range1, range2);
 
             resultMap.addAlignmentRow(alignmentRow);
+            resultMap.addContentValidationResults(contentValidationResults);
+
+
         }
     }
 
     private File ensurePdf(String path) throws Exception {
-        return path.toLowerCase().endsWith(".pdf") ? new File(path) : WordToPdfConverter.convertToPdf(path);
+        return path.toLowerCase().endsWith(FileTypes.PDF_EXTENSION) ? new File(path) : WordToPdfConverter.convertToPdf(path);
     }
 
     private String[] saveImages(int rowIndex, int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {
@@ -91,9 +86,9 @@ public class PDFProcessor {
         File img2File = new File(dir, "img2.png");
         File diffFile = new File(dir, "diff.png");
 
-        ImageIO.write(img1, "png", img1File);
-        ImageIO.write(img2, "png", img2File);
-        ImageIO.write(diff, "png", diffFile);
+        ImageIO.write(img1, FileTypes.PNG_EXTENSION, img1File);
+        ImageIO.write(img2, FileTypes.PNG_EXTENSION, img2File);
+        ImageIO.write(diff, FileTypes.PNG_EXTENSION, diffFile);
 
         return new String[]{img1File.getPath(), img2File.getPath(), diffFile.getPath()};
     }
