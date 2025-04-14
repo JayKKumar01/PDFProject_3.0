@@ -8,6 +8,12 @@ public class RangeParser {
 
     public static List<Integer> parse(String range, int totalPages) throws IllegalArgumentException {
         List<Integer> result = new ArrayList<>();
+        if (range == null || range.isEmpty()){
+            for (int i=0; i<totalPages; i++){
+                result.add(i+1);
+            }
+            return result;
+        }
         String[] parts = range.split(",");
 
         for (String part : parts) {

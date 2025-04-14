@@ -16,21 +16,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PDFProcessor {
+    private String output_image_path;
 
-    public MapModel processAll(List<InputData> dataList) {
-        MapModel resultMap = new MapModel();
-        int rowIndex = 0;
+    // 🔁 Updated: return a list of MapModel (one per row)
+    public List<MapModel> processAll(List<InputData> dataList) {
+        output_image_path = Config.OUTPUT_IMAGES_PATH + "/Result - "+System.currentTimeMillis();
+        List<MapModel> resultList = new ArrayList<>();
 
-        for (InputData data : dataList) {
+        for (int rowIndex = 0; rowIndex < dataList.size(); rowIndex++) {
+            InputData data = dataList.get(rowIndex);
+            MapModel resultMap = new MapModel();
+
             try {
                 processRow(data, rowIndex, resultMap);
+                resultList.add(resultMap);
             } catch (Exception e) {
                 System.err.println("Error in row " + rowIndex + ": " + e.getMessage());
+                resultList.add(resultMap); // Optional: still add empty MapModel to keep indexing
             }
-            rowIndex++;
         }
 
-        return resultMap;
+        return resultList;
     }
 
     private void processRow(InputData data, int rowIndex, MapModel resultMap) throws Exception {
@@ -77,7 +83,7 @@ public class PDFProcessor {
     }
 
     private String[] saveImages(int rowIndex, int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {
-        String dirPath = String.format("%s/item_%d/alignment/page_%d", Config.OUTPUT_IMAGES_PATH, rowIndex + 1, pageNumber);
+        String dirPath = String.format("%s/item_%d/alignment/page_%d", output_image_path, rowIndex + 1, pageNumber);
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 

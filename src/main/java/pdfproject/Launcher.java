@@ -25,6 +25,6 @@ public class Launcher {
             return;
         }
         System.out.println("✅ Loaded " + inputs.size() + " input rows.");
-        MapModel mapModel = new PDFProcessor().processAll(inputs);
+        List<MapModel> mapModel = new PDFProcessor().processAll(inputs);
     }
 }
