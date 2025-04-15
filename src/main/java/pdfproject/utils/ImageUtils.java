@@ -34,12 +34,12 @@ public class ImageUtils {
 
     public static BufferedImage drawBoundingBoxes(BufferedImage image, List<WordInfo> words) {
         float scale = Config.RENDER_DPI / 72f; // PDF default is 72 DPI
-        float padding = 2.0f; // Padding around the word
+        float padding = 3.0f; // Padding around the word
 
         BufferedImage output = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = output.createGraphics();
         g2d.drawImage(image, 0, 0, null);
-        g2d.setStroke(new BasicStroke(1.5f));
+        g2d.setStroke(new BasicStroke(5f));
 
         for (WordInfo word : words) {
             if (word.getPositions().isEmpty()) continue;
@@ -51,8 +51,8 @@ public class ImageUtils {
             // Calculate position and size with padding
             float x = first.getX() * scale - padding; // Apply padding on left
             float y = first.getY() * scale - padding; // Apply padding on top
-            float width = (last.getX() + last.getWidth()) * scale - x + (2 * padding); // Apply padding on both sides
-            float height = first.getHeight() * scale + (2 * padding); // Apply padding on top and bottom
+            float width = (last.getX() + last.getWidth()) * scale - x; // Apply padding on both sides
+            float height = first.getHeight() * scale; // Apply padding on top and bottom
 
             // Set the color based on the operation
             Color boxColor = getOperationColor(word);
@@ -61,7 +61,7 @@ public class ImageUtils {
             g2d.setColor(boxColor);
 
             // Draw box with padding
-            g2d.drawRect(Math.round(x), Math.round(y - height), Math.round(width), Math.round(height));
+            g2d.drawRect(Math.round(x), Math.round(y - height), Math.round(width + (2 * padding)), Math.round(height + (2 * padding)));
         }
 
         g2d.dispose();
