@@ -30,20 +30,22 @@ public class AlignmentValidator {
         this.resultMap = resultMap;
     }
 
-    public void validateAlignment(int p1, int p2, int imagePage) throws Exception {
+    public List<BufferedImage> validateAlignment(int p1, int p2, int imagePage) throws Exception {
+        // Render pages (PDFBox uses 0-based indexing)
+        BufferedImage img1 = renderer1.renderImageWithDPI(p1 - 1, Config.RENDER_DPI);
+        BufferedImage img2 = renderer2.renderImageWithDPI(p2 - 1, Config.RENDER_DPI);
 
-        BufferedImage img1 = renderer1.renderImageWithDPI(p1-1, Config.RENDER_DPI);
-        BufferedImage img2 = renderer2.renderImageWithDPI(p2-1, Config.RENDER_DPI);
+        // Generate difference image
         BufferedImage diff = ImageUtils.generateDiffImage(img1, img2);
 
+        // Save images and track file paths
         String[] paths = saveImages(imagePage, img1, img2, diff);
-        List<String> alignmentRow = new ArrayList<>();
-        alignmentRow.add(paths[0]); // img1 path
-        alignmentRow.add(paths[1]); // img2 path
-        alignmentRow.add(paths[2]); // diff path
+        resultMap.addAlignmentRow(List.of(paths));
 
-        resultMap.addAlignmentRow(alignmentRow);
+        // Return images
+        return List.of(img1, img2, diff);
     }
+
 
     private String[] saveImages(int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {
         String dirPath = String.format("%s/item_%d/alignment/page_%d", outputImagePath, rowIndex + 1, pageNumber);

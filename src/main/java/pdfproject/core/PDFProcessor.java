@@ -70,8 +70,8 @@ public class PDFProcessor {
             for (int i = 0; i < range1.size(); i++) {
                 int p1 = range1.get(i);
                 int p2 = range2.get(i);
-                alignmentValidator.validateAlignment(p1, p2,i+1);
-                contentValidator.validateContent(p1, p2,i+1);
+                List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2,i+1);
+                contentValidator.validateContent(p1, p2,i+1,images);
             }
 
 

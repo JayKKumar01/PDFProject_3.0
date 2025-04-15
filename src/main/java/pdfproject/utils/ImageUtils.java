@@ -1,7 +1,11 @@
 package pdfproject.utils;
 
+import org.apache.pdfbox.text.TextPosition;
+import pdfproject.models.WordInfo;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 public class ImageUtils {
     public static BufferedImage generateDiffImage(BufferedImage img1, BufferedImage img2) {
@@ -24,4 +28,33 @@ public class ImageUtils {
 
         return result;
     }
+
+    public static BufferedImage drawBoundingBoxes(BufferedImage image, List<WordInfo> words, float dpi) {
+        float scale = dpi / 72f; // PDF default is 72 DPI
+
+        BufferedImage output = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = output.createGraphics();
+        g2d.drawImage(image, 0, 0, null);
+        g2d.setColor(Color.RED);
+        g2d.setStroke(new BasicStroke(1.5f));
+
+        for (WordInfo word : words) {
+            if (word.getPositions().isEmpty()) continue;
+
+            TextPosition first = word.getPositions().getFirst();
+            TextPosition last = word.getPositions().getLast();
+
+            float x = first.getX() * scale;
+            float y = first.getY() * scale;
+            float width = (last.getX() + last.getWidth()) * scale - x;
+            float height = first.getHeight() * scale;
+
+            // Draw box (adjust y for image coord system if needed)
+            g2d.drawRect(Math.round(x), Math.round(y - height), Math.round(width), Math.round(height));
+        }
+
+        g2d.dispose();
+        return output;
+    }
+
 }

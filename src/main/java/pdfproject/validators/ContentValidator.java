@@ -3,11 +3,16 @@ package pdfproject.validators;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import pdfproject.Config;
 import pdfproject.core.StringDiff;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.models.WordInfo;
+import pdfproject.utils.ImageUtils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +34,7 @@ public class ContentValidator {
         this.resultMap = resultMap;
     }
 
-    public void validateContent(int p1, int p2, int imagePage) throws Exception {
+    public void validateContent(int p1, int p2, int imagePage, List<BufferedImage> images) throws Exception {
 
         List<WordInfo> words1 = extractWords(doc1, p1);
         List<WordInfo> words2 = extractWords(doc2, p2);
@@ -37,9 +42,17 @@ public class ContentValidator {
         // Use StringDiff class to compare word lists
         List<WordInfo> diff = StringDiff.compare(words1, words2);
 
-        for (WordInfo wordInfo: diff){
-            System.out.println(wordInfo.getWord()+": "+wordInfo.getInfo());
-        }
+//        for (WordInfo wordInfo: diff){
+//            System.out.println(wordInfo.getWord()+": "+wordInfo.getInfo());
+//        }
+
+        BufferedImage img1WithBoxes = ImageUtils.drawBoundingBoxes(images.get(0), diff, Config.RENDER_DPI);
+
+// Optional: save it for review
+        File debugFile = new File("debug_img1_with_boxes.png");
+        ImageIO.write(img1WithBoxes, "png", debugFile);
+
+
     }
 
     // Extract WordInfo list from a PDF page
