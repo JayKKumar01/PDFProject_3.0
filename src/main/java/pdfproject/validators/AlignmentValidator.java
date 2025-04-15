@@ -3,7 +3,6 @@ package pdfproject.validators;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.Config;
-import pdfproject.constants.AppPaths;
 import pdfproject.constants.FileTypes;
 import pdfproject.models.MapModel;
 import pdfproject.utils.ImageUtils;
@@ -48,13 +47,13 @@ public class AlignmentValidator {
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 
-        File img1File = new File(dir, "img1" + FileTypes.PNG_EXTENSION);
-        File img2File = new File(dir, "img2" + FileTypes.PNG_EXTENSION);
-        File diffFile = new File(dir, "diff" + FileTypes.PNG_EXTENSION);
+        File img1File = new File(dir, "img1" + FileTypes.IMAGE_EXTENSION);
+        File img2File = new File(dir, "img2" + FileTypes.IMAGE_EXTENSION);
+        File diffFile = new File(dir, "diff" + FileTypes.IMAGE_EXTENSION);
 
-        ImageIO.write(img1, FileTypes.PNG_EXTENSION, img1File);
-        ImageIO.write(img2, FileTypes.PNG_EXTENSION, img2File);
-        ImageIO.write(diff, FileTypes.PNG_EXTENSION, diffFile);
+        ImageIO.write(img1, FileTypes.IMAGE_TYPE, img1File);
+        ImageIO.write(img2, FileTypes.IMAGE_TYPE, img2File);
+        ImageIO.write(diff, FileTypes.IMAGE_TYPE, diffFile);
 
         return new String[]{img1File.getPath(), img2File.getPath(), diffFile.getPath()};
     }

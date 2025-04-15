@@ -72,20 +72,4 @@ public class PDFProcessor {
     private File ensurePdf(String path) throws Exception {
         return path.toLowerCase().endsWith(FileTypes.PDF_EXTENSION) ? new File(path) : WordToPdfConverter.convertToPdf(path);
     }
-
-    private String[] saveImages(int rowIndex, int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {
-        String dirPath = String.format("%s/item_%d/alignment/page_%d", outputImagePath, rowIndex + 1, pageNumber);
-        File dir = new File(dirPath);
-        if (!dir.exists()) dir.mkdirs();
-
-        File img1File = new File(dir, "img1.png");
-        File img2File = new File(dir, "img2.png");
-        File diffFile = new File(dir, "diff.png");
-
-        ImageIO.write(img1, FileTypes.PNG_EXTENSION, img1File);
-        ImageIO.write(img2, FileTypes.PNG_EXTENSION, img2File);
-        ImageIO.write(diff, FileTypes.PNG_EXTENSION, diffFile);
-
-        return new String[]{img1File.getPath(), img2File.getPath(), diffFile.getPath()};
-    }
 }
