@@ -1,6 +1,9 @@
 package pdfproject.utils;
 
 import org.apache.pdfbox.text.TextPosition;
+import pdfproject.Config;
+import pdfproject.constants.Operation;
+import pdfproject.constants.OperationColor;
 import pdfproject.models.WordInfo;
 
 import java.awt.*;
@@ -29,32 +32,62 @@ public class ImageUtils {
         return result;
     }
 
-    public static BufferedImage drawBoundingBoxes(BufferedImage image, List<WordInfo> words, float dpi) {
-        float scale = dpi / 72f; // PDF default is 72 DPI
+    public static BufferedImage drawBoundingBoxes(BufferedImage image, List<WordInfo> words) {
+        float scale = Config.RENDER_DPI / 72f; // PDF default is 72 DPI
+        float padding = 2.0f; // Padding around the word
 
         BufferedImage output = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = output.createGraphics();
         g2d.drawImage(image, 0, 0, null);
-        g2d.setColor(Color.RED);
         g2d.setStroke(new BasicStroke(1.5f));
 
         for (WordInfo word : words) {
             if (word.getPositions().isEmpty()) continue;
 
+            // Get the first and last text positions
             TextPosition first = word.getPositions().getFirst();
             TextPosition last = word.getPositions().getLast();
 
-            float x = first.getX() * scale;
-            float y = first.getY() * scale;
-            float width = (last.getX() + last.getWidth()) * scale - x;
-            float height = first.getHeight() * scale;
+            // Calculate position and size with padding
+            float x = first.getX() * scale - padding; // Apply padding on left
+            float y = first.getY() * scale - padding; // Apply padding on top
+            float width = (last.getX() + last.getWidth()) * scale - x + (2 * padding); // Apply padding on both sides
+            float height = first.getHeight() * scale + (2 * padding); // Apply padding on top and bottom
 
-            // Draw box (adjust y for image coord system if needed)
+            // Set the color based on the operation
+            Color boxColor = getOperationColor(word);
+
+            // Set the color for the bounding box
+            g2d.setColor(boxColor);
+
+            // Draw box with padding
             g2d.drawRect(Math.round(x), Math.round(y - height), Math.round(width), Math.round(height));
         }
 
         g2d.dispose();
         return output;
     }
+
+
+    private static Color getOperationColor(WordInfo word) {
+        // Check if there are multiple operations
+        if (word.getOperations().size() > 1) {
+            return OperationColor.MULTIPLE; // BLACK for multiple operations
+        }
+
+        // If only one operation, use switch to determine the color
+        Operation operation = word.getOperations().iterator().next(); // Get the single operation
+
+        return switch (operation) {
+            case DELETED -> OperationColor.DELETED; // RED for DELETED
+            case ADDED -> OperationColor.ADDED; // GREEN for ADDED
+            case FONT -> OperationColor.FONT_NAME; // MAGENTA for FONT_NAME
+            case SIZE -> OperationColor.FONT_SIZE; // BLUE for FONT_SIZE
+            case STYLE -> OperationColor.FONT_STYLE; // CYAN for FONT_STYLE
+            default -> OperationColor.MULTIPLE; // BLACK for unknown or unhandled cases
+        };
+    }
+
+
 
 }
