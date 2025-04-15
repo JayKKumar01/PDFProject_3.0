@@ -63,15 +63,15 @@ public class PDFProcessor {
             PDFRenderer renderer2 = new PDFRenderer(doc2);
 
             AlignmentValidator alignmentValidator = new AlignmentValidator(data,outputImagePath,rowIndex,renderer1,renderer2,resultMap);
-            ContentValidator contentValidator = new ContentValidator(data,outputImagePath);
+            ContentValidator contentValidator = new ContentValidator(data,outputImagePath,rowIndex,doc1,doc2,resultMap);
 
 
 
             for (int i = 0; i < range1.size(); i++) {
-                int p1 = range1.get(i) - 1;
-                int p2 = range2.get(i) - 1;
+                int p1 = range1.get(i);
+                int p2 = range2.get(i);
                 alignmentValidator.validateAlignment(p1, p2,i+1);
-//                contentValidator.validateContent(doc1, doc2, range1, range2,rowIndex,resultMap);
+                contentValidator.validateContent(p1, p2,i+1);
             }
 
 

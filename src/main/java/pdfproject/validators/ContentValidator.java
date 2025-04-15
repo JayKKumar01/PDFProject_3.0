@@ -15,24 +15,30 @@ import java.util.List;
 public class ContentValidator {
     private final InputData data;
     private final String outputImagePath;
+    private final int rowIndex;
+    private final PDDocument doc1;
+    private final PDDocument doc2;
+    private final MapModel resultMap;
 
-    public ContentValidator(InputData data, String outputImagePath) {
+    public ContentValidator(InputData data, String outputImagePath, int rowIndex, PDDocument doc1, PDDocument doc2, MapModel resultMap) {
         this.data = data;
         this.outputImagePath = outputImagePath;
+        this.rowIndex = rowIndex;
+        this.doc1 = doc1;
+        this.doc2 = doc2;
+        this.resultMap = resultMap;
     }
 
-    public void validateContent(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2, int rowIndex, MapModel resultMap) throws Exception {
+    public void validateContent(int p1, int p2, int imagePage) throws Exception {
 
-        // Loop through the ranges and compare content
-        for (int i = 0; i < range1.size(); i++) {
+        List<WordInfo> words1 = extractWords(doc1, p1);
+        List<WordInfo> words2 = extractWords(doc2, p2);
 
-            List<WordInfo> words1 = extractWords(doc1, range1.get(i));
-            List<WordInfo> words2 = extractWords(doc2, range2.get(i));
+        // Use StringDiff class to compare word lists
+        List<WordInfo> diff = StringDiff.compare(words1, words2);
 
-            // Use StringDiff class to compare word lists
-            List<WordInfo> diff = StringDiff.compare(words1, words2);
-
-            // i will do something later
+        for (WordInfo wordInfo: diff){
+            System.out.println(wordInfo.getWord()+": "+wordInfo.getInfo());
         }
     }
 

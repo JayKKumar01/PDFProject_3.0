@@ -32,8 +32,8 @@ public class AlignmentValidator {
 
     public void validateAlignment(int p1, int p2, int imagePage) throws Exception {
 
-        BufferedImage img1 = renderer1.renderImageWithDPI(p1, Config.RENDER_DPI);
-        BufferedImage img2 = renderer2.renderImageWithDPI(p2, Config.RENDER_DPI);
+        BufferedImage img1 = renderer1.renderImageWithDPI(p1-1, Config.RENDER_DPI);
+        BufferedImage img2 = renderer2.renderImageWithDPI(p2-1, Config.RENDER_DPI);
         BufferedImage diff = ImageUtils.generateDiffImage(img1, img2);
 
         String[] paths = saveImages(imagePage, img1, img2, diff);
