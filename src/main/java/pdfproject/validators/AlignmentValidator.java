@@ -5,6 +5,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.Config;
 import pdfproject.constants.AppPaths;
 import pdfproject.constants.FileTypes;
+import pdfproject.models.MapModel;
 import pdfproject.utils.ImageUtils;
 
 import javax.imageio.ImageIO;
@@ -15,11 +16,9 @@ import java.util.List;
 
 public class AlignmentValidator {
 
-    public List<String> validateAlignment(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2, int rowIndex) throws Exception {
+    public void validateAlignment(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2, int rowIndex, MapModel resultMap) throws Exception {
         PDFRenderer renderer1 = new PDFRenderer(doc1);
         PDFRenderer renderer2 = new PDFRenderer(doc2);
-
-        List<String> alignmentRow = new ArrayList<>();
 
         for (int i = 0; i < range1.size(); i++) {
             int p1 = range1.get(i) - 1;
@@ -30,12 +29,13 @@ public class AlignmentValidator {
             BufferedImage diff = ImageUtils.generateDiffImage(img1, img2);
 
             String[] paths = saveImages(rowIndex, i + 1, img1, img2, diff);
+            List<String> alignmentRow = new ArrayList<>();
             alignmentRow.add(paths[0]); // img1 path
             alignmentRow.add(paths[1]); // img2 path
             alignmentRow.add(paths[2]); // diff path
-        }
 
-        return alignmentRow;
+            resultMap.addAlignmentRow(alignmentRow);
+        }
     }
 
     private String[] saveImages(int rowIndex, int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {

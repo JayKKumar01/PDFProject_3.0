@@ -4,6 +4,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import pdfproject.core.StringDiff;
+import pdfproject.models.MapModel;
 import pdfproject.models.WordInfo;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class ContentValidator {
 
-    public void validateContent(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2) throws Exception {
+    public void validateContent(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2, int rowIndex, MapModel resultMap) throws Exception {
 
         // Loop through the ranges and compare content
         for (int i = 0; i < range1.size(); i++) {

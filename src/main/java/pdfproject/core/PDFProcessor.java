@@ -11,6 +11,7 @@ import pdfproject.parsers.RangeParser;
 import pdfproject.utils.ImageUtils;
 import pdfproject.utils.WordToPdfConverter;
 import pdfproject.validators.AlignmentValidator;
+import pdfproject.validators.ContentValidator;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -60,14 +61,12 @@ public class PDFProcessor {
 
             // Perform alignment validation
             AlignmentValidator alignmentValidator = new AlignmentValidator();
-            List<String> alignmentRow = alignmentValidator.validateAlignment(doc1, doc2, range1, range2, rowIndex);
+            alignmentValidator.validateAlignment(doc1, doc2, range1, range2, rowIndex,resultMap);
 
             // Perform content validation
             ContentValidator contentValidator = new ContentValidator();
-            List<String> contentValidationResults = contentValidator.validateContent(doc1, doc2, range1, range2);
+            contentValidator.validateContent(doc1, doc2, range1, range2,rowIndex,resultMap);
 
-            resultMap.addAlignmentRow(alignmentRow);
-            resultMap.addContentValidationResults(contentValidationResults);
 
 
         }

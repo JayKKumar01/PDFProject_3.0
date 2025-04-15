@@ -101,6 +101,9 @@ public class InputDataProvider {
     }
 
     private static Iterator<Row> getRowIterator() {
+        if (Config.INPUT_PATH.isEmpty()){
+            return null;
+        }
         FileInputStream fis;
         XSSFWorkbook wb = null;
         try {

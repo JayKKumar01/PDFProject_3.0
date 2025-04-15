@@ -1,6 +1,8 @@
 package pdfproject.core;
 
+import pdfproject.constants.Operation;
 import pdfproject.models.WordInfo;
+import pdfproject.utils.Base;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -64,8 +66,7 @@ public class StringDiff {
                     gotEqual = true;
                 }
                 if (Base.isFontInfoSame(wordInfo1, wordInfo2)) {
-                    wordInfo1.addType(Operation.EQUAL);
-                    resultEql.add(wordInfo1);
+                    wordInfo1.addOperation(Operation.EQUAL);
                 } else {
                     Base.updateFontInfo(wordInfo1, wordInfo2);
                     resultEql.add(wordInfo2);
@@ -76,7 +77,7 @@ public class StringDiff {
 
                 if(confirmDel(words1,m-i,words2,n-j)) {
                     gotEqual = false;
-                    wordInfo1.addType(Operation.DELETED);
+                    wordInfo1.addOperation(Operation.DELETED);
                     String info = Base.getInfo(Operation.DELETED, wordInfo1);
                     wordInfo1.setInfo(info);
                     resultDel.add(wordInfo1);
@@ -86,7 +87,7 @@ public class StringDiff {
             } else {
                 if (confirmAdd(words1,m-i,words2,n-j)) {
                     gotEqual = false;
-                    wordInfo2.addType(Operation.ADDED);
+                    wordInfo2.addOperation(Operation.ADDED);
                     String info = Base.getInfo(Operation.ADDED, wordInfo2);
                     wordInfo2.setInfo(info);
                     resultAdd.add(wordInfo2);
@@ -98,7 +99,7 @@ public class StringDiff {
         while (i > 0) {
             // confirm del here also, use refresh list after detecting issue
             WordInfo wordInfo1 = words1.get(m - i);
-            wordInfo1.addType(Operation.DELETED);
+            wordInfo1.addOperation(Operation.DELETED);
             String info = Base.getInfo(Operation.DELETED, wordInfo1);
             wordInfo1.setInfo(info);
             resultDel.add(wordInfo1);
@@ -107,7 +108,7 @@ public class StringDiff {
 
         while (j > 0) {
             WordInfo wordInfo2 = words2.get(n - j);
-            wordInfo2.addType(Operation.ADDED);
+            wordInfo2.addOperation(Operation.ADDED);
             String info = Base.getInfo(Operation.ADDED, wordInfo2);
             wordInfo2.setInfo(info);
             resultAdd.add(wordInfo2);
@@ -116,6 +117,7 @@ public class StringDiff {
 
         list.addAll(resultDel);
         list.addAll(resultAdd);
+        list.addAll(resultEql);
         return list;
     }
 

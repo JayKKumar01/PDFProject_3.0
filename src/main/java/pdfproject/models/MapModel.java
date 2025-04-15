@@ -5,26 +5,26 @@ import java.util.List;
 
 public class MapModel {
     private final List<List<String>> alignmentImages;
-    private final List<List<String>> validationImages;
+    private final List<List<String>> contentImages;
 
     public MapModel() {
         this.alignmentImages = new ArrayList<>();
-        this.validationImages = new ArrayList<>();
+        this.contentImages = new ArrayList<>();
     }
 
     public void addAlignmentRow(List<String> row) {
         alignmentImages.add(row);
     }
 
-    public void addValidationRow(List<String> row) {
-        validationImages.add(row);
+    public void addContentRow(List<String> row) {
+        contentImages.add(row);
     }
 
     public List<List<String>> getAlignmentImages() {
         return alignmentImages;
     }
 
-    public List<List<String>> getValidationImages() {
-        return validationImages;
+    public List<List<String>> getContentImages() {
+        return contentImages;
     }
 }
