@@ -33,7 +33,7 @@ public class StringDiff {
         if (words1 == null || words2 == null){
             return null;
         }
-        List<WordInfo> list = new ArrayList<>();
+        List<WordInfo> result = new ArrayList<>();
         int m = words1.size();
         int n = words2.size();
 
@@ -48,11 +48,6 @@ public class StringDiff {
             }
         }
 
-        List<WordInfo> resultEql = new ArrayList<>();
-        List<WordInfo> resultDel = new ArrayList<>();
-        List<WordInfo> resultAdd = new ArrayList<>();
-        boolean gotEqual = false;
-
         int i = m;
         int j = n;
         while (i > 0 && j > 0) {
@@ -62,35 +57,29 @@ public class StringDiff {
             String w2 = wordInfo2.getWord();
             if (w1.equals(w2)) {
 
-                if (!gotEqual) {
-                    gotEqual = true;
-                }
                 if (Base.isFontInfoSame(wordInfo1, wordInfo2)) {
                     wordInfo1.addOperation(Operation.EQUAL);
                 } else {
                     Base.updateFontInfo(wordInfo1, wordInfo2);
-                    resultEql.add(wordInfo2);
+                    result.add(wordInfo2);
                 }
                 i--;
                 j--;
             } else if (LCSuffix[i - 1][j] > LCSuffix[i][j - 1]) {
-
                 if(confirmDel(words1,m-i,words2,n-j)) {
-                    gotEqual = false;
                     wordInfo1.addOperation(Operation.DELETED);
                     String info = Base.getInfo(Operation.DELETED, wordInfo1);
                     wordInfo1.setInfo(info);
-                    resultDel.add(wordInfo1);
+                    result.add(wordInfo1);
                 }
 
                 i--;
             } else {
                 if (confirmAdd(words1,m-i,words2,n-j)) {
-                    gotEqual = false;
                     wordInfo2.addOperation(Operation.ADDED);
                     String info = Base.getInfo(Operation.ADDED, wordInfo2);
                     wordInfo2.setInfo(info);
-                    resultAdd.add(wordInfo2);
+                    result.add(wordInfo2);
                 }
                 j--;
             }
@@ -102,7 +91,7 @@ public class StringDiff {
             wordInfo1.addOperation(Operation.DELETED);
             String info = Base.getInfo(Operation.DELETED, wordInfo1);
             wordInfo1.setInfo(info);
-            resultDel.add(wordInfo1);
+            result.add(wordInfo1);
             i--;
         }
 
@@ -111,14 +100,10 @@ public class StringDiff {
             wordInfo2.addOperation(Operation.ADDED);
             String info = Base.getInfo(Operation.ADDED, wordInfo2);
             wordInfo2.setInfo(info);
-            resultAdd.add(wordInfo2);
+            result.add(wordInfo2);
             j--;
         }
-
-        list.addAll(resultDel);
-        list.addAll(resultAdd);
-        list.addAll(resultEql);
-        return list;
+        return result;
     }
 
 
@@ -162,11 +147,5 @@ public class StringDiff {
             }else return !w1.getWord().endsWith("-") && !w2.getWord().startsWith("-");
         }
         return true;
-    }
-
-    /**
-         * CustomList class to encapsulate lists of equal, deleted, and added WordInfo objects.
-         */
-        public record CustomList(List<WordInfo> resultEql, List<WordInfo> resultDel, List<WordInfo> resultAdd) {
     }
 }

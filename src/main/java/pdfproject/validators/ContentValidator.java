@@ -70,8 +70,8 @@ public class ContentValidator {
             }
         };
 
-        stripper.setStartPage(pageNum + 1);
-        stripper.setEndPage(pageNum + 1);
+        stripper.setStartPage(pageNum);
+        stripper.setEndPage(pageNum);
         stripper.setSortByPosition(true);
         stripper.getText(document);  // Trigger extraction
 
