@@ -12,6 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContentValidator {
+    private final String outputImagePath;
+
+    public ContentValidator(String outputImagePath) {
+        this.outputImagePath = outputImagePath;
+    }
 
     public void validateContent(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2, int rowIndex, MapModel resultMap) throws Exception {
 

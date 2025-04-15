@@ -1,14 +1,11 @@
 package pdfproject.core;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
-import pdfproject.Config;
 import pdfproject.constants.AppPaths;
 import pdfproject.constants.FileTypes;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.parsers.RangeParser;
-import pdfproject.utils.ImageUtils;
 import pdfproject.utils.WordToPdfConverter;
 import pdfproject.validators.AlignmentValidator;
 import pdfproject.validators.ContentValidator;
@@ -20,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PDFProcessor {
-    private String output_image_path;
+    private String outputImagePath;
 
     // 🔁 Updated: return a list of MapModel (one per row)
     public List<MapModel> processAll(List<InputData> dataList) {
-        output_image_path = AppPaths.OUTPUT_IMAGES_BASE + "/Result - "+System.currentTimeMillis();
+        outputImagePath = AppPaths.OUTPUT_IMAGES_BASE + "/Result - "+System.currentTimeMillis();
         List<MapModel> resultList = new ArrayList<>();
 
         for (int rowIndex = 0; rowIndex < dataList.size(); rowIndex++) {
@@ -60,11 +57,11 @@ public class PDFProcessor {
                 throw new IllegalArgumentException("Mismatch in page range counts.");
 
             // Perform alignment validation
-            AlignmentValidator alignmentValidator = new AlignmentValidator();
+            AlignmentValidator alignmentValidator = new AlignmentValidator(outputImagePath);
             alignmentValidator.validateAlignment(doc1, doc2, range1, range2, rowIndex,resultMap);
 
             // Perform content validation
-            ContentValidator contentValidator = new ContentValidator();
+            ContentValidator contentValidator = new ContentValidator(outputImagePath);
             contentValidator.validateContent(doc1, doc2, range1, range2,rowIndex,resultMap);
 
 
@@ -77,7 +74,7 @@ public class PDFProcessor {
     }
 
     private String[] saveImages(int rowIndex, int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {
-        String dirPath = String.format("%s/item_%d/alignment/page_%d", output_image_path, rowIndex + 1, pageNumber);
+        String dirPath = String.format("%s/item_%d/alignment/page_%d", outputImagePath, rowIndex + 1, pageNumber);
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 

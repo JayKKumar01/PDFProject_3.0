@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlignmentValidator {
+    private final String outputImagePath;
+
+    public AlignmentValidator(String outputImagePath) {
+        this.outputImagePath = outputImagePath;
+    }
 
     public void validateAlignment(PDDocument doc1, PDDocument doc2, List<Integer> range1, List<Integer> range2, int rowIndex, MapModel resultMap) throws Exception {
         PDFRenderer renderer1 = new PDFRenderer(doc1);
@@ -39,7 +44,7 @@ public class AlignmentValidator {
     }
 
     private String[] saveImages(int rowIndex, int pageNumber, BufferedImage img1, BufferedImage img2, BufferedImage diff) throws Exception {
-        String dirPath = String.format("%s/item_%d/alignment/page_%d", AppPaths.OUTPUT_IMAGES_BASE, rowIndex + 1, pageNumber);
+        String dirPath = String.format("%s/item_%d/alignment/page_%d", outputImagePath, rowIndex + 1, pageNumber);
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
 
