@@ -2,8 +2,10 @@ package pdfproject.models;
 
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
+import pdfproject.Config;
 import pdfproject.constants.Operation;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -106,6 +108,28 @@ public class WordInfo {
     public void addOperations(Collection<Operation> ops) {
         operations.addAll(ops);
     }
+
+    public Rectangle getBoundingBox() {
+        if (positions == null || positions.isEmpty()) return new Rectangle(0, 0, 0, 0);
+
+        float scale = Config.RENDER_DPI / 72f;
+
+        TextPosition first = positions.getFirst();
+        TextPosition last = positions.getLast();
+
+        float x = first.getXDirAdj();
+        float y = first.getYDirAdj();
+        float width = (last.getXDirAdj() + last.getWidthDirAdj()) - x;
+        float height = first.getHeightDir(); // Assuming uniform height for word
+
+        return new Rectangle(
+                Math.round(x * scale),
+                Math.round(y * scale),
+                Math.round(width * scale),
+                Math.round(height * scale)
+        );
+    }
+
 
     @Override
     public String toString() {

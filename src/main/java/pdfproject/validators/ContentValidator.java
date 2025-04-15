@@ -53,6 +53,10 @@ public class ContentValidator {
                 .filter(word -> !word.getOperations().contains(Operation.DELETED))
                 .toList();
 
+        BufferedImage diffImage = generateDiffImage(diff, images.get(0), images.get(1));
+        String diffPath = saveDiffImage(imagePage, diffImage);
+
+
         // Create bounding boxes on each image
         BufferedImage boxedImg1 = ImageUtils.drawBoundingBoxes(images.get(0), forImage1);
         BufferedImage boxedImg2 = ImageUtils.drawBoundingBoxes(images.get(1), forImage2);
@@ -62,9 +66,92 @@ public class ContentValidator {
 
         // Save the combined image
         String[] paths = saveImage(imagePage, combinedImage);
-        resultMap.addContentRow(List.of(paths));
+        List<String> finalList = new ArrayList<>(List.of(paths));
+        finalList.add(diffPath);
+        resultMap.addContentRow(finalList);
 
     }
+
+    private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
+        int width = Math.max(img1.getWidth(), img2.getWidth());
+
+        int padding = 5;
+        int estimatedHeight = 0;
+
+        int lastLine = -1;
+        float lastPos = -1;
+        int currentLineHeight = 0;
+
+        // First, estimate required height from diff words
+        for (WordInfo word : diff) {
+            Rectangle box = word.getBoundingBox();
+            if (box.height == 0) continue;
+
+            if (word.getLine() != lastLine || word.getPosition() != lastPos) {
+                estimatedHeight += currentLineHeight + padding;
+                currentLineHeight = box.height;
+            } else {
+                currentLineHeight = Math.max(currentLineHeight, box.height);
+            }
+
+            lastLine = word.getLine();
+            lastPos = word.getPosition();
+        }
+        estimatedHeight += currentLineHeight + 2 * padding; // add last line + top padding
+
+        int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
+
+        BufferedImage diffImg = new BufferedImage(width, finalHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = diffImg.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, width, finalHeight);
+
+        // Reset for actual drawing
+        int x = padding;
+        int y = padding;
+        lastLine = -1;
+        lastPos = -1;
+
+        for (WordInfo word : diff) {
+            BufferedImage srcImg = word.getOperations().contains(Operation.DELETED) ? img1 : img2;
+            Rectangle box = word.getBoundingBox();
+
+            if (box.width == 0 || box.height == 0) continue;
+
+            BufferedImage wordImg = srcImg.getSubimage(
+                    Math.max(0, box.x),
+                    Math.max(0, box.y),
+                    Math.min(box.width, srcImg.getWidth() - box.x),
+                    Math.min(box.height, srcImg.getHeight() - box.y)
+            );
+
+            if (word.getLine() != lastLine || word.getPosition() != lastPos) {
+                x = padding;
+                y += box.height + padding;
+            }
+
+            g.drawImage(wordImg, x, y, null);
+
+            x += box.width + padding;
+            lastLine = word.getLine();
+            lastPos = word.getPosition();
+        }
+
+        g.dispose();
+        return diffImg;
+    }
+
+    private String saveDiffImage(int pageNumber, BufferedImage diffImage) throws IOException {
+        String dirPath = String.format("%s/item_%d/content/page_%d", outputImagePath, rowIndex + 1, pageNumber);
+        File dir = new File(dirPath);
+        if (!dir.exists()) dir.mkdirs();
+
+        File diffFile = new File(dir, "diff" + FileTypes.IMAGE_EXTENSION);
+        ImageIO.write(diffImage, FileTypes.IMAGE_TYPE, diffFile);
+
+        return diffFile.getPath();
+    }
+
 
     // Combine images side by side (both images should have the same height)
     private BufferedImage combineImagesSideBySide(BufferedImage img1, BufferedImage img2) {
