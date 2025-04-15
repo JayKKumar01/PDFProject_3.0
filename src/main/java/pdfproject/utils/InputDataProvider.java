@@ -66,6 +66,11 @@ public class InputDataProvider {
             // Create a DataModel object and add it to the list
             InputData dataModel = new InputData(strPath1, strPath2,
                     formatVal(range1), formatVal(range2));
+            String isMultiColumn = formatVal(row.getCell(4));
+            if (isMultiColumn != null && !isMultiColumn.isEmpty()){
+                dataModel.setSingleColumn(!isMultiColumn.equalsIgnoreCase("yes"));
+            }
+
             list.add(dataModel);
         }
         return list;

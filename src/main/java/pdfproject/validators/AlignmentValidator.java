@@ -4,6 +4,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.Config;
 import pdfproject.constants.FileTypes;
+import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.utils.ImageUtils;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class AlignmentValidator {
     private final String outputImagePath;
 
-    public AlignmentValidator(String outputImagePath) {
+    public AlignmentValidator(InputData data, String outputImagePath) {
         this.outputImagePath = outputImagePath;
     }
 

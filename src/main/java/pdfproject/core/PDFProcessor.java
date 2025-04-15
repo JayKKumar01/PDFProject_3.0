@@ -41,8 +41,8 @@ public class PDFProcessor {
     }
 
     private void processRow(InputData data, int rowIndex, MapModel resultMap) throws Exception {
-        File pdf1 = ensurePdf(data.path1);
-        File pdf2 = ensurePdf(data.path2);
+        File pdf1 = ensurePdf(data.getPath1());
+        File pdf2 = ensurePdf(data.getPath2());
 
         try (PDDocument doc1 = PDDocument.load(pdf1);
              PDDocument doc2 = PDDocument.load(pdf2)) {
@@ -50,18 +50,18 @@ public class PDFProcessor {
             int total1 = doc1.getNumberOfPages();
             int total2 = doc2.getNumberOfPages();
 
-            List<Integer> range1 = RangeParser.parse(data.range1, total1);
-            List<Integer> range2 = RangeParser.parse(data.range2, total2);
+            List<Integer> range1 = RangeParser.parse(data.getRange1(), total1);
+            List<Integer> range2 = RangeParser.parse(data.getRange2(), total2);
 
             if (range1.size() != range2.size())
                 throw new IllegalArgumentException("Mismatch in page range counts.");
 
             // Perform alignment validation
-            AlignmentValidator alignmentValidator = new AlignmentValidator(outputImagePath);
+            AlignmentValidator alignmentValidator = new AlignmentValidator(data,outputImagePath);
             alignmentValidator.validateAlignment(doc1, doc2, range1, range2, rowIndex,resultMap);
 
             // Perform content validation
-            ContentValidator contentValidator = new ContentValidator(outputImagePath);
+            ContentValidator contentValidator = new ContentValidator(data,outputImagePath);
             contentValidator.validateContent(doc1, doc2, range1, range2,rowIndex,resultMap);
 
 

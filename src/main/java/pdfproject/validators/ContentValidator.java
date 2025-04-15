@@ -4,6 +4,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
 import pdfproject.core.StringDiff;
+import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.models.WordInfo;
 
@@ -12,9 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContentValidator {
+    private final InputData data;
     private final String outputImagePath;
 
-    public ContentValidator(String outputImagePath) {
+    public ContentValidator(InputData data, String outputImagePath) {
+        this.data = data;
         this.outputImagePath = outputImagePath;
     }
 
@@ -72,7 +75,7 @@ public class ContentValidator {
 
         stripper.setStartPage(pageNum);
         stripper.setEndPage(pageNum);
-        stripper.setSortByPosition(true);
+        stripper.setSortByPosition(data.isSingleColumn());
         stripper.getText(document);  // Trigger extraction
 
         return wordInfoList;
