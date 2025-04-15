@@ -1,11 +1,14 @@
 package pdfproject.core;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import pdfproject.Config;
 import pdfproject.constants.AppPaths;
 import pdfproject.constants.FileTypes;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.parsers.RangeParser;
+import pdfproject.utils.ImageUtils;
 import pdfproject.utils.WordToPdfConverter;
 import pdfproject.validators.AlignmentValidator;
 import pdfproject.validators.ContentValidator;
@@ -56,13 +59,20 @@ public class PDFProcessor {
             if (range1.size() != range2.size())
                 throw new IllegalArgumentException("Mismatch in page range counts.");
 
-            // Perform alignment validation
-            AlignmentValidator alignmentValidator = new AlignmentValidator(data,outputImagePath);
-            alignmentValidator.validateAlignment(doc1, doc2, range1, range2, rowIndex,resultMap);
+            PDFRenderer renderer1 = new PDFRenderer(doc1);
+            PDFRenderer renderer2 = new PDFRenderer(doc2);
 
-            // Perform content validation
+            AlignmentValidator alignmentValidator = new AlignmentValidator(data,outputImagePath,rowIndex,renderer1,renderer2,resultMap);
             ContentValidator contentValidator = new ContentValidator(data,outputImagePath);
-            contentValidator.validateContent(doc1, doc2, range1, range2,rowIndex,resultMap);
+
+
+
+            for (int i = 0; i < range1.size(); i++) {
+                int p1 = range1.get(i) - 1;
+                int p2 = range2.get(i) - 1;
+                alignmentValidator.validateAlignment(p1, p2,i+1);
+//                contentValidator.validateContent(doc1, doc2, range1, range2,rowIndex,resultMap);
+            }
 
 
 
