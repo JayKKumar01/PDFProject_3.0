@@ -53,8 +53,7 @@ public class ContentValidator {
                 .filter(word -> !word.getOperations().contains(Operation.DELETED))
                 .toList();
 
-        BufferedImage diffImage = generateDiffImage(diff, images.get(0), images.get(1));
-        String diffPath = saveDiffImage(imagePage, diffImage);
+
 
 
         // Create bounding boxes on each image
@@ -63,6 +62,10 @@ public class ContentValidator {
 
         // Combine images side by side
         BufferedImage combinedImage = combineImagesSideBySide(boxedImg1, boxedImg2);
+
+
+        BufferedImage diffImage = generateDiffImage(diff, images.get(0), images.get(1));
+        String diffPath = saveDiffImage(imagePage, diffImage);
 
         // Save the combined image
         String[] paths = saveImage(imagePage, combinedImage);
@@ -113,7 +116,7 @@ public class ContentValidator {
         lastPos = -1;
 
         for (WordInfo word : diff) {
-            BufferedImage srcImg = word.getOperations().contains(Operation.DELETED) ? img1 : img2;
+            BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
             Rectangle box = word.getBoundingBox();
 
             if (box.width == 0 || box.height == 0) continue;

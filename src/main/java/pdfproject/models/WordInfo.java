@@ -18,6 +18,8 @@ public class WordInfo {
     // Store multiple operations
     private final Set<Operation> operations = EnumSet.noneOf(Operation.class);
     private String info;
+    private Rectangle boundingBox;
+    private boolean belongsToFirst = false;
 
     public WordInfo(String word, List<TextPosition> positions) {
         this.word = word;
@@ -109,25 +111,22 @@ public class WordInfo {
         operations.addAll(ops);
     }
 
+    // ========== Bounding Box Support ==========
+
     public Rectangle getBoundingBox() {
-        if (positions == null || positions.isEmpty()) return new Rectangle(0, 0, 0, 0);
+        return boundingBox;
+    }
 
-        float scale = Config.RENDER_DPI / 72f;
+    public void setBoundingBox(Rectangle boundingBox) {
+        this.boundingBox = boundingBox;
+    }
 
-        TextPosition first = positions.getFirst();
-        TextPosition last = positions.getLast();
+    public boolean isBelongsToFirst() {
+        return belongsToFirst;
+    }
 
-        float x = first.getXDirAdj();
-        float y = first.getYDirAdj();
-        float width = (last.getXDirAdj() + last.getWidthDirAdj()) - x;
-        float height = first.getHeightDir(); // Assuming uniform height for word
-
-        return new Rectangle(
-                Math.round(x * scale),
-                Math.round(y * scale),
-                Math.round(width * scale),
-                Math.round(height * scale)
-        );
+    public void setBelongsToFirst(boolean belongsToFirst) {
+        this.belongsToFirst = belongsToFirst;
     }
 
 

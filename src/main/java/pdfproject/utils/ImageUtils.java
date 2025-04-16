@@ -56,12 +56,20 @@ public class ImageUtils {
 
             // Set the color based on the operation
             Color boxColor = getOperationColor(word);
+            if (OperationColor.DELETED.equals(boxColor)) {
+                word.setBelongsToFirst(true);
+            }
+
+            // check if boxColor is same as Deleted color then set wordInfo.setBelongsToFirst(true)
 
             // Set the color for the bounding box
             g2d.setColor(boxColor);
+            // here do wordInfo.setBoundingBox(rect) then use this rect to draw
 
-            // Draw box with padding
-            g2d.drawRect(Math.round(x), Math.round(y - height), Math.round(width + (2 * padding)), Math.round(height + (2 * padding)));
+            Rectangle boundingBox = new Rectangle(Math.round(x), Math.round(y - height), Math.round(width + (2 * padding)), Math.round(height + (2 * padding)));
+            word.setBoundingBox(boundingBox);
+            // Draw using the bounding box stored earlier
+            g2d.drawRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
         }
 
         g2d.dispose();
