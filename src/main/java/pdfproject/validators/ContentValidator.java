@@ -78,6 +78,7 @@ public class ContentValidator {
 
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
         final int padding = 5;
+        final int textHeight = 15; // space for drawing info below each cutout
         final int width = Math.max(img1.getWidth(), img2.getWidth());
 
         int estimatedHeight = 0;
@@ -94,7 +95,7 @@ public class ContentValidator {
             float pos = word.getPosition();
 
             if (pos != lastPos || !Objects.equals(info, lastInfo)) {
-                estimatedHeight += currentLineHeight + padding;
+                estimatedHeight += currentLineHeight + textHeight + padding;
                 currentLineHeight = box.height;
             } else {
                 currentLineHeight = Math.max(currentLineHeight, box.height);
@@ -103,7 +104,7 @@ public class ContentValidator {
             lastPos = pos;
             lastInfo = info;
         }
-        estimatedHeight += currentLineHeight + 2 * padding;
+        estimatedHeight += currentLineHeight + textHeight + 2 * padding;
 
         int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
         BufferedImage diffImg = new BufferedImage(width, finalHeight, BufferedImage.TYPE_INT_RGB);
@@ -111,10 +112,18 @@ public class ContentValidator {
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, finalHeight);
 
-        // Draw words
+        // Use Times New Roman font
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setFont(new Font("Times New Roman", Font.PLAIN, 12)); // Set Times New Roman
+        g.setColor(Color.BLACK);
+
+        // Draw words + info text
         int x = padding, y = padding;
         lastPos = -1;
         lastInfo = null;
+
+        // This is to track when to print info and avoid printing it multiple times for same line
+        String lastPrintedInfo = null;
 
         for (WordInfo word : diff) {
             Rectangle box = word.getBoundingBox();
@@ -125,7 +134,7 @@ public class ContentValidator {
 
             if (pos != lastPos || !Objects.equals(info, lastInfo)) {
                 x = padding;
-                y += box.height + padding;
+                y += currentLineHeight + padding; // Go to the next line
             }
 
             BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
@@ -139,6 +148,12 @@ public class ContentValidator {
             g.drawImage(wordImg, x, y, null);
             x += box.width + padding;
 
+            // Only print info once for the line
+            if (!Objects.equals(lastPrintedInfo, info)) {
+                g.drawString(info, padding, y + box.height + 12); // Draw info just below the cutouts
+                lastPrintedInfo = info;
+            }
+
             lastPos = pos;
             lastInfo = info;
         }
@@ -146,6 +161,7 @@ public class ContentValidator {
         g.dispose();
         return diffImg;
     }
+
 
 
     private String saveDiffImage(int pageNumber, BufferedImage diffImage) throws IOException {
