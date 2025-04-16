@@ -78,7 +78,7 @@ public class ContentValidator {
 
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
         final int padding = 5;
-        final int textHeight = 15; // space for drawing info below each cutout
+        final int textHeight = 40; // space for drawing info below each cutout
         final int width = Math.max(img1.getWidth(), img2.getWidth());
 
         int estimatedHeight = 0;
@@ -114,16 +114,13 @@ public class ContentValidator {
 
         // Use Times New Roman font
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.setFont(new Font("Times New Roman", Font.PLAIN, 12)); // Set Times New Roman
-        g.setColor(Color.BLACK);
+        g.setFont(new Font("Times New Roman", Font.PLAIN, 20)); // Set Times New Roman
+
 
         // Draw words + info text
         int x = padding, y = padding;
         lastPos = -1;
         lastInfo = null;
-
-        // This is to track when to print info and avoid printing it multiple times for same line
-        String lastPrintedInfo = null;
 
         for (WordInfo word : diff) {
             Rectangle box = word.getBoundingBox();
@@ -131,10 +128,12 @@ public class ContentValidator {
 
             String info = word.getInfo();
             float pos = word.getPosition();
+            boolean shouldWriteInfo = false;
 
             if (pos != lastPos || !Objects.equals(info, lastInfo)) {
                 x = padding;
-                y += currentLineHeight + padding; // Go to the next line
+                y += currentLineHeight + textHeight + padding; // Go to the next line
+                shouldWriteInfo = true;
             }
 
             BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
@@ -148,11 +147,11 @@ public class ContentValidator {
             g.drawImage(wordImg, x, y, null);
             x += box.width + padding;
 
-            // Only print info once for the line
-            if (!Objects.equals(lastPrintedInfo, info)) {
-                g.drawString(info, padding, y + box.height + 12); // Draw info just below the cutouts
-                lastPrintedInfo = info;
+            if (shouldWriteInfo){
+                g.setColor(ImageUtils.getOperationColor(word));
+                g.drawString(info, padding, y + box.height + 20); // Draw info just below the cutouts
             }
+
 
             lastPos = pos;
             lastInfo = info;

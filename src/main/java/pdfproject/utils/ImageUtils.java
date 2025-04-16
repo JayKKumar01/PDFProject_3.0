@@ -77,7 +77,7 @@ public class ImageUtils {
     }
 
 
-    private static Color getOperationColor(WordInfo word) {
+    public static Color getOperationColor(WordInfo word) {
         // Check if there are multiple operations
         if (word.getOperations().size() > 1) {
             return OperationColor.MULTIPLE; // BLACK for multiple operations
