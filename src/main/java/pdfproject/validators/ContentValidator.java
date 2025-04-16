@@ -83,6 +83,7 @@ public class ContentValidator {
 
         int lastLine = -1;
         float lastPos = -1;
+        String lastInfo = "null";
         int currentLineHeight = 0;
 
         // First, estimate required height from diff words
@@ -90,7 +91,7 @@ public class ContentValidator {
             Rectangle box = word.getBoundingBox();
             if (box.height == 0) continue;
 
-            if (word.getLine() != lastLine || word.getPosition() != lastPos) {
+            if (word.getLine() != lastLine || word.getPosition() != lastPos || !word.getInfo().equals(lastInfo)) {
                 estimatedHeight += currentLineHeight + padding;
                 currentLineHeight = box.height;
             } else {
@@ -99,6 +100,7 @@ public class ContentValidator {
 
             lastLine = word.getLine();
             lastPos = word.getPosition();
+            lastInfo = word.getInfo();
         }
         estimatedHeight += currentLineHeight + 2 * padding; // add last line + top padding
 
@@ -114,6 +116,7 @@ public class ContentValidator {
         int y = padding;
         lastLine = -1;
         lastPos = -1;
+        lastInfo = "null";
 
         for (WordInfo word : diff) {
             BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
@@ -128,7 +131,7 @@ public class ContentValidator {
                     Math.min(box.height, srcImg.getHeight() - box.y)
             );
 
-            if (word.getLine() != lastLine || word.getPosition() != lastPos) {
+            if (word.getLine() != lastLine || word.getPosition() != lastPos || !word.getInfo().equals(lastInfo)) {
                 x = padding;
                 y += box.height + padding;
             }
@@ -138,6 +141,7 @@ public class ContentValidator {
             x += box.width + padding;
             lastLine = word.getLine();
             lastPos = word.getPosition();
+            lastInfo = word.getInfo();
         }
 
         g.dispose();
