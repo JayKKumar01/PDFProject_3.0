@@ -79,14 +79,15 @@ public class ContentValidator {
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
         final int padding = 5;
         final int textHeight = 40; // space for drawing info below each cutout
-        final int width = Math.max(img1.getWidth(), img2.getWidth());
 
         int estimatedHeight = 0;
         float lastPos = -1;
         String lastInfo = null;
         int currentLineHeight = 0;
+        int currentLineWidth = padding;
+        int maxLineWidth = 0;
 
-        // Estimate required height
+        // Estimate required height and max line width
         for (WordInfo word : diff) {
             Rectangle box = word.getBoundingBox();
             if (box.height == 0) continue;
@@ -96,26 +97,33 @@ public class ContentValidator {
 
             if (pos != lastPos || !Objects.equals(info, lastInfo)) {
                 estimatedHeight += currentLineHeight + textHeight + padding;
+                maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
+                currentLineWidth = padding + box.width + padding;
                 currentLineHeight = box.height;
             } else {
                 currentLineHeight = Math.max(currentLineHeight, box.height);
+                currentLineWidth += box.width + padding;
             }
 
             lastPos = pos;
             lastInfo = info;
         }
-        estimatedHeight += currentLineHeight + textHeight + 2 * padding;
 
-        int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
-        BufferedImage diffImg = new BufferedImage(width, finalHeight, BufferedImage.TYPE_INT_RGB);
+        estimatedHeight += currentLineHeight + textHeight + 2 * padding;
+        maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
+
+        int finalHeight = Math.max(estimatedHeight, 1);
+//        int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
+        int finalWidth = Math.max(maxLineWidth, 1); // Fallback to 1 to avoid 0 width
+
+        BufferedImage diffImg = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = diffImg.createGraphics();
         g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, finalHeight);
+        g.fillRect(0, 0, finalWidth, finalHeight);
 
         // Use Times New Roman font
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setFont(new Font("Times New Roman", Font.PLAIN, 20)); // Set Times New Roman
-
 
         // Draw words + info text
         int x = padding, y = padding;
@@ -147,11 +155,10 @@ public class ContentValidator {
             g.drawImage(wordImg, x, y, null);
             x += box.width + padding;
 
-            if (shouldWriteInfo){
+            if (shouldWriteInfo) {
                 g.setColor(ImageUtils.getOperationColor(word));
                 g.drawString(info, padding, y + box.height + 20); // Draw info just below the cutouts
             }
-
 
             lastPos = pos;
             lastInfo = info;
@@ -160,6 +167,7 @@ public class ContentValidator {
         g.dispose();
         return diffImg;
     }
+
 
 
 
