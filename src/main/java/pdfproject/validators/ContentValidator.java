@@ -78,7 +78,13 @@ public class ContentValidator {
 
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
         final int padding = 5;
-        final int textHeight = 40; // space for drawing info below each cutout
+        final int textHeight = 40;
+
+        Font font = new Font("Times New Roman", Font.PLAIN, 20);
+        BufferedImage dummyImg = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+        Graphics2D dummyG = dummyImg.createGraphics();
+        dummyG.setFont(font);
+        FontMetrics fontMetrics = dummyG.getFontMetrics();
 
         int estimatedHeight = 0;
         float lastPos = -1;
@@ -86,8 +92,9 @@ public class ContentValidator {
         int currentLineHeight = 0;
         int currentLineWidth = padding;
         int maxLineWidth = 0;
+        int maxTextWidth = 0;
 
-        // Estimate required height and max line width
+        // Estimate required height and max widths
         for (WordInfo word : diff) {
             Rectangle box = word.getBoundingBox();
             if (box.height == 0) continue;
@@ -99,6 +106,12 @@ public class ContentValidator {
                 estimatedHeight += currentLineHeight + textHeight + padding;
                 maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
                 currentLineWidth = padding + box.width + padding;
+
+                // update max info string width
+                if (info != null) {
+                    maxTextWidth = Math.max(maxTextWidth, fontMetrics.stringWidth(info));
+                }
+
                 currentLineHeight = box.height;
             } else {
                 currentLineHeight = Math.max(currentLineHeight, box.height);
@@ -112,23 +125,22 @@ public class ContentValidator {
         estimatedHeight += currentLineHeight + textHeight + 2 * padding;
         maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
 
-        int finalHeight = Math.max(estimatedHeight, 1);
-//        int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
-        int finalWidth = Math.max(maxLineWidth, 1); // Fallback to 1 to avoid 0 width
+        int finalWidth = Math.max(maxLineWidth, maxTextWidth + 2 * padding);
+        int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
 
         BufferedImage diffImg = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = diffImg.createGraphics();
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, finalWidth, finalHeight);
 
-        // Use Times New Roman font
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.setFont(new Font("Times New Roman", Font.PLAIN, 20)); // Set Times New Roman
+        g.setFont(font);
 
-        // Draw words + info text
+        // Reset variables for drawing
         int x = padding, y = padding;
         lastPos = -1;
         lastInfo = null;
+        currentLineHeight = 0;
 
         for (WordInfo word : diff) {
             Rectangle box = word.getBoundingBox();
@@ -140,8 +152,11 @@ public class ContentValidator {
 
             if (pos != lastPos || !Objects.equals(info, lastInfo)) {
                 x = padding;
-                y += currentLineHeight + textHeight + padding; // Go to the next line
+                y += currentLineHeight + textHeight + padding;
+                currentLineHeight = box.height;
                 shouldWriteInfo = true;
+            } else {
+                currentLineHeight = Math.max(currentLineHeight, box.height);
             }
 
             BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
@@ -155,9 +170,9 @@ public class ContentValidator {
             g.drawImage(wordImg, x, y, null);
             x += box.width + padding;
 
-            if (shouldWriteInfo) {
+            if (shouldWriteInfo && info != null) {
                 g.setColor(ImageUtils.getOperationColor(word));
-                g.drawString(info, padding, y + box.height + 20); // Draw info just below the cutouts
+                g.drawString(info, padding, y + currentLineHeight + 20); // Draw string below line of cutouts
             }
 
             lastPos = pos;
@@ -167,6 +182,7 @@ public class ContentValidator {
         g.dispose();
         return diffImg;
     }
+
 
 
 
