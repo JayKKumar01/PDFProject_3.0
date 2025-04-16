@@ -39,11 +39,9 @@ public class ContentValidator {
     }
 
     public void validateContent(int p1, int p2, int imagePage, List<BufferedImage> images) throws Exception {
-
         List<WordInfo> words1 = extractWords(doc1, p1);
         List<WordInfo> words2 = extractWords(doc2, p2);
 
-        // Use StringDiff class to compare word lists
         List<WordInfo> diff = StringDiff.compare(words1, words2);
 
         List<WordInfo> forImage1 = diff.stream()
@@ -54,27 +52,40 @@ public class ContentValidator {
                 .filter(word -> !word.getOperations().contains(Operation.DELETED))
                 .toList();
 
-
-
+        BufferedImage baseImg1 = images.get(0);
+        BufferedImage baseImg2 = images.get(1);
 
         // Create bounding boxes on each image
-        BufferedImage boxedImg1 = ImageUtils.drawBoundingBoxes(images.get(0), forImage1);
-        BufferedImage boxedImg2 = ImageUtils.drawBoundingBoxes(images.get(1), forImage2);
+        BufferedImage boxedImg1 = ImageUtils.drawBoundingBoxes(baseImg1, forImage1);
+        BufferedImage boxedImg2 = ImageUtils.drawBoundingBoxes(baseImg2, forImage2);
 
         // Combine images side by side
         BufferedImage combinedImage = combineImagesSideBySide(boxedImg1, boxedImg2);
 
+        // Optional: release boxed images after combining
+        boxedImg1 = null;
+        boxedImg2 = null;
 
-        BufferedImage diffImage = generateDiffImage(diff, images.get(0), images.get(1));
+        BufferedImage diffImage = generateDiffImage(diff, baseImg1, baseImg2);
         String diffPath = saveDiffImage(imagePage, diffImage);
+
+        // Cleanup input images and diff
+        baseImg1 = null;
+        baseImg2 = null;
+        diffImage = null;
 
         // Save the combined image
         String[] paths = saveImage(imagePage, combinedImage);
+        combinedImage = null;
+
         List<String> finalList = new ArrayList<>(List.of(paths));
         finalList.add(diffPath);
         resultMap.addContentRow(finalList);
 
+        // Suggest garbage collection (optional, usually not needed unless in tight loops)
+        // System.gc();
     }
+
 
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
         final int padding = 5;
@@ -109,8 +120,10 @@ public class ContentValidator {
 
                 // update max info string width
                 if (info != null) {
-                    maxTextWidth = Math.max(maxTextWidth, fontMetrics.stringWidth(info));
+                    int infoWidth = fontMetrics.stringWidth(info);
+                    maxTextWidth = Math.max(maxTextWidth, infoWidth);
                 }
+
 
                 currentLineHeight = box.height;
             } else {
@@ -126,7 +139,7 @@ public class ContentValidator {
         maxLineWidth = Math.max(maxLineWidth, currentLineWidth);
 
         int finalWidth = Math.max(maxLineWidth, maxTextWidth + 2 * padding);
-        int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
+        int finalHeight = Math.max(estimatedHeight, 1);
 
         BufferedImage diffImg = new BufferedImage(finalWidth, finalHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = diffImg.createGraphics();
@@ -180,6 +193,8 @@ public class ContentValidator {
         }
 
         g.dispose();
+
+        // release dummy images
         return diffImg;
     }
 
