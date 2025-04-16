@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ContentValidator {
     private final InputData data;
@@ -76,54 +77,58 @@ public class ContentValidator {
     }
 
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
-        int width = Math.max(img1.getWidth(), img2.getWidth());
+        final int padding = 5;
+        final int width = Math.max(img1.getWidth(), img2.getWidth());
 
-        int padding = 5;
         int estimatedHeight = 0;
-
-        int lastLine = -1;
         float lastPos = -1;
-        String lastInfo = "null";
+        String lastInfo = null;
         int currentLineHeight = 0;
 
-        // First, estimate required height from diff words
+        // Estimate required height
         for (WordInfo word : diff) {
             Rectangle box = word.getBoundingBox();
             if (box.height == 0) continue;
 
-            if (word.getLine() != lastLine || word.getPosition() != lastPos || !word.getInfo().equals(lastInfo)) {
+            String info = word.getInfo();
+            float pos = word.getPosition();
+
+            if (pos != lastPos || !Objects.equals(info, lastInfo)) {
                 estimatedHeight += currentLineHeight + padding;
                 currentLineHeight = box.height;
             } else {
                 currentLineHeight = Math.max(currentLineHeight, box.height);
             }
 
-            lastLine = word.getLine();
-            lastPos = word.getPosition();
-            lastInfo = word.getInfo();
+            lastPos = pos;
+            lastInfo = info;
         }
-        estimatedHeight += currentLineHeight + 2 * padding; // add last line + top padding
+        estimatedHeight += currentLineHeight + 2 * padding;
 
         int finalHeight = Math.max(estimatedHeight, Math.max(img1.getHeight(), img2.getHeight()));
-
         BufferedImage diffImg = new BufferedImage(width, finalHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = diffImg.createGraphics();
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, width, finalHeight);
 
-        // Reset for actual drawing
-        int x = padding;
-        int y = padding;
-        lastLine = -1;
+        // Draw words
+        int x = padding, y = padding;
         lastPos = -1;
-        lastInfo = "null";
+        lastInfo = null;
 
         for (WordInfo word : diff) {
-            BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
             Rectangle box = word.getBoundingBox();
-
             if (box.width == 0 || box.height == 0) continue;
 
+            String info = word.getInfo();
+            float pos = word.getPosition();
+
+            if (pos != lastPos || !Objects.equals(info, lastInfo)) {
+                x = padding;
+                y += box.height + padding;
+            }
+
+            BufferedImage srcImg = word.isBelongsToFirst() ? img1 : img2;
             BufferedImage wordImg = srcImg.getSubimage(
                     Math.max(0, box.x),
                     Math.max(0, box.y),
@@ -131,22 +136,17 @@ public class ContentValidator {
                     Math.min(box.height, srcImg.getHeight() - box.y)
             );
 
-            if (word.getLine() != lastLine || word.getPosition() != lastPos || !word.getInfo().equals(lastInfo)) {
-                x = padding;
-                y += box.height + padding;
-            }
-
             g.drawImage(wordImg, x, y, null);
-
             x += box.width + padding;
-            lastLine = word.getLine();
-            lastPos = word.getPosition();
-            lastInfo = word.getInfo();
+
+            lastPos = pos;
+            lastInfo = info;
         }
 
         g.dispose();
         return diffImg;
     }
+
 
     private String saveDiffImage(int pageNumber, BufferedImage diffImage) throws IOException {
         String dirPath = String.format("%s/item_%d/content/page_%d", outputImagePath, rowIndex + 1, pageNumber);
