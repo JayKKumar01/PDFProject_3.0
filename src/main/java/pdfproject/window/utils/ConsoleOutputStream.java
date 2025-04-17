@@ -1,35 +1,28 @@
 package pdfproject.window.utils;
 
-import java.io.*;
 import javax.swing.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class ConsoleOutputStream extends PrintStream {
-    private JEditorPane editorPane;
+public class ConsoleOutputStream extends OutputStream {
+    private final JEditorPane console;
 
-    public ConsoleOutputStream(JEditorPane editorPane) {
-        super(new ByteArrayOutputStream());
-        this.editorPane = editorPane;
+    public ConsoleOutputStream(JEditorPane console) {
+        this.console = console;
     }
 
     @Override
-    public void println(String x) {
-        String currentText = editorPane.getText();
-        int bodyEndIndex = currentText.lastIndexOf("</body>");
-        if (bodyEndIndex != -1) {
-            String newText = currentText.substring(0, bodyEndIndex)
-                    + "<br>" + x + "</body></html>";
-            editorPane.setText(newText);
-        }
-    }
-
-    @Override
-    public void print(String s) {
-        String currentText = editorPane.getText();
-        int bodyEndIndex = currentText.lastIndexOf("</body>");
-        if (bodyEndIndex != -1) {
-            String newText = currentText.substring(0, bodyEndIndex)
-                    + s + "</body></html>";
-            editorPane.setText(newText);
-        }
+    public void write(int b) throws IOException {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                String text = String.valueOf((char) b);
+                String currentText = console.getText();
+                console.setText(currentText + text);
+                // Optionally, you can wrap the text in a style tag to ensure it's white
+                console.setText("<html><body style='font-family:Segoe UI Emoji; font-size:14px; color:white;'>" + currentText + text + "</body></html>");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }
