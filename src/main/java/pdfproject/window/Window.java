@@ -2,6 +2,7 @@ package pdfproject.window;
 
 import pdfproject.Config;
 import pdfproject.Launcher;
+import pdfproject.constants.AppPaths;
 import pdfproject.constants.OperationColor;
 import pdfproject.interfaces.LauncherListener;
 import pdfproject.window.utils.CustomOutputStream;
@@ -11,6 +12,7 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,9 @@ public class Window {
 
     private final Map<String, String> defaultColors = new HashMap<>();
     private final Map<String, JComboBox<String>> operationBoxes = new HashMap<>();
+
+    private File lastDirectory = new File(AppPaths.DOWNLOAD_DIR);
+
 
 
     public Window(int h) {
@@ -99,16 +104,19 @@ public class Window {
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser();
+                JFileChooser fileChooser = new JFileChooser(lastDirectory); // Start from lastDirectory
                 int result = fileChooser.showOpenDialog(null);
                 if (result == JFileChooser.APPROVE_OPTION) {
-                    var selected = fileChooser.getSelectedFile();
+                    File selected = fileChooser.getSelectedFile();
                     Config.INPUT_PATH = selected.getAbsolutePath();
                     fileLabel.setText(selected.getName());
                     System.out.println(Config.INPUT_PATH);
+
+                    lastDirectory = selected.getParentFile(); // Update last directory
                 }
             }
         });
+
 
         panel.add(browseButton);
         panel.add(fileLabel);
