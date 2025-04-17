@@ -104,16 +104,29 @@ public class Window {
         browseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFileChooser fileChooser = new JFileChooser(lastDirectory); // Start from lastDirectory
-                int result = fileChooser.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selected = fileChooser.getSelectedFile();
+                FileDialog fileDialog = new FileDialog((Frame) null, "Select InputData", FileDialog.LOAD);
+                fileDialog.setDirectory(lastDirectory.getAbsolutePath());
+                fileDialog.setVisible(true);
+
+                String filename = fileDialog.getFile();
+                if (filename != null) {
+                    File selected = new File(fileDialog.getDirectory(), filename);
                     Config.INPUT_PATH = selected.getAbsolutePath();
                     fileLabel.setText(selected.getName());
                     System.out.println(Config.INPUT_PATH);
-
-                    lastDirectory = selected.getParentFile(); // Update last directory
+                    lastDirectory = selected.getParentFile();
                 }
+
+//                JFileChooser fileChooser = new JFileChooser(lastDirectory); // Start from lastDirectory
+//                int result = fileChooser.showOpenDialog(null);
+//                if (result == JFileChooser.APPROVE_OPTION) {
+//                    File selected = fileChooser.getSelectedFile();
+//                    Config.INPUT_PATH = selected.getAbsolutePath();
+//                    fileLabel.setText(selected.getName());
+//                    System.out.println(Config.INPUT_PATH);
+//
+//                    lastDirectory = selected.getParentFile(); // Update last directory
+//                }
             }
         });
 
