@@ -26,10 +26,14 @@ public class MapModel {
 
     private List<String> trimAndQuotePaths(List<String> row) {
         return row.stream()
-                .map(path -> "\"" + path.replace("\\", "/")
-                        .substring(outputImagePath.length() + 1) + "\"")
+                .map(path -> {
+                    if (path == null) return null;
+                    return "\"" + path.replace("\\", "/")
+                            .substring(outputImagePath.length() + 1) + "\"";
+                })
                 .collect(Collectors.toList());
     }
+
 
     public List<List<String>> getAlignmentImages() {
         return alignmentImages;

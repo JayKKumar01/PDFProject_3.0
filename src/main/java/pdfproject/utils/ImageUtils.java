@@ -69,7 +69,7 @@ public class ImageUtils {
             g2d.setColor(boxColor);
             // here do wordInfo.setBoundingBox(rect) then use this rect to draw
 
-            Rectangle boundingBox = new Rectangle(Math.round(x), Math.round(y - height), Math.round(width + (2 * padding)), Math.round(height + (2 * padding)));
+            Rectangle boundingBox = new Rectangle(Math.round(x), Math.round(y - height), Math.round(width + (padding)), Math.round(height + (2 * padding)));
             word.setBoundingBox(boundingBox);
             // Draw using the bounding box stored earlier
             g2d.drawRect(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
