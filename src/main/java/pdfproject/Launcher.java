@@ -1,6 +1,7 @@
 package pdfproject;
 
 import pdfproject.core.PDFProcessor;
+import pdfproject.interfaces.LauncherListener;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.utils.InputDataProvider;
@@ -10,14 +11,27 @@ import java.util.List;
 
 public class Launcher {
     public static void main(String[] args) {
-        start();
+        start(new LauncherListener() {
+            @Override
+            public void onStart() {
+
+            }
+
+            @Override
+            public void onFinish() {
+
+            }
+        });
     }
 
-    public static void start() {
+    public static void start(LauncherListener launcherListener) {
+
         if (ProcessUtils.isWordRunning()) {
             System.out.println("⚠️ MS Word is currently running. Please close it and try again.");
             return;
         }
+
+        launcherListener.onStart();
 
         List<InputData> inputs = InputDataProvider.load();
         if (inputs == null || inputs.isEmpty()) {
@@ -26,5 +40,7 @@ public class Launcher {
         }
         System.out.println("✅ Loaded " + inputs.size() + " input rows.");
         List<MapModel> mapModel = new PDFProcessor().processAll(inputs);
+
+        launcherListener.onFinish();
     }
 }

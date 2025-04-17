@@ -51,11 +51,11 @@ public class WordInfo {
     }
 
     public float getPosition() {
-        return positions.getFirst().getY();
+        return positions.get(0).getY();
     }
 
     public PDFont getPDFont() {
-        return positions.getFirst().getFont();
+        return positions.get(0).getFont();
     }
 
     public String getJustFont() {
@@ -94,7 +94,7 @@ public class WordInfo {
     }
 
     public int getFontSize() {
-        return Math.round(positions.getFirst().getFontSize());
+        return Math.round(positions.get(0).getFontSize());
     }
 
     // ========== Operations Support ==========

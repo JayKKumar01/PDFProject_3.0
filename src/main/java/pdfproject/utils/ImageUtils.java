@@ -33,6 +33,9 @@ public class ImageUtils {
     }
 
     public static BufferedImage drawBoundingBoxes(BufferedImage image, List<WordInfo> words) {
+        if (words.isEmpty()){
+            return image;
+        }
         float scale = Config.RENDER_DPI / 72f; // PDF default is 72 DPI
         float padding = 3.0f; // Padding around the word
 
@@ -45,8 +48,8 @@ public class ImageUtils {
             if (word.getPositions().isEmpty()) continue;
 
             // Get the first and last text positions
-            TextPosition first = word.getPositions().getFirst();
-            TextPosition last = word.getPositions().getLast();
+            TextPosition first = word.getPositions().get(0);
+            TextPosition last = word.getPositions().get(word.getPositions().size()-1);
 
             // Calculate position and size with padding
             float x = first.getX() * scale - padding; // Apply padding on left
@@ -86,14 +89,21 @@ public class ImageUtils {
         // If only one operation, use switch to determine the color
         Operation operation = word.getOperations().iterator().next(); // Get the single operation
 
-        return switch (operation) {
-            case DELETED -> OperationColor.DELETED; // RED for DELETED
-            case ADDED -> OperationColor.ADDED; // GREEN for ADDED
-            case FONT -> OperationColor.FONT_NAME; // MAGENTA for FONT_NAME
-            case SIZE -> OperationColor.FONT_SIZE; // BLUE for FONT_SIZE
-            case STYLE -> OperationColor.FONT_STYLE; // CYAN for FONT_STYLE
-            default -> OperationColor.MULTIPLE; // BLACK for unknown or unhandled cases
-        };
+        switch (operation) {
+            case DELETED:
+                return OperationColor.DELETED; // RED for DELETED
+            case ADDED:
+                return OperationColor.ADDED; // GREEN for ADDED
+            case FONT:
+                return OperationColor.FONT_NAME; // MAGENTA for FONT_NAME
+            case SIZE:
+                return OperationColor.FONT_SIZE; // BLUE for FONT_SIZE
+            case STYLE:
+                return OperationColor.FONT_STYLE; // CYAN for FONT_STYLE
+            default:
+                return OperationColor.MULTIPLE; // BLACK for unknown or unhandled cases
+        }
+
     }
 
 

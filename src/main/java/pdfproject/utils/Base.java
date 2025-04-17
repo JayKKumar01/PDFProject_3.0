@@ -12,26 +12,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Base {
-
-    public static Color getOperationColor(Set<Operation> operations) {
-        if (operations == null || operations.isEmpty()) {
-            return null;
-        }
-        if (operations.size() > 1) {
-            return OperationColor.MULTIPLE;
-        }
-
-        Operation op = operations.iterator().next();
-        return switch (op) {
-            case DELETED -> OperationColor.DELETED;
-            case ADDED -> OperationColor.ADDED;
-            case FONT -> OperationColor.FONT_NAME;
-            case SIZE -> OperationColor.FONT_SIZE;
-            case STYLE -> OperationColor.FONT_STYLE;
-            case EQUAL -> null;
-        };
-    }
-
     /**
      * Checks if font information of two WordInfo objects is the same.
      *

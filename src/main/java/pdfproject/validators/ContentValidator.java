@@ -18,6 +18,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,52 +40,65 @@ public class ContentValidator {
     }
 
     public void validateContent(int p1, int p2, int imagePage, List<BufferedImage> images) throws Exception {
+        // Extract words from both PDFs
         List<WordInfo> words1 = extractWords(doc1, p1);
         List<WordInfo> words2 = extractWords(doc2, p2);
 
+        // Compare words
         List<WordInfo> diff = StringDiff.compare(words1, words2);
 
-        List<WordInfo> forImage1 = diff.stream()
-                .filter(word -> word.getOperations().contains(Operation.DELETED))
-                .toList();
-
-        List<WordInfo> forImage2 = diff.stream()
-                .filter(word -> !word.getOperations().contains(Operation.DELETED))
-                .toList();
-
+        // Base images from input list
         BufferedImage baseImg1 = images.get(0);
         BufferedImage baseImg2 = images.get(1);
 
-        // Create bounding boxes on each image
-        BufferedImage boxedImg1 = ImageUtils.drawBoundingBoxes(baseImg1, forImage1);
-        BufferedImage boxedImg2 = ImageUtils.drawBoundingBoxes(baseImg2, forImage2);
+        BufferedImage combinedImage;
+        String diffPath = null;
 
-        // Combine images side by side
-        BufferedImage combinedImage = combineImagesSideBySide(boxedImg1, boxedImg2);
+        if (diff.isEmpty()) {
+            // No difference – combine raw base images directly
+            combinedImage = combineImagesSideBySide(baseImg1, baseImg2);
+        } else {
+            // Difference exists – split diff into two sets
+            List<WordInfo> forImage1 = new ArrayList<>();
+            List<WordInfo> forImage2 = new ArrayList<>();
 
-        // Optional: release boxed images after combining
-        boxedImg1 = null;
-        boxedImg2 = null;
+            for (WordInfo word : diff) {
+                if (word.getOperations().contains(Operation.DELETED)) {
+                    forImage1.add(word);
+                } else {
+                    forImage2.add(word);
+                }
+            }
 
-        BufferedImage diffImage = generateDiffImage(diff, baseImg1, baseImg2);
-        String diffPath = saveDiffImage(imagePage, diffImage);
+            // Draw bounding boxes
+            BufferedImage boxedImg1 = ImageUtils.drawBoundingBoxes(baseImg1, forImage1);
+            BufferedImage boxedImg2 = ImageUtils.drawBoundingBoxes(baseImg2, forImage2);
 
-        // Cleanup input images and diff
-        baseImg1 = null;
-        baseImg2 = null;
-        diffImage = null;
+            combinedImage = combineImagesSideBySide(boxedImg1, boxedImg2);
 
-        // Save the combined image
-        String[] paths = saveImage(imagePage, combinedImage);
+            // Explicitly release boxed images early
+            boxedImg1 = null;
+            boxedImg2 = null;
+
+            // Generate and save diff image
+            BufferedImage diffImage = generateDiffImage(diff, baseImg1, baseImg2);
+            diffPath = saveDiffImage(imagePage, diffImage);
+            diffImage = null;
+        }
+
+        // Save combined image
+        String path = saveImage(imagePage, combinedImage);
         combinedImage = null;
 
-        List<String> finalList = new ArrayList<>(List.of(paths));
-        finalList.add(diffPath);
-        resultMap.addContentRow(finalList);
+        // Release base images
+        baseImg1 = null;
+        baseImg2 = null;
 
-        // Suggest garbage collection (optional, usually not needed unless in tight loops)
-        // System.gc();
+        // Prepare result
+        resultMap.addContentRow(Arrays.asList(path, diffPath));
     }
+
+
 
 
     private BufferedImage generateDiffImage(List<WordInfo> diff, BufferedImage img1, BufferedImage img2) {
@@ -229,7 +243,7 @@ public class ContentValidator {
     }
 
     // Save the combined image
-    private String[] saveImage(int pageNumber, BufferedImage combinedImage) throws Exception {
+    private String saveImage(int pageNumber, BufferedImage combinedImage) throws Exception {
         String dirPath = String.format("%s/item_%d/content/page_%d", outputImagePath, rowIndex + 1, pageNumber);
         File dir = new File(dirPath);
         if (!dir.exists()) dir.mkdirs();
@@ -237,7 +251,7 @@ public class ContentValidator {
         File combinedFile = new File(dir, "combined" + FileTypes.IMAGE_EXTENSION);
         ImageIO.write(combinedImage, FileTypes.IMAGE_TYPE, combinedFile);
 
-        return new String[]{combinedFile.getPath()};
+        return combinedFile.getPath();
     }
 
 
