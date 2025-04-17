@@ -5,7 +5,6 @@ import pdfproject.Launcher;
 import pdfproject.constants.AppPaths;
 import pdfproject.constants.OperationColor;
 import pdfproject.interfaces.LauncherListener;
-import pdfproject.window.utils.ConsoleOutputStream;
 import pdfproject.window.utils.CustomOutputStream;
 
 import javax.swing.*;
@@ -23,7 +22,7 @@ import java.util.concurrent.Executors;
 
 public class Window {
 //    private final JTextArea console = new JTextArea();
-    private final JEditorPane console = new JEditorPane();
+    private final JTextArea console = new JTextArea();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private JButton resetButton;
 
@@ -60,7 +59,7 @@ public class Window {
         jFrame.setLocationRelativeTo(null);
         jFrame.setVisible(true);
 
-        redirectSystemOut();
+
     }
 
     private JFrame createMainFrame() {
@@ -78,12 +77,12 @@ public class Window {
     }
 
     private JScrollPane createConsoleScrollPane(int w, int h) {
-        console.setContentType("text/html");
-        console.setEditable(false);
-        console.setText("<html><body style='font-family:Segoe UI Emoji; font-size:14px; color:white;'>Console Output:<br></body></html>");
-
         console.setBackground(new Color(40, 40, 40));
         console.setForeground(Color.WHITE);
+        console.setEditable(false);
+        console.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
+
+        redirectSystemOut();
 
         JScrollPane scrollPane = new JScrollPane(console);
         scrollPane.setPreferredSize(new Dimension(w, h));
@@ -122,6 +121,8 @@ public class Window {
                     System.out.println(Config.INPUT_PATH);
                     lastDirectory = selected.getParentFile();
                 }
+//                testEmojiConsoleOutput();
+
             }
         });
 
@@ -130,6 +131,18 @@ public class Window {
         panel.add(fileLabel);
         return panel;
     }
+
+    private void testEmojiConsoleOutput() {
+        System.out.println("▶️ Starting process...");
+        System.out.println("⚠️ Warning: Mismatch in page count.");
+        System.out.println("📝 Beginning validation...");
+        System.out.println("📄 Page details shown here.");
+        System.out.println("🔍 Validating alignment...");
+        System.out.println("🧠 Validating content...");
+        System.out.println("✅ Validation complete.");
+        System.out.println("✔️ All pages validated successfully.");
+    }
+
 
     private void setUIEnabled(boolean enabled) {
         for (JComboBox<String> box : operationBoxes.values()) {
@@ -391,9 +404,9 @@ public class Window {
 
 
     private void redirectSystemOut() {
-        PrintStream ps = new PrintStream(new ConsoleOutputStream(console), true, StandardCharsets.UTF_8);
+        PrintStream ps = new PrintStream(new CustomOutputStream(console), true, StandardCharsets.UTF_8);
         System.setOut(ps);
         System.setErr(ps);
-
     }
+
 }
