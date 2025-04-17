@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class WindowOld {
+public class Window {
     private final JTextArea console = new JTextArea();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private JButton resetButton;
@@ -26,8 +26,7 @@ public class WindowOld {
     private final Map<String, JComboBox<String>> operationBoxes = new HashMap<>();
 
 
-    public WindowOld(int h) {
-
+    public Window(int h) {
 
         JFrame jFrame = createMainFrame();
         int w = h * 16 / 9;
