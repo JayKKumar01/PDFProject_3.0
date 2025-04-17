@@ -5,6 +5,7 @@ import pdfproject.Launcher;
 import pdfproject.constants.AppPaths;
 import pdfproject.constants.OperationColor;
 import pdfproject.interfaces.LauncherListener;
+import pdfproject.window.utils.ConsoleOutputStream;
 import pdfproject.window.utils.CustomOutputStream;
 
 import javax.swing.*;
@@ -14,13 +15,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Window {
-    private final JTextArea console = new JTextArea();
+//    private final JTextArea console = new JTextArea();
+    private final JEditorPane console = new JEditorPane();
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private JButton resetButton;
 
@@ -75,7 +78,10 @@ public class Window {
     }
 
     private JScrollPane createConsoleScrollPane(int w, int h) {
+        console.setContentType("text/html");
         console.setEditable(false);
+        console.setText("<html><body style='font-family:Segoe UI Emoji; font-size:14px; color:white;'>Console Output:<br></body></html>");
+
         console.setBackground(new Color(40, 40, 40));
         console.setForeground(Color.WHITE);
 
@@ -116,17 +122,6 @@ public class Window {
                     System.out.println(Config.INPUT_PATH);
                     lastDirectory = selected.getParentFile();
                 }
-
-//                JFileChooser fileChooser = new JFileChooser(lastDirectory); // Start from lastDirectory
-//                int result = fileChooser.showOpenDialog(null);
-//                if (result == JFileChooser.APPROVE_OPTION) {
-//                    File selected = fileChooser.getSelectedFile();
-//                    Config.INPUT_PATH = selected.getAbsolutePath();
-//                    fileLabel.setText(selected.getName());
-//                    System.out.println(Config.INPUT_PATH);
-//
-//                    lastDirectory = selected.getParentFile(); // Update last directory
-//                }
             }
         });
 
@@ -396,6 +391,9 @@ public class Window {
 
 
     private void redirectSystemOut() {
-        System.setOut(new PrintStream(new CustomOutputStream(console)));
+        PrintStream ps = new PrintStream(new ConsoleOutputStream(console), true, StandardCharsets.UTF_8);
+        System.setOut(ps);
+        System.setErr(ps);
+
     }
 }
