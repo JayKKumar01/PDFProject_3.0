@@ -54,7 +54,7 @@ public class ContentValidator {
         BufferedImage combinedImage;
         String diffPath = null;
 
-        if (diff.isEmpty()) {
+        if (diff.isEmpty()) { // check exception case for one image null
             // No difference – combine raw base images directly
             combinedImage = combineImagesSideBySide(baseImg1, baseImg2);
         } else {
@@ -230,6 +230,21 @@ public class ContentValidator {
 
     // Combine images side by side (both images should have the same height)
     private BufferedImage combineImagesSideBySide(BufferedImage img1, BufferedImage img2) {
+        // Check if img1 is null
+        if (img1 == null) {
+            int width = img2.getWidth();
+            int height = img2.getHeight();
+            img1 = createDummyImage(width, height); // Create dummy image for img1
+        }
+
+        // Check if img2 is null
+        if (img2 == null) {
+            int width = img1.getWidth();
+            int height = img1.getHeight();
+            img2 = createDummyImage(width, height); // Create dummy image for img2
+        }
+
+        // Combine valid images side by side
         int totalWidth = img1.getWidth() + img2.getWidth();
         int height = Math.max(img1.getHeight(), img2.getHeight());
 
@@ -241,6 +256,36 @@ public class ContentValidator {
 
         return combined;
     }
+
+    private BufferedImage createDummyImage(int width, int height) {
+        // Create a dummy image with the specified width and height
+        BufferedImage dummyImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = dummyImage.createGraphics();
+
+        // Fill the image with white
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, width, height);
+
+        // Set up the "Page Not Found" text
+        g2d.setColor(Color.RED);
+        g2d.setFont(new Font("Arial", Font.BOLD, 30));
+
+        // Calculate the position to center the text horizontally and vertically
+        FontMetrics fontMetrics = g2d.getFontMetrics();
+        int textWidth = fontMetrics.stringWidth("Page Not Found");
+        int textHeight = fontMetrics.getHeight();
+        int x = (width - textWidth) / 2;  // Center text horizontally
+        int y = (height - textHeight) / 2 + fontMetrics.getAscent();  // Center text vertically
+
+        // Draw the text in the middle
+        g2d.drawString("Page Not Found", x, y);
+
+        g2d.dispose();
+
+        return dummyImage;
+    }
+
+
 
     // Save the combined image
     private String saveImage(int pageNumber, BufferedImage combinedImage) throws Exception {
@@ -258,6 +303,9 @@ public class ContentValidator {
     // Extract WordInfo list from a PDF page
     private List<WordInfo> extractWords(PDDocument document, int pageNum) throws IOException {
         List<WordInfo> wordInfoList = new ArrayList<>();
+        if (document == null || pageNum == -1){
+            return wordInfoList;
+        }
         PDFTextStripper stripper = new PDFTextStripper() {
             @Override
             protected void writeString(String string, List<TextPosition> textPositions){

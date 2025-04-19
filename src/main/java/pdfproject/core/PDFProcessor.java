@@ -63,20 +63,17 @@ public class PDFProcessor {
 
             int size1 = range1.size();
             int size2 = range2.size();
+            int maxSize = Math.max(size1, size2);
 
             if (size1 != size2) {
-                int minSize = Math.min(size1, size2);
-
-                if (size1 > minSize) {
-                    System.out.printf("⚠️  [Item %d]: Skipping %d extra page(s) in Document 1.%n", itemIndex + 1, size1 - minSize);
-                    range1 = range1.subList(0, minSize);
-                }
-
-                if (size2 > minSize) {
-                    System.out.printf("⚠️  [Item %d]: Skipping %d extra page(s) in Document 2.%n", itemIndex + 1, size2 - minSize);
-                    range2 = range2.subList(0, minSize);
+                if (size1 > size2) {
+                    System.out.printf("⚠️  [Item %d]: Document 1 has %d extra page(s).%n", itemIndex + 1, size1 - size2);
+                } else {
+                    System.out.printf("⚠️  [Item %d]: Document 2 has %d extra page(s).%n", itemIndex + 1, size2 - size1);
                 }
             }
+
+            System.out.printf("📝 Item %d: Starting validation for %d page(s).%n", itemIndex + 1, maxSize);
 
             PDFRenderer renderer1 = new PDFRenderer(doc1);
             PDFRenderer renderer2 = new PDFRenderer(doc2);
@@ -84,29 +81,24 @@ public class PDFProcessor {
             AlignmentValidator alignmentValidator = new AlignmentValidator(data, outputImagePath, itemIndex, renderer1, renderer2, resultMap);
             ContentValidator contentValidator = new ContentValidator(data, outputImagePath, itemIndex, doc1, doc2, resultMap);
 
-            System.out.printf("📝 Item %d: Starting validation for %d page(s).%n", itemIndex + 1, range1.size());
+            for (int i = 0; i < maxSize; i++) {
+                int p1 = i < size1 ? range1.get(i) : -1;
+                int p2 = i < size2 ? range2.get(i) : -1;
 
-            for (int i = 0; i < range1.size(); i++) {
-                int p1 = range1.get(i);
-                int p2 = range2.get(i);
+                System.out.printf("📄 Item %d | Page %d: Doc1 Page %s, Doc2 Page %s%n",
+                        itemIndex + 1, i + 1,
+                        p1 >= 0 ? String.valueOf(p1) : "N/A",
+                        p2 >= 0 ? String.valueOf(p2) : "N/A");
 
-                System.out.printf("📄 Item %d | Page %d: Doc1 Page %d, Doc2 Page %d%n", itemIndex + 1, i + 1, p1 + 1, p2 + 1);
-
-                // Alignment validation
-                System.out.printf("🔍 Item %d | Page %d: Validating alignment...%n", itemIndex + 1, i + 1);
                 List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2, i + 1);
-                System.out.printf("✅ Item %d | Page %d: Alignment validation complete.%n", itemIndex + 1, i + 1);
-
-                // Content validation
-                System.out.printf("🧠 Item %d | Page %d: Validating content...%n", itemIndex + 1, i + 1);
                 contentValidator.validateContent(p1, p2, i + 1, images);
-                System.out.printf("✅ Item %d | Page %d: Content validation complete.%n", itemIndex + 1, i + 1);
+
+                System.out.printf("✅ Item %d | Page %d: Validation complete.%n", itemIndex + 1, i + 1);
             }
 
             System.out.printf("✔️  Item %d: Validation for all pages completed.%n", itemIndex + 1);
         }
     }
-
 
     private File ensurePdf(String path) throws Exception {
         return path.toLowerCase().endsWith(FileTypes.PDF_EXTENSION) ? new File(path) : WordToPdfConverter.convertToPdf(path);

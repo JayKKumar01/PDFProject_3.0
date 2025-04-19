@@ -33,7 +33,7 @@ public class ImageUtils {
     }
 
     public static BufferedImage drawBoundingBoxes(BufferedImage image, List<WordInfo> words) {
-        if (words.isEmpty()){
+        if (words.isEmpty() || image == null){
             return image;
         }
         float scale = Config.RENDER_DPI / 72f; // PDF default is 72 DPI
