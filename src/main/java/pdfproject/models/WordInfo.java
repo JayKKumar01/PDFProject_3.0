@@ -75,7 +75,7 @@ public class WordInfo {
         }else if (font.contains(",")){
             font = font.replace(font.substring(font.lastIndexOf(",")),"");
         }
-        return font;
+        return font.replace("mt","").replace("MT","");
     }
 
     public String getFontStyle() {
