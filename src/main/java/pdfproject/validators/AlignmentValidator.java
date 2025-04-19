@@ -34,8 +34,8 @@ public class AlignmentValidator {
     public List<BufferedImage> validateAlignment(int p1, int p2, int imagePage) throws Exception {
         BufferedImage img1 = null, img2 = null, diff = null;
 
-        if (p1 >= 0) img1 = renderer1.renderImageWithDPI(p1, Config.RENDER_DPI);
-        if (p2 >= 0) img2 = renderer2.renderImageWithDPI(p2, Config.RENDER_DPI);
+        if (p1 >= 0) img1 = renderer1.renderImageWithDPI(p1-1, Config.RENDER_DPI);
+        if (p2 >= 0) img2 = renderer2.renderImageWithDPI(p2-1, Config.RENDER_DPI);
 
         if (img1 != null && img2 != null) {
             diff = ImageUtils.generateDiffImage(img1, img2);
@@ -70,9 +70,17 @@ public class AlignmentValidator {
             File diffFile = new File(dir, "diff" + FileTypes.IMAGE_EXTENSION);
             ImageIO.write(diff, FileTypes.IMAGE_TYPE, diffFile);
             pathDiff = diffFile.getPath();
+        } else {
+            // Fallback: Use a valid path (img1 or img2) if diff is null
+            if (path1 != null) {
+                return Arrays.asList(path1,path1,path1);
+            } else if (path2 != null) {
+                return Arrays.asList(path2,path2,path2);
+            }
         }
 
         return Arrays.asList(path1, path2, pathDiff);
     }
+
 
 }
