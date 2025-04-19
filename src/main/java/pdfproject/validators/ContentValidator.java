@@ -195,7 +195,7 @@ public class ContentValidator {
             );
 
             g.drawImage(wordImg, x, y, null);
-            x += box.width + padding;
+            x += box.width;
 
             if (shouldWriteInfo && info != null) {
                 g.setColor(ImageUtils.getOperationColor(word));
