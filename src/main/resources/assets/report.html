@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head><style>
+/* Setting a darker shade of white for the body */
+body {
+    background-color: #f4f4f4; /* A bit darker than white */
+    margin: 0; /* Removing default margin */
+    padding: 0;
+    height: 100vh; /* Ensure full viewport height */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center content vertically */
+    font-family: 'Arial', sans-serif; /* Modern sans-serif font */
+}
+
+/* Container div with 95% width and 95% height of the viewport */
+.container {
+    width: 95vw; /* 95% of viewport width */
+    height: 95vh; /* 95% of viewport height */
+    background-color: #ffffff; /* White background for the div */
+    box-sizing: border-box; /* Ensure margin is inside the div */
+    display: flex;
+    justify-content: center; /* Align items horizontally */
+    align-items: center; /* Center content vertically */
+    border-radius: 15px; /* Rounded corners for a soft modern look */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: box-shadow 0.3s ease; /* Smooth transition for shadow */
+}
+
+
+/* Right-side div with 90% width */
+.right-content {
+    width: 90%; /* 90% width */
+    height: 100%; /* Full height */
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+}
+
+/* Top div */
+.top-div {
+    display: flex;
+    flex-direction: row; /* Arrange buttons horizontally */
+    justify-content: center; /* Center buttons horizontally */
+    align-items: center; /* Center buttons vertically */
+    padding: 10px 0; /* Small padding for some spacing */
+    height: auto; /* Allow height to adjust based on content */
+    width: 100%; /* Full width */
+}
+
+/* Styling only the buttons inside the top div */
+.top-div button {
+    padding: 15px 30px; /* Horizontal padding to make buttons bigger */
+    margin: 0 10px; /* Small margin between buttons */
+    font-size: 18px; /* Larger font size for readability */
+    border: none; /* Remove default border */
+    border-radius: 8px; /* Rounded corners for modern look */
+    background-color: #d3d3d3; /* Grey background color for unselected buttons */
+    color: white; /* White text color */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+/* Selected button style (green) */
+.top-div button.selected {
+    background-color: #28a745; /* Green background color */
+}
+
+/* Hover effect for buttons inside top div */
+.top-div button:hover {
+    background-color: #146544; /* Darker grey on hover */
+    transform: scale(.95); /* Slight scale-up effect */
+}
+
+/* Bottom div */
+.bottom-div {
+    display: flex; /* Flexbox for bottom div */
+    justify-content: center; /* Center navigation elements */
+    align-items: center; /* Center items vertically */
+    width: 100%; /* Full width */
+    padding: 10px 0; /* Small padding for some spacing */
+}
+
+/* Navigation buttons container */
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Gap between buttons and page info */
+}
+
+/* Styling for individual navigation buttons */
+.navigation-buttons button {
+    padding: 10px 20px; /* Padding for buttons */
+    font-size: 16px; /* Font size for readability */
+    background-color: #4a90e2; /* Blue background */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+/* Hover effect for navigation buttons */
+.navigation-buttons button:hover {
+    background-color: #357ab7; /* Darker blue on hover */
+}
+
+/* Styling for the page info text */
+.navigation-buttons #page-info {
+    font-size: 16px;
+    color: #333; /* Dark text color for readability */
+}
+
+/* Disabled button styles */
+.navigation-buttons button:disabled {
+    background-color: #cccccc; /* Light gray */
+    color: #666666;             /* Darker text */
+    cursor: not-allowed;
+}
+/* Middle content section */
+.middle-content {
+    flex: 1; 
+    overflow-y: auto;
+    display: flex; /* Make sure middle-content itself is a flex container */
+    flex-direction: column; /* Stack content-div and alignment-div vertically */
+}
+
+
+
+/* Content div with fixed width */
+.content-div {
+    display: flex; /* Flexbox layout */
+    flex-direction: row; /* Horizontal layout */
+    gap: 20px; /* Space between image and report containers */
+    width: 100%; /* 100% width of its parent container */
+    height: 100%; /* Full height of its parent container */
+    padding: 0 10px; /* <-- Only left and right */
+    box-sizing: border-box; /* Includes padding and border in the width calculation */
+    overflow: hidden; /* Prevents overflow if any */
+}
+
+/* Image container (2/3 width) */
+.image-container {
+    width: 66.66%; /* Fixed width 2/3 of the container */
+    height: 100%; /* Full height of its parent container */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Image to fit in the container */
+#mainImage {
+    width: 100%; /* Ensure the image fits container width */
+    max-height: 100%; /* Ensure the image fits container height */
+    object-fit: contain; /* Maintain aspect ratio */
+    background-color: black;
+}
+#circleImage {
+    position: absolute;
+    display: none;
+    border-radius: 50%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+/* Report container (1/3 width) */
+.report-container {
+    width: 33.33%; /* Fixed width 1/3 of the container */
+    height: 100%; /* Full height of its parent container */
+    display: block;
+    justify-content: flex-start; /* Align from top */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+/* Report image */
+.report-container img {
+    width: 100%; /* Image width 100% */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: cover; /* Image fills container, maintaining aspect ratio */
+    object-position: top; /* Align the image from the top */
+    max-height: none; /* Ensure no height restriction */
+}
+.alignment-div {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    padding: 0 10px; /* <-- Only left and right */
+    box-sizing: border-box; /* Includes padding and border in the width calculation */
+    overflow: hidden;
+}
+
+
+.action-mode-buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 0;
+}
+
+.action-mode-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e0e0e0;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.action-mode-buttons button:hover {
+    background-color: #c8e6c9;
+}
+
+.action-mode-buttons button.selected {
+    background-color: #4caf50;
+    color: white;
+}
+
+.alignment-image-wrapper {
+    width: auto;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+#alignmentImage {
+    width: auto;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+#fullscreenBtn {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    top: 10px;
+    right: 10px;
+    color: white; /* White text */
+    font-size: 20px;
+    border: 2px solid white;
+    border-radius: 50%;
+    background-color: #4a90e2; /* Blue background */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 10px 12px 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Add a transform for hover effect */
+}
+
+#fullscreenBtn:hover {
+    background-color: rgba(0, 100, 0);
+}
+
+.alignment-image-wrapper.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+}
+
+.alignment-image-wrapper.fullscreen #alignmentImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* Sidebar with 10% width, blue background, and matching rounded corners */
+.sidebar {
+    width: 10%; /* 10% width */
+    background-color: #4a90e2; /* Blue background */
+    height: 100%; /* Full height */
+    border-top-left-radius: 15px; /* Matching top-left rounded corner */
+    border-bottom-left-radius: 15px; /* Matching bottom-left rounded corner */
+    padding: 10px; /* Padding for overall sidebar */
+    box-sizing: border-box; /* Include padding in width calculation */
+    display: flex;
+    flex-direction: column; /* Arrange items vertically */
+}
+
+/* Header text */
+.sidebar-header {
+    font-size: 24px; /* Large text size */
+    font-weight: bold; /* Bold text */
+    color: white; /* White color for the header */
+    margin-bottom: 20px; /* Space below the header */
+    text-align: center; /* Center the header */
+}
+
+/* Sidebar items container (scrollable) */
+.sidebar-items {
+    overflow-y: auto; /* Enable vertical scroll */
+    max-height: calc(100% - 80px); /* Ensures space for header */
+}
+
+/* Sidebar items */
+.sidebar-item {
+    width: 60%; /* Items take 90% width of the sidebar */
+    margin: 10px 0; /* Space between items */
+    padding: 15px 20px; /* Padding for each item */
+    background-color: #d3d3d3; /* Default grey background */
+    color: black; /* Black text color */
+    font-size: 16px; /* Font size for the items */
+    font-weight: bold; /* Bold text inside the items */
+    border-radius: 8px; /* Rounded corners with more radius */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth background and scale transition */
+    text-align: center; /* Centered text */
+    white-space: nowrap; /* Prevent text from wrapping */
+    overflow: hidden; /* Hide overflow text */
+    text-overflow: ellipsis; /* Show ellipsis if the text overflows */
+}
+
+/* Hover effect for sidebar items */
+.sidebar-item:hover {
+    background-color: #b0b0b0; /* Darker grey on hover */
+    transform: scale(.95); /* Slight scale-up effect */
+}
+
+/* Active item style (green background) */
+.sidebar-item.active {
+    background-color: #3cb371; /* Green background for active item */
+    color: white; /* White text for active item */
+}
+
+</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Report</title>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar on the left with blue background -->
+        <div class="sidebar">
+            <div class="sidebar-header">Items</div>
+            <div id="sidebar-items" class="sidebar-items">
+            </div>
+        </div>
+
+        <!-- Right-side content container -->
+        <div class="right-content">
+            <!-- Top div with buttons -->
+            <div class="top-div">
+                <button class="selected" id="content-validation-btn">Content Validation</button>
+                <button id="alignment-validation-btn">Alignment Validation</button>
+            </div>
+
+            <!-- Middle content section -->
+            <div class="middle-content">
+                <!-- Content Validation div -->
+                <div class="content-div" id="content-div">
+                    <div class="image-container">
+                        <img id="mainImage" src="" alt="Main Image" />
+                        <img id="circleImage" />
+                    </div>
+
+                    <div class="report-container">
+                        <img id="reportImage" src="" alt="Report Image" />
+                    </div>
+                </div>
+
+                <!-- Alignment Validation div -->
+                <div class="alignment-div" id="alignment-div">
+                    <div class="action-mode-buttons" id="actionModeButtons">
+                        <button id="pressHoldBtn" class="selected">Press and Hold</button>
+                        <button id="highlightBtn">Highlight</button>
+                    </div>
+                    
+                    <div class="alignment-image-wrapper">
+                        <img id="alignmentImage" src="" />
+                        <button id="fullscreenBtn" title="Fullscreen">⛶</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom div with navigation buttons -->
+            <div class="bottom-div">
+                <!-- Navigation Buttons -->
+                <div class="navigation-buttons">
+                    <button id="prev-page" disabled>Previous</button>
+                    <span id="page-info">Page 1 of 1</span>
+                    <button id="next-page" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="data-map.js"></script>
+<script>
+// JavaScript to toggle content and alignment validation
+const contentValidationBtn = document.getElementById('content-validation-btn');
+const alignmentValidationBtn = document.getElementById('alignment-validation-btn');
+const contentDiv = document.getElementById('content-div');
+const alignmentDiv = document.getElementById('alignment-div');
+
+// Function to show Content Validation
+contentValidationBtn.addEventListener('click', () => {
+    contentDiv.style.display = 'flex';
+    alignmentDiv.style.display = 'none';
+    contentValidationBtn.classList.add('selected');
+    alignmentValidationBtn.classList.remove('selected');
+    updateImageProperties();
+});
+
+// Function to show Alignment Validation
+alignmentValidationBtn.addEventListener('click', () => {
+    contentDiv.style.display = 'none';
+    alignmentDiv.style.display = 'flex';
+    alignmentValidationBtn.classList.add('selected');
+    contentValidationBtn.classList.remove('selected');
+});
+
+// Assuming itemImageMap is already available in the scope
+
+let currentSet = {};
+let currentPageIndex = 0;
+let totalPages = 0;
+let currentPage = 1;  // Reset currentPage to 1
+
+// Function to create sidebar items dynamically
+function createSidebarItems() {
+    const sidebarItemsContainer = document.getElementById('sidebar-items');
+
+    // Iterate through the map and create items
+    itemImageMap.forEach((value, key) => {
+        const itemElement = document.createElement('div');
+        itemElement.classList.add('sidebar-item');
+        itemElement.id = `item-${key.toLowerCase().replace(' ', '-')}`;
+        itemElement.textContent = key;
+
+        // Add event listener for item selection
+        itemElement.addEventListener('click', () => {
+            selectItem(key, itemElement);
+        });
+
+        sidebarItemsContainer.appendChild(itemElement);
+    });
+
+    // Set the first item as active by default
+    const firstItem = sidebarItemsContainer.querySelector('.sidebar-item');
+    if (firstItem) {
+        const firstKey = firstItem.textContent;
+        selectItem(firstKey, firstItem);
+    }
+}
+
+// Function to handle item selection
+function selectItem(key, itemElement) {
+    // Remove active class from all sidebar items
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+    // Add active class to the clicked item
+    itemElement.classList.add('active');
+
+    // Reset currentPage to 1
+    currentPage = 1;
+
+    // Get the current set from the clicked item
+    currentSet = itemImageMap.get(key);
+
+    // Calculate totalPages based on validationImages length
+    totalPages = currentSet.validationImages.length;
+
+    // Update navigation buttons and page info
+    updateNavigation();
+
+    // (Optional) Display alert with current set details
+    console.log(`Item: ${key}, Total Pages: ${totalPages}, Current Page: ${currentPage}`);
+}
+
+// Call the function to populate the sidebar after the DOM has loaded
+document.addEventListener('DOMContentLoaded', function(){
+    createSidebarItems();
+});
+// Flag to track if "Press and Hold" is selected
+let isPressAndHoldSelected = true; // Assume true initially (or set based on default state)
+
+// Get all buttons inside the action-mode-buttons container
+const actionButtons = document.querySelectorAll('.action-mode-buttons button');
+
+// Add click event listener to each button
+actionButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Remove 'selected' class from all buttons
+        actionButtons.forEach(btn => btn.classList.remove('selected'));
+
+        // Add 'selected' class to the clicked button
+        button.classList.add('selected');
+
+        // Update flag based on the selected button
+        if (button.id === 'pressHoldBtn') {
+            isPressAndHoldSelected = true; // "Press and Hold" is selected
+        } else if (button.id === 'highlightBtn') {
+            isPressAndHoldSelected = false; // "Highlight" is selected
+        }
+
+        // Update the alignment image when the action mode changes
+        updateAlignmentImage(currentSet, currentPage);
+    });
+});
+
+// Function to get the alignment image for the current page based on the flag
+function getAlignmentImage(currentSet, currentPage) {
+    // Ensure we are not trying to access an out-of-bounds index
+    const alignmentImages = currentSet.alignmentImages[currentPage - 1];
+
+    // Check if the alignment image exists for the given page
+    if (alignmentImages && alignmentImages.length > 2) {
+        // Use the flag to return the correct alignment image
+        return alignmentImages[isPressAndHoldSelected ? 0 : 2]; // Return 0th image if flag is true, else 1st
+    } else {
+        console.warn(`No alignment image found for page ${currentPage}`);
+        return null;
+    }
+}
+
+// Function to update the alignment image
+function updateAlignmentImage(currentSet, currentPage) {
+    const alignmentImageWrapper = document.querySelector('.alignment-image-wrapper');
+    const alignmentImage = document.getElementById('alignmentImage');
+
+    if (alignmentImageWrapper && alignmentImage) {
+        const currentAlignmentImage = getAlignmentImage(currentSet, currentPage);
+
+        if (currentAlignmentImage) {
+            alignmentImage.src = currentAlignmentImage;
+        } else {
+            console.warn(`No alignment image found for page ${currentPage}`);
+        }
+    }
+}
+
+// Handle press-and-hold toggle for alignment image
+const alignmentImage = document.getElementById('alignmentImage');
+
+// Track whether the mouse is currently pressed
+let isMousePressed = false;
+
+// Add mousedown and mouseup events to handle press and hold
+alignmentImage.addEventListener('mousedown', () => {
+    if (isPressAndHoldSelected) {
+        isMousePressed = true;
+        // Change the image to the second one when the mouse is pressed down
+        const alignmentImages = currentSet.alignmentImages[currentPage - 1];
+        if (alignmentImages && alignmentImages.length > 1) {
+            alignmentImage.src = alignmentImages[1]; // Show the second image
+        }
+    }
+});
+
+alignmentImage.addEventListener('mouseup', () => {
+    if (isPressAndHoldSelected && isMousePressed) {
+        isMousePressed = false;
+        // Revert back to the first image when the mouse is released
+        const alignmentImages = currentSet.alignmentImages[currentPage - 1];
+        if (alignmentImages && alignmentImages.length > 1) {
+            alignmentImage.src = alignmentImages[0]; // Show the first image
+        }
+    }
+});
+
+alignmentImage.addEventListener('mouseleave', () => {
+    if (isMousePressed) {
+        // Reset the image if the mouse leaves the alignmentImage while pressed
+        isMousePressed = false;
+        const alignmentImages = currentSet.alignmentImages[currentPage - 1];
+        if (alignmentImages && alignmentImages.length > 1) {
+            alignmentImage.src = alignmentImages[0]; // Revert to the first image
+        }
+    }
+});
+// navigation.js
+
+// Function to update page info and button states
+function updateNavigation() {
+    const prevButton = document.getElementById("prev-page");
+    const nextButton = document.getElementById("next-page");
+    const pageInfo = document.getElementById("page-info");
+
+    // Update page info text
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+
+    // Enable or disable Previous button
+    prevButton.disabled = currentPage <= 1;
+    nextButton.disabled = currentPage >= totalPages;
+
+    // Also update images when navigation changes
+    updateImages();
+    updateAlignmentImage(currentSet, currentPage);
+    // updateImageProperties();
+}
+
+// Function to update mainImage and reportImage based on current page
+function updateImages() {
+    if (!currentSet || !currentSet.validationImages || currentSet.validationImages.length === 0) {
+        console.warn("No images to update.");
+        return;
+    }
+
+    const mainImage = document.getElementById("mainImage");
+    const reportImage = document.getElementById("reportImage");
+
+    const currentImages = currentSet.validationImages[currentPage - 1];
+
+    if (currentImages) {
+        mainImage.src = `${currentImages[0]}`;
+        reportImage.src = `${currentImages[1]}`;
+    } else {
+        console.warn(`No images found for page ${currentPage}`);
+    }
+}
+
+// Event listeners for buttons
+document.getElementById("prev-page").addEventListener("click", () => {
+    if (currentPage > 1) {
+        currentPage--;
+        updateNavigation();
+    }
+});
+
+document.getElementById("next-page").addEventListener("click", () => {
+    if (currentPage < totalPages) {
+        currentPage++;
+        updateNavigation();
+    }
+});
+const mainImage = document.getElementById('mainImage');
+const circleImage = document.getElementById('circleImage');
+
+// Zoom factor: Controls the level of zoom
+const zoomFactor = 3;
+const circleSize = 200;  // Size of the zoomed area (200px is the size of the circle)
+const sourceWidth = circleSize / zoomFactor;
+const sourceHeight = circleSize / zoomFactor;
+
+// Declare global variables to be updated
+let imageWidth = 0;
+let imageHeight = 0;
+let imageSrc = "";
+let rect = {};
+
+// Function to refresh image-related properties
+function updateImageProperties() {
+  imageWidth = mainImage.width;
+  imageHeight = mainImage.height;
+  imageSrc = mainImage.src;
+  rect = mainImage.getBoundingClientRect();
+}
+
+// Update image properties when the main image is loaded
+mainImage.onload = updateImageProperties;
+
+// If image is already loaded (e.g., cached), call the function immediately
+if (mainImage.complete) {
+  updateImageProperties();
+}
+
+// Function to update zoomed view and position circular image
+function updateZoomedView(x, y) {
+
+  // Log the image properties on each zoom update
+  console.log('Image Width:', imageWidth);
+  console.log('Image Height:', imageHeight);
+  console.log('Image Src:', imageSrc);
+  // Round off values to avoid fractional pixels
+  let roundedX = Math.round(x);
+  let roundedY = Math.round(y);
+
+  // Clamp the coordinates to ensure they stay within image bounds
+  roundedX = Math.max(sourceWidth / 2, Math.min(imageWidth - sourceWidth / 2, roundedX));
+  roundedY = Math.max(sourceHeight / 2, Math.min(imageHeight - sourceHeight / 2, roundedY));
+
+  // Calculate the source area to zoom into, so the center of the circle is at (x, y)
+  const sourceX = roundedX - sourceWidth / 2;
+  const sourceY = roundedY - sourceHeight / 2;
+
+  // Set the circular image's background properties for zoom effect
+  circleImage.style.backgroundImage = `url(${imageSrc})`;
+  circleImage.style.backgroundSize = `${imageWidth * zoomFactor}px ${imageHeight * zoomFactor}px`;
+  circleImage.style.backgroundPosition = `-${sourceX * zoomFactor}px -${sourceY * zoomFactor}px`;
+  circleImage.style.backgroundRepeat = 'no-repeat';
+
+  // Set the circular image size and position based on mouse coordinates
+  circleImage.style.width = `${circleSize}px`;
+  circleImage.style.height = `${circleSize}px`;
+  const circlePosX = Math.round(rect.left + (x - circleSize / 2));
+  const circlePosY = Math.round(rect.top + (y - circleSize / 2));
+
+  // Update the position of the circular image
+  circleImage.style.left = `${circlePosX}px`;
+  circleImage.style.top = `${circlePosY}px`;
+
+  // Show the circular image when updating zoomed view
+  circleImage.style.display = 'block';
+}
+
+// Mouse move handler to track coordinates and update the zoomed view
+mainImage.addEventListener('mousemove', (event) => {
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  updateZoomedView(x, y);
+});
+
+// Hide the circular image when mouse leaves the main image
+mainImage.addEventListener('mouseleave', () => {
+  circleImage.style.display = 'none';
+});
+
+document.getElementById("fullscreenBtn").addEventListener("click", function() {
+    var wrapper = document.querySelector(".alignment-image-wrapper");
+    var icon = document.getElementById("fullscreenBtn");
+    
+    // Toggle fullscreen class on wrapper
+    wrapper.classList.toggle("fullscreen");
+    
+    // Toggle icon to indicate fullscreen state
+    if (wrapper.classList.contains("fullscreen")) {
+        icon.textContent = "⛔"; // Change to "Exit Fullscreen" icon (or any icon of your choice)
+    } else {
+        icon.textContent = "⛶"; // Original fullscreen icon
+    }
+});
+
+</script>
+</body>
+
+</html>
