@@ -1,15 +1,13 @@
 package pdfproject.utils;
 
-import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
+import pdfproject.reportutil.ReportHtml;
 
 import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class DataMapGenerator {
@@ -69,17 +67,18 @@ public class DataMapGenerator {
         }
 
         // Copy predefined files
-        copyFile(outputDir);
+        createReport(outputDir);
 
         System.out.println("File Generated Successfully!");
     }
 
-    private static void copyFile(String outputDir) {
+    private static void createReport(String outputDir) {
 
         File destinationFile = new File(outputDir, "report.html");
         try {
-            InputStream inputStream = DataMapGenerator.class.getResourceAsStream("/assets/report.html");
-            Files.copy(inputStream, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+//            InputStream inputStream = DataMapGenerator.class.getResourceAsStream("/assets/report.html");
+            Files.writeString(destinationFile.toPath(), ReportHtml.REPORT_HTML);
+//            Files.copy(inputStream, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             Desktop.getDesktop().browse(destinationFile.toURI());
         } catch (IOException e) {
             System.err.println("Error copying file: " + e.getMessage());
