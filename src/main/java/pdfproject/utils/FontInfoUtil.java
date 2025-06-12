@@ -73,8 +73,8 @@ public class FontInfoUtil {
     }
 
     public static void setFontDiffInfo(WordInfo wordInfo) {
-        List<TextPosition> tps1 = wordInfo.getTextPositions();
-        List<TextPosition> tps2 = wordInfo.getOtherTextPositions();
+        List<TextPosition> tps1 = wordInfo.getOtherTextPositions();
+        List<TextPosition> tps2 = wordInfo.getTextPositions();
 
         if (tps1 == null || tps2 == null || tps1.size() != tps2.size()) {
             wordInfo.setInfo("[Invalid or mismatched positions]");
@@ -84,6 +84,7 @@ public class FontInfoUtil {
         StringBuilder result = new StringBuilder();
         StringBuilder chunk = new StringBuilder();
         String lastDiff = null;
+        boolean needChunk = false;
 
         for (int i = 0; i < tps1.size(); i++) {
             TextPosition tp1 = tps1.get(i);
@@ -122,6 +123,7 @@ public class FontInfoUtil {
             } else if (lastDiff.equals(currentDiff)) {
                 chunk.append(ch);
             } else {
+                needChunk = true;
                 result.append(chunk).append(": ").append(lastDiff).append(", ");
                 chunk.setLength(0);
                 chunk.append(ch);
@@ -130,8 +132,11 @@ public class FontInfoUtil {
         }
 
         // Append the final chunk
-        if (chunk.length() > 0 && lastDiff != null) {
-            result.append(chunk).append(": ").append(lastDiff);
+        if (!chunk.isEmpty() && lastDiff != null) {
+            if (needChunk){
+                result.append(chunk).append(": ");
+            }
+            result.append(lastDiff);
         }
 
         wordInfo.setInfo(result.toString());

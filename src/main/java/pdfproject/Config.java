@@ -6,4 +6,6 @@ public final class Config {
     public static String INPUT_PATH = "";
     public static int RENDER_DPI = 100;
     public static final String IMAGE_FORMAT = "png";
+
+    //open ms word once and close it after the conversions for faster word to pdf conversion
 }

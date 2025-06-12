@@ -52,6 +52,7 @@ public class WordUtil {
         fontRawName = fontRawName
                 .replaceAll("(?i)boldmtbold", "") // rare edge case
                 .replaceAll("(?i)mt", "")          // remove MT/mt
+                .replaceAll("(?i)ps", "")
                 .replaceAll("[^a-zA-Z0-9]", "")    // cleanup non-alphanumeric
                 .trim();
 
