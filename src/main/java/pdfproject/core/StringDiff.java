@@ -2,10 +2,10 @@ package pdfproject.core;
 
 import pdfproject.constants.Operation;
 import pdfproject.models.WordInfo;
-import pdfproject.utils.Base;
+import pdfproject.utils.FontInfoUtil;
+import pdfproject.utils.WordUtil;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -57,10 +57,11 @@ public class StringDiff {
             String w2 = wordInfo2.getWord();
             if (w1.equals(w2)) {
 
-                if (Base.isFontInfoSame(wordInfo1, wordInfo2)) {
+                if (WordUtil.isWordInfoSame(wordInfo1, wordInfo2)) {
                     wordInfo1.addOperation(Operation.EQUAL);
                 } else {
-                    Base.updateFontInfo(wordInfo1, wordInfo2);
+                    wordInfo2.setOtherTextPositions(wordInfo1.getTextPositions());
+                    FontInfoUtil.setFontDiffInfo(wordInfo2);
                     result.add(wordInfo2);
                 }
                 i--;
@@ -68,8 +69,7 @@ public class StringDiff {
             } else if (LCSuffix[i - 1][j] > LCSuffix[i][j - 1]) {
                 if(confirmDel(words1,m-i,words2,n-j)) {
                     wordInfo1.addOperation(Operation.DELETED);
-                    String info = Base.getInfo(Operation.DELETED, wordInfo1);
-                    wordInfo1.setInfo(info);
+                    FontInfoUtil.setFontInfo(Operation.DELETED, wordInfo1);
                     result.add(wordInfo1);
                 }
 
@@ -77,8 +77,7 @@ public class StringDiff {
             } else {
                 if (confirmAdd(words1,m-i,words2,n-j)) {
                     wordInfo2.addOperation(Operation.ADDED);
-                    String info = Base.getInfo(Operation.ADDED, wordInfo2);
-                    wordInfo2.setInfo(info);
+                    FontInfoUtil.setFontInfo(Operation.ADDED, wordInfo2);
                     result.add(wordInfo2);
                 }
                 j--;
@@ -89,8 +88,7 @@ public class StringDiff {
             // confirm del here also, use refresh list after detecting issue
             WordInfo wordInfo1 = words1.get(m - i);
             wordInfo1.addOperation(Operation.DELETED);
-            String info = Base.getInfo(Operation.DELETED, wordInfo1);
-            wordInfo1.setInfo(info);
+            FontInfoUtil.setFontInfo(Operation.DELETED, wordInfo1);
             result.add(wordInfo1);
             i--;
         }
@@ -98,8 +96,7 @@ public class StringDiff {
         while (j > 0) {
             WordInfo wordInfo2 = words2.get(n - j);
             wordInfo2.addOperation(Operation.ADDED);
-            String info = Base.getInfo(Operation.ADDED, wordInfo2);
-            wordInfo2.setInfo(info);
+            FontInfoUtil.setFontInfo(Operation.ADDED, wordInfo2);
             result.add(wordInfo2);
             j--;
         }

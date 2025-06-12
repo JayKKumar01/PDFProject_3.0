@@ -17,7 +17,7 @@ import java.util.concurrent.*;
 
 public class WordToPdfConverter {
 
-    private static final int TIMEOUT_SECONDS = 60;
+    private static final int TIMEOUT_SECONDS = 120;
     private static final File tempDir = new File(AppPaths.TEMP_WORD_PDF);
 
     public static File convertToPdf(String wordPath) throws Exception {

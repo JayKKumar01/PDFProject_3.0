@@ -42,14 +42,14 @@ public class ImageUtils {
         BufferedImage output = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = output.createGraphics();
         g2d.drawImage(image, 0, 0, null);
-        g2d.setStroke(new BasicStroke(5f));
+        g2d.setStroke(new BasicStroke(3f));
 
         for (WordInfo word : words) {
-            if (word.getPositions().isEmpty()) continue;
+            if (word.getTextPositions().isEmpty()) continue;
 
             // Get the first and last text positions
-            TextPosition first = word.getPositions().get(0);
-            TextPosition last = word.getPositions().get(word.getPositions().size()-1);
+            TextPosition first = word.getTextPositions().get(0);
+            TextPosition last = word.getTextPositions().get(word.getTextPositions().size()-1);
 
             // Calculate position and size with padding
             float x = first.getX() * scale - padding; // Apply padding on left
