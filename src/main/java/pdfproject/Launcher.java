@@ -28,6 +28,7 @@ public class Launcher {
 
         launcherListener.onStart();
 
+
         List<InputData> inputs = InputDataProvider.load();
         if (inputs == null || inputs.isEmpty()) {
             System.out.println("❌ No input data found. Please check the input source.");
@@ -51,6 +52,8 @@ public class Launcher {
         List<MapModel> mapModel = new PDFProcessor().processAll(inputs);
 
         launcherListener.onFinish();
+
+
     }
 
     private static boolean isPdf(String path) {

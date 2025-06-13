@@ -24,6 +24,7 @@ public class FontInfoUtil {
         int lastSize = -1;
         String lastStyle = null;
         boolean isFirstGroup = true;
+        boolean needChunk = false;
 
         for (int i = 0; i < positions.size(); i++) {
             TextPosition tp = positions.get(i);
@@ -41,6 +42,7 @@ public class FontInfoUtil {
             } else if (font.equals(lastFont) && size == lastSize && style.equals(lastStyle)) {
                 charGroup.append(ch);
             } else {
+                needChunk = true;
                 if (!isFirstGroup) infoBuilder.append(", ");
                 infoBuilder.append(charGroup)
                         .append("(Font: ").append(lastFont)
@@ -61,7 +63,7 @@ public class FontInfoUtil {
         // Final group
         if (!charGroup.isEmpty()) {
             if (!isFirstGroup) infoBuilder.append(", ");
-            infoBuilder.append(charGroup)
+            infoBuilder.append(needChunk ? charGroup : "")
                     .append("(Font: ").append(lastFont)
                     .append(", Size: ").append(lastSize)
                     .append(", Style: ").append(lastStyle)

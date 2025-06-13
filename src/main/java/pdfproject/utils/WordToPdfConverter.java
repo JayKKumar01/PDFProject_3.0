@@ -33,6 +33,7 @@ public class WordToPdfConverter {
         File cleanedWordFile = removeCommentsFromWord(inputFile);
 
         File outputFile = File.createTempFile("converted_", ".pdf", tempDir);
+        long time = System.currentTimeMillis();
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<Boolean> future = executor.submit(() -> {
@@ -57,8 +58,12 @@ public class WordToPdfConverter {
             future.cancel(true);
             throw new RuntimeException("Conversion timed out after " + TIMEOUT_SECONDS + " seconds.");
         } finally {
-            executor.shutdownNow();
+//            executor.shutdownNow();
         }
+
+        long endTime = System.currentTimeMillis();
+        double elapsedSeconds = (endTime - time) / 1000.0;
+        System.out.printf("🕒 Total time taken: %.2f seconds%n", elapsedSeconds);
 
         return outputFile;
     }

@@ -299,43 +299,56 @@ public class ContentValidator {
         return combinedFile.getPath();
     }
 
-
-    // Extract WordInfo list from a PDF page
     private List<WordInfo> extractWords(PDDocument document, int pageNum) throws IOException {
         List<WordInfo> wordInfoList = new ArrayList<>();
-        if (document == null || pageNum == -1){
-            return wordInfoList;
-        }
+        if (document == null || pageNum == -1) return wordInfoList;
+
         PDFTextStripper stripper = new PDFTextStripper() {
             @Override
-            protected void writeString(String string, List<TextPosition> textPositions){
-
+            protected void writeString(String ignored, List<TextPosition> textPositions) {
                 WordInfo prevWordInfo = null;
                 int line = 1;
-                String[] words = string.split(getWordSeparator());
-                int i = 0;
-                for (String word : words) {
-                    if (!word.isEmpty() && textPositions.get(i).getFontSize() > 1) {
 
-                        List<TextPosition> positions = new ArrayList<>();
-                        int len = i + word.length();
-                        for (int j = i; j < len; j++) {
-                            positions.add(textPositions.get(j));
-                        }
-                        WordInfo wordInfo = new WordInfo(word, positions);
+                StringBuilder currentWord = new StringBuilder();
+                List<TextPosition> currentPositions = new ArrayList<>();
 
-                        if (prevWordInfo != null) {
-                            if (prevWordInfo.getPosition() < wordInfo.getPosition()) {
-                                line++;
+                for (TextPosition tp : textPositions) {
+                    String unicode = tp.getUnicode();
+
+                    // Break down combined unicode characters
+                    for (char c : unicode.toCharArray()) {
+                        if (Character.isWhitespace(c)) {
+                            if (!currentWord.isEmpty()) {
+                                WordInfo wordInfo = new WordInfo(currentWord.toString(), new ArrayList<>(currentPositions));
+
+                                if (prevWordInfo != null && prevWordInfo.getPosition() < wordInfo.getPosition()) {
+                                    line++;
+                                }
+
+                                wordInfo.setLine(line);
+                                wordInfoList.add(wordInfo);
+                                prevWordInfo = wordInfo;
+
+                                currentWord.setLength(0);
+                                currentPositions.clear();
                             }
+                        } else {
+                            currentWord.append(c);
+                            currentPositions.add(tp); // Same tp reused for each char — intentional
                         }
-                        wordInfo.setLine(line);
-
-                        wordInfoList.add(wordInfo);
-
-                        prevWordInfo = wordInfo;
                     }
-                    i += word.length() + 1;
+                }
+
+                // Final word
+                if (!currentWord.isEmpty()) {
+                    WordInfo wordInfo = new WordInfo(currentWord.toString(), currentPositions);
+
+                    if (prevWordInfo != null && prevWordInfo.getPosition() < wordInfo.getPosition()) {
+                        line++;
+                    }
+
+                    wordInfo.setLine(line);
+                    wordInfoList.add(wordInfo);
                 }
             }
         };
@@ -343,7 +356,7 @@ public class ContentValidator {
         stripper.setStartPage(pageNum);
         stripper.setEndPage(pageNum);
         stripper.setSortByPosition(data.isSingleColumn());
-        stripper.getText(document);  // Trigger extraction
+        stripper.getText(document);
 
         return wordInfoList;
     }
