@@ -16,7 +16,7 @@ public class FontInfoUtil {
         }
 
         StringBuilder infoBuilder = new StringBuilder();
-        infoBuilder.append("[").append(operation.name()).append(": ");
+        infoBuilder.append("[").append(operation.name()).append("] ");
 
         StringBuilder charGroup = new StringBuilder();
 
@@ -32,7 +32,7 @@ public class FontInfoUtil {
 
             String font = WordUtil.getCleanFontName(tp.getFont().getName());
             int size = Math.round(tp.getFontSize());
-            String style = WordUtil.getFontStyle(tp.getFont().getName());
+            String style = WordUtil.getFontStyle(tp);
 
             if (lastFont == null) {
                 charGroup.append(ch);
@@ -44,11 +44,10 @@ public class FontInfoUtil {
             } else {
                 needChunk = true;
                 if (!isFirstGroup) infoBuilder.append(", ");
-                infoBuilder.append(charGroup)
-                        .append("(Font: ").append(lastFont)
-                        .append(", Size: ").append(lastSize)
-                        .append(", Style: ").append(lastStyle)
-                        .append(")");
+                infoBuilder.append("[").append(charGroup).append("]: ")
+                        .append(lastFont).append("/")
+                        .append(lastSize).append("/")
+                        .append(lastStyle);
                 isFirstGroup = false;
 
                 // Reset group
@@ -63,16 +62,17 @@ public class FontInfoUtil {
         // Final group
         if (!charGroup.isEmpty()) {
             if (!isFirstGroup) infoBuilder.append(", ");
-            infoBuilder.append(needChunk ? charGroup : "")
-                    .append("(Font: ").append(lastFont)
-                    .append(", Size: ").append(lastSize)
-                    .append(", Style: ").append(lastStyle)
-                    .append(")");
+            if (needChunk) {
+                infoBuilder.append("[").append(charGroup).append("]: ");
+            }
+            infoBuilder.append(lastFont)
+                    .append("/").append(lastSize)
+                    .append("/").append(lastStyle);
         }
 
-        infoBuilder.append("]");
         wordInfo.setInfo(infoBuilder.toString());
     }
+
 
     public static void setFontDiffInfo(WordInfo wordInfo) {
         List<TextPosition> tps1 = wordInfo.getOtherTextPositions();
@@ -95,8 +95,8 @@ public class FontInfoUtil {
 
             String font1 = WordUtil.getCleanFontName(tp1.getFont().getName());
             String font2 = WordUtil.getCleanFontName(tp2.getFont().getName());
-            String style1 = WordUtil.getFontStyle(tp1.getFont().getName());
-            String style2 = WordUtil.getFontStyle(tp2.getFont().getName());
+            String style1 = WordUtil.getFontStyle(tp1);
+            String style2 = WordUtil.getFontStyle(tp2);
             int size1 = Math.round(tp1.getFontSize());
             int size2 = Math.round(tp2.getFontSize());
 
