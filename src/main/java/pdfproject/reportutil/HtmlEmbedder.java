@@ -60,6 +60,13 @@ public class HtmlEmbedder {
                 continue;
             }
 
+            String excludeFilename = "data-map.js";
+            if (relativePath.endsWith(excludeFilename)) {
+                System.out.println("⏭ Skipping inlining for: " + relativePath);
+                matcher.appendReplacement(result, Matcher.quoteReplacement(tagHtml));
+                continue;
+            }
+
             Path resourcePath = baseFolder.resolve(relativePath).normalize();
             if (!Files.exists(resourcePath)) {
                 System.err.println("⚠ Missing file: " + resourcePath);
