@@ -14,9 +14,9 @@ public class HtmlEmbedder {
 
         String html = Files.readString(htmlPath, StandardCharsets.UTF_8);
 
-        // Inline CSS and JS (but skip specific scripts like 'script/data-map.js')
+        // Inline CSS and JS (skip 'data-map.js' script)
         html = inlineResources(html, baseFolder, "link", "href", "rel=\"stylesheet\"", "style", "text/css", null);
-        html = inlineResources(html, baseFolder, "script", "src", null, "script", "text/javascript", "scripts/data-map.js");
+        html = inlineResources(html, baseFolder, "script", "src", null, "script", "text/javascript", "data-map.js");
 
         String escapedHtml = html
                 .replace("\\", "\\\\")
@@ -40,7 +40,7 @@ public class HtmlEmbedder {
 
     private static String inlineResources(String html, Path baseFolder, String tag, String attr,
                                           String filterAttr, String wrapperTag, String typeAttrValue,
-                                          String skipPath) throws IOException {
+                                          String skipFile) throws IOException {
 
         Pattern pattern = Pattern.compile(
                 "<" + tag + "\\b([^>]*?)\\s" + attr + "=\"([^\"]+)\"([^>]*)>(</" + tag + ">)?", Pattern.CASE_INSENSITIVE);
@@ -49,15 +49,16 @@ public class HtmlEmbedder {
 
         while (matcher.find()) {
             String fullMatch = matcher.group(0);
-            String attrValue = matcher.group(2);  // path from the HTML src/href attribute
+            String attrValue = matcher.group(2).replace("\\", "/");
 
+            // Only inline if matches the optional attribute filter (e.g., rel="stylesheet")
             if (filterAttr != null && !fullMatch.contains(filterAttr)) {
                 matcher.appendReplacement(result, Matcher.quoteReplacement(fullMatch));
                 continue;
             }
 
-            // ✅ Do not inline the specified JS path (e.g., script/data-map.js)
-            if (skipPath != null && attrValue.replace("\\", "/").equals(skipPath)) {
+            // ✅ Skip inlining if this is the explicitly excluded JS file
+            if (skipFile != null && attrValue.equals("data-map.js")) {
                 System.out.println("⏭ Skipping inlining for: " + attrValue);
                 matcher.appendReplacement(result, Matcher.quoteReplacement(fullMatch));
                 continue;
