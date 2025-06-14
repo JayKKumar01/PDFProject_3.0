@@ -10,6 +10,7 @@ public class HtmlEmbedder {
 
     public static void main(String[] args) throws IOException {
         // Path to your HTML file
+
         Path htmlPath = Paths.get("E:\\ReportProject 2.0\\index.html");
         Path baseFolder = htmlPath.getParent(); // For resolving relative CSS/JS paths
 
