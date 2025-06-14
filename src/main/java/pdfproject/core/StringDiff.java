@@ -1,5 +1,6 @@
 package pdfproject.core;
 
+import pdfproject.Config;
 import pdfproject.constants.Operation;
 import pdfproject.models.WordInfo;
 import pdfproject.utils.FontInfoUtil;
@@ -98,6 +99,9 @@ public class StringDiff {
 
 
     private static boolean confirmAdd(List<WordInfo> words1, int i, List<WordInfo> words2, int j) {
+        if (Config.IGNORE_BROKEN_WORDS){
+            return true;
+        }
 
         // Check if this word is added when 1st page has parts of this word
         if (i + 2 > words1.size()) {
@@ -119,7 +123,9 @@ public class StringDiff {
 
     // what if these are edge cases for 20 batch, check if words are not in same line
     private static boolean confirmDel(List<WordInfo> words1, int i, List<WordInfo> words2, int j) {
-
+        if (Config.IGNORE_BROKEN_WORDS){
+            return true;
+        }
         WordInfo wordInfo = words1.get(i);
         String curWord = wordInfo.getWord();
 
