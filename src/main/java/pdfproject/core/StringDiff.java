@@ -13,14 +13,6 @@ import java.util.List;
  */
 public class StringDiff {
 
-    /**
-     * Compares two lists of WordInfo objects and identifies differences.
-     *
-     * @param words1 List of WordInfo objects from the first source.
-     * @param words2 List of WordInfo objects from the second source.
-     * @return A list of WordInfo objects representing the differences between the two lists.
-     */
-
 
     /**
      * Gets a custom list containing information about equal, deleted, and added WordInfo objects.

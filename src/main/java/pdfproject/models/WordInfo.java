@@ -1,11 +1,9 @@
 package pdfproject.models;
 
-import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.text.TextPosition;
 import pdfproject.constants.Operation;
 
 import java.awt.*;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -73,10 +71,6 @@ public class WordInfo {
         operations.add(op);
     }
 
-    public void addOperations(Collection<Operation> ops) {
-        operations.addAll(ops);
-    }
-
     // ========== Bounding Box Support ==========
 
     public Rectangle getBoundingBox() {
@@ -101,9 +95,6 @@ public class WordInfo {
         return "WordInfo{" +
                 "word='" + word + '\'' +
                 ", line=" + line +
-//                ", font='" + getFontName() + '\'' +
-//                ", style='" + getFontStyle() + '\'' +
-//                ", size=" + getFontSize() +
                 ", operations=" + operations +
                 '}';
     }

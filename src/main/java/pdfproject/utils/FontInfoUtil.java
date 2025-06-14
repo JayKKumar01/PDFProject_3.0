@@ -191,11 +191,11 @@ public class FontInfoUtil {
 
         for (int i = 0; i < diffs.size(); i++) {
             DiffItem diff = diffs.get(i);
-            Color color = OperationColor.get(diff.getOperation());
+            Color color = OperationColor.get(diff.operation());
 
-            parts.add(new FontInfoPart(diff.getFrom(), color));
+            parts.add(new FontInfoPart(diff.from(), color));
             parts.add(new FontInfoPart("→", Color.BLACK));
-            parts.add(new FontInfoPart(diff.getTo(), color));
+            parts.add(new FontInfoPart(diff.to(), color));
 
             if (i < diffs.size() - 1) {
                 parts.add(new FontInfoPart("/", Color.BLACK));
@@ -208,7 +208,7 @@ public class FontInfoUtil {
     public static String getPlainInfo(WordInfo word) {
         List<FontInfoPart> parts = word.getFontInfoParts();
         if (parts == null) return "[Invalid or mismatched positions]";
-        return parts.stream().map(FontInfoPart::getText).collect(Collectors.joining());
+        return parts.stream().map(FontInfoPart::text).collect(Collectors.joining());
     }
 
 

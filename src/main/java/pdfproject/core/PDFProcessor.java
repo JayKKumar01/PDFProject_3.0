@@ -99,7 +99,7 @@ public class PDFProcessor {
             PDFRenderer renderer2 = new PDFRenderer(doc2);
 
             AlignmentValidator alignmentValidator = new AlignmentValidator(
-                    data, Config.outputImagePath, itemIndex, renderer1, renderer2, resultMap
+                    Config.outputImagePath, itemIndex, renderer1, renderer2, resultMap
             );
             ContentValidator contentValidator = new ContentValidator(
                     data, Config.outputImagePath, itemIndex, doc1, doc2, resultMap

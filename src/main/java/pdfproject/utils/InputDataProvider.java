@@ -5,8 +5,6 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import pdfproject.Config;
-import pdfproject.constants.ConsoleMessages;
-import pdfproject.constants.StringConstants;
 import pdfproject.models.InputData;
 
 import java.io.FileInputStream;
@@ -14,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Utility class responsible for reading input data from an Excel sheet
@@ -33,8 +30,6 @@ import java.util.regex.Pattern;
 public class InputDataProvider {
 
     private static final DataFormatter FORMATTER = new DataFormatter();
-    private static final Pattern RANGE_PATTERN = Pattern.compile("\\d+-\\d+"); // e.g., "1-3"
-    private static final Pattern SINGLE_PAGE_PATTERN = Pattern.compile("\\d+"); // e.g., "5"
 
     /**
      * Loads input data from the Excel file defined in {@link Config#INPUT_PATH}.
@@ -72,7 +67,7 @@ public class InputDataProvider {
             // Optional: Multi-column layout flag
             String layoutFlag = getCellValue(row.getCell(5));
             if (layoutFlag != null && !layoutFlag.isEmpty()) {
-                input.setSingleColumn(!layoutFlag.equalsIgnoreCase(StringConstants.YES));
+                input.setSingleColumn(!layoutFlag.equalsIgnoreCase("yes"));
             }
 
             inputList.add(input);
@@ -91,22 +86,6 @@ public class InputDataProvider {
     }
 
     /**
-     * Returns true if the given cell does not contain a valid range string.
-     * Accepts "n" or "n-m" where n <= m.
-     */
-    private static boolean isInvalidRange(Cell rangeCell) {
-        String val = getCellValue(rangeCell);
-        if (val == null) return true;
-
-        if (RANGE_PATTERN.matcher(val).matches()) {
-            String[] parts = val.split("-");
-            return Integer.parseInt(parts[0]) > Integer.parseInt(parts[1]);
-        }
-
-        return !SINGLE_PAGE_PATTERN.matcher(val).matches();
-    }
-
-    /**
      * Opens the Excel file at {@link Config#INPUT_PATH} and returns an iterator
      * over the rows of the first sheet.
      *
@@ -121,7 +100,7 @@ public class InputDataProvider {
             return workbook.getSheetAt(0).rowIterator();
 
         } catch (IOException e) {
-            System.err.println(ConsoleMessages.EXCEL_READ_ERROR + e.getMessage());
+            System.err.println("❌ Failed to read Excel input file: " + e.getMessage());
             return null;
         }
     }

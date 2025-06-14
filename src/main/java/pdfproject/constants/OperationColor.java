@@ -15,20 +15,14 @@ public final class OperationColor {
 
     public static Color get(Operation operation) {
         if (operation == null) return MULTIPLE;
-        switch (operation) {
-            case FONT:
-                return FONT_NAME;
-            case SIZE:
-                return FONT_SIZE;
-            case STYLE:
-                return FONT_STYLE;
-            case ADDED:
-                return ADDED;
-            case DELETED:
-                return DELETED;
-            default:
-                return MULTIPLE;
-        }
+        return switch (operation) {
+            case FONT -> FONT_NAME;
+            case SIZE -> FONT_SIZE;
+            case STYLE -> FONT_STYLE;
+            case ADDED -> ADDED;
+            case DELETED -> DELETED;
+            default -> MULTIPLE;
+        };
     }
 
 }

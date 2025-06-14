@@ -1,11 +1,9 @@
 package pdfproject;
 
-import pdfproject.constants.ConsoleMessages;
 import pdfproject.constants.FileTypes;
 import pdfproject.core.PDFProcessor;
 import pdfproject.interfaces.LauncherListener;
 import pdfproject.models.InputData;
-import pdfproject.models.MapModel;
 import pdfproject.utils.InputDataProvider;
 import pdfproject.utils.ProcessUtils;
 
@@ -51,7 +49,7 @@ public class Launcher {
      *     <li>Calling the onFinish lifecycle hook</li>
      * </ul>
      *
-     * @param launcherListener Lifecycle listener for pre/post event hooks
+     * @param launcherListener Lifecycle listener for pre- / post-event hooks
      */
     public static void start(LauncherListener launcherListener) {
         launcherListener.onStart();
@@ -61,7 +59,7 @@ public class Launcher {
 
         // If no input rows found, stop processing
         if (inputs == null || inputs.isEmpty()) {
-            System.out.println(ConsoleMessages.NO_INPUT_DATA);
+            System.out.println("❌ No input data found. Please check the input source.");
             return;
         }
 
@@ -72,15 +70,15 @@ public class Launcher {
 
         // If non-PDFs exist and MS Word is open, abort for safety
         if (!allPathsArePDF && ProcessUtils.isWordRunning()) {
-            System.out.println(ConsoleMessages.WORD_RUNNING_ERROR);
+            System.out.println("⚠️ MS Word is currently running. Please close it and try again.");
             return;
         }
 
         // Print success message with row count
-        System.out.println(ConsoleMessages.LOADED_ROWS_PREFIX + inputs.size() + ConsoleMessages.LOADED_ROWS_SUFFIX);
+        System.out.println("✅ Loaded " + inputs.size() + " input rows.");
 
         // Process all input records via the core engine
-        List<MapModel> mapModels = new PDFProcessor().processAll(inputs);
+        new PDFProcessor().processAll(inputs);
 
         launcherListener.onFinish();
     }

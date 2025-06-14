@@ -58,7 +58,7 @@ public class WordToPdfConverter {
             future.cancel(true);
             throw new RuntimeException("Conversion timed out after " + TIMEOUT_SECONDS + " seconds.");
         } finally {
-//            executor.shutdownNow();
+            executor.shutdownNow();
         }
 
         long endTime = System.currentTimeMillis();

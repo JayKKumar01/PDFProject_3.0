@@ -1,6 +1,5 @@
 package pdfproject.utils;
 
-import pdfproject.constants.ConsoleMessages;
 import pdfproject.constants.ProcessNames;
 
 import java.io.BufferedReader;
@@ -29,7 +28,7 @@ public class ProcessUtils {
                 return isProcessRunning(ProcessNames.PS_COMMAND, ProcessNames.WORD_PROCESS_UNIX);
             }
         } catch (IOException e) {
-            System.err.println(ConsoleMessages.PROCESS_CHECK_FAILED + e.getMessage());
+            System.err.println("❌ Failed to check process status: " + e.getMessage());
         }
 
         return false;

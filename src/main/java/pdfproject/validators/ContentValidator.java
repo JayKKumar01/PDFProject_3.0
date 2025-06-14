@@ -3,7 +3,6 @@ package pdfproject.validators;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
-import pdfproject.Config;
 import pdfproject.constants.FileTypes;
 import pdfproject.constants.Operation;
 import pdfproject.constants.Texts;
@@ -79,23 +78,13 @@ public class ContentValidator {
 
             combinedImage = combineImagesSideBySide(boxedImg1, boxedImg2);
 
-            // Explicitly release boxed images early
-            boxedImg1 = null;
-            boxedImg2 = null;
-
             // Generate and save diff image
             BufferedImage diffImage = generateDiffImage(diff, baseImg1, baseImg2);
             diffPath = saveDiffImage(imagePage, diffImage);
-            diffImage = null;
         }
 
         // Save combined image
         String path = saveImage(imagePage, combinedImage);
-        combinedImage = null;
-
-        // Release base images
-        baseImg1 = null;
-        baseImg2 = null;
 
         // Prepare result
         resultMap.addContentRow(Arrays.asList(path, diffPath));
@@ -209,14 +198,14 @@ public class ContentValidator {
 
                 for (int i = 0; i <= lastIndex; i++) {
                     FontInfoPart part = parts.get(i);
-                    String text = part.getText();
+                    String text = part.text();
 
                     // Trim trailing comma only for the last part
                     if (i == lastIndex && text.endsWith(", ")) {
                         text = text.substring(0, text.length() - 2);
                     }
 
-                    g.setColor(part.getColor());
+                    g.setColor(part.color());
                     g.drawString(text, xCursor, infoY);
                     xCursor += g.getFontMetrics().stringWidth(text);
                 }
@@ -309,7 +298,7 @@ public class ContentValidator {
                 for (TextPosition tp : textPositions) {
                     String unicode = tp.getUnicode();
 
-                    // Break down combined unicode characters
+                    // Break down combined Unicode characters
                     for (char c : unicode.toCharArray()) {
                         if (Character.isWhitespace(c)) {
                             if (!currentWord.isEmpty()) {

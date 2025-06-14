@@ -3,7 +3,6 @@ package pdfproject.validators;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.Config;
 import pdfproject.constants.FileTypes;
-import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.utils.ImageUtils;
 
@@ -18,8 +17,6 @@ import java.util.List;
  * generating a visual difference (diff), and saving the results.
  */
 public class AlignmentValidator {
-
-    private final InputData data;
     private final String outputImagePath;
     private final int rowIndex;
     private final PDFRenderer renderer1;
@@ -29,16 +26,14 @@ public class AlignmentValidator {
     /**
      * Constructs an alignment validator for a specific data row.
      *
-     * @param data            The input data for the row.
      * @param outputImagePath Base directory where image outputs will be saved.
      * @param rowIndex        Index of the current row (zero-based).
      * @param renderer1       PDF renderer for document 1.
      * @param renderer2       PDF renderer for document 2.
      * @param resultMap       Model to store output image paths.
      */
-    public AlignmentValidator(InputData data, String outputImagePath, int rowIndex,
+    public AlignmentValidator(String outputImagePath, int rowIndex,
                               PDFRenderer renderer1, PDFRenderer renderer2, MapModel resultMap) {
-        this.data = data;
         this.outputImagePath = outputImagePath;
         this.rowIndex = rowIndex;
         this.renderer1 = renderer1;
