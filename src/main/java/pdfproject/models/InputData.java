@@ -6,6 +6,7 @@ public class InputData {
     private final String range1;
     private final String range2;
     private boolean isSingleColumn = true;
+    private String key;
 
     public InputData(String path1, String path2, String range1, String range2) {
         this.path1 = path1;
@@ -36,5 +37,13 @@ public class InputData {
 
     public void setSingleColumn(boolean singleColumn) {
         this.isSingleColumn = singleColumn;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

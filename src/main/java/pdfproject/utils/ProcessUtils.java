@@ -1,58 +1,60 @@
 package pdfproject.utils;
 
+import pdfproject.constants.ConsoleMessages;
 import pdfproject.constants.ProcessNames;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.util.List;
 
+/**
+ * Utility class for checking the status of system processes.
+ */
 public class ProcessUtils {
 
+    /**
+     * Checks if Microsoft Word is currently running.
+     *
+     * @return true if Word is running; false otherwise
+     */
     public static boolean isWordRunning() {
-        String os = System.getProperty(ProcessNames.OS_NAME).toLowerCase();
+        String os = System.getProperty(ProcessNames.OS_NAME_PROPERTY).toLowerCase();
 
         try {
-            ProcessBuilder processBuilder;
-            BufferedReader reader;
-            String line;
-            boolean isRunning = false;
-
-            if (os.contains("win")) {
-                // Windows-specific process checking
-                processBuilder = new ProcessBuilder(ProcessNames.TASK_LIST_COMMAND);
-                processBuilder.redirectErrorStream(true);
-                Process process = processBuilder.start();
-                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                while ((line = reader.readLine()) != null) {
-                    if (line.toLowerCase().contains(ProcessNames.WORD_PROCESS.toLowerCase())) {
-                        isRunning = true;
-                        break;
-                    }
-                }
-                process.waitFor();
-                reader.close();
-            } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
-                // Unix/Linux/Mac-specific process checking
-                processBuilder = new ProcessBuilder("ps", "-ef");
-                processBuilder.redirectErrorStream(true);
-                Process process = processBuilder.start();
-                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                while ((line = reader.readLine()) != null) {
-                    if (line.toLowerCase().contains(ProcessNames.WORD_PROCESS.toLowerCase())) {
-                        isRunning = true;
-                        break;
-                    }
-                }
-                process.waitFor();
-                reader.close();
+            if (os.contains(ProcessNames.WINDOWS_OS_INDICATOR)) {
+                return isProcessRunning(ProcessNames.TASK_LIST_COMMAND, ProcessNames.WORD_PROCESS_WINDOWS);
+            } else if (os.contains(ProcessNames.LINUX_OS_INDICATOR)
+                    || os.contains(ProcessNames.UNIX_OS_INDICATOR)
+                    || os.contains(ProcessNames.MAC_OS_INDICATOR)) {
+                return isProcessRunning(ProcessNames.PS_COMMAND, ProcessNames.WORD_PROCESS_UNIX);
             }
-
-            return isRunning;
-
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            System.err.println(ConsoleMessages.PROCESS_CHECK_FAILED + e.getMessage());
         }
+
+        return false;
+    }
+
+    /**
+     * Executes a process list command and checks if the specified process is running.
+     *
+     * @param command     command to list running processes
+     * @param processName the process name to search for
+     * @return true if the process is found; false otherwise
+     */
+    private static boolean isProcessRunning(String[] command, String processName) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder(command);
+        builder.redirectErrorStream(true);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(builder.start().getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.toLowerCase().contains(processName.toLowerCase())) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 }

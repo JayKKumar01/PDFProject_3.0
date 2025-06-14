@@ -33,7 +33,12 @@ public class DataMapGenerator {
             List<List<String>> validationImages = model.getContentImages();
             List<List<String>> alignmentImages = model.getAlignmentImages();
 
-            jsContent.append("    [\"Item ").append(itemNumber).append("\", {\n");
+            String key = model.getKey();
+            if (key == null || key.trim().isEmpty()){
+                key = "Item "+itemNumber;
+            }
+
+            jsContent.append("    [\"").append(key).append("\", {\n");
 
             // Validation images
             jsContent.append("        validationImages: [\n");

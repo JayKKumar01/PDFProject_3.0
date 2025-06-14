@@ -2,11 +2,16 @@ package pdfproject.utils;
 
 import org.apache.pdfbox.text.TextPosition;
 import pdfproject.Config;
+import pdfproject.constants.FileTypes;
 import pdfproject.constants.OperationColor;
+import pdfproject.constants.Texts;
 import pdfproject.models.WordInfo;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class ImageUtils {
@@ -78,6 +83,36 @@ public class ImageUtils {
         return output;
     }
 
+    public static BufferedImage createDummyImage(int width, int height, Color textColor, String infoText) {
+        // Create a dummy image with the specified width and height
+        BufferedImage dummyImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = dummyImage.createGraphics();
+
+        // Fill the image with white
+        g2d.setColor(Color.WHITE);
+        g2d.fillRect(0, 0, width, height);
+
+        // Set up the info text
+        g2d.setColor(textColor);
+        g2d.setFont(new Font("Arial", Font.BOLD, 30));
+
+        // Calculate the position to center the text horizontally and vertically
+        FontMetrics fontMetrics = g2d.getFontMetrics();
+        int textWidth = fontMetrics.stringWidth(infoText);
+        int textHeight = fontMetrics.getHeight();
+        int x = (width - textWidth) / 2;
+        int y = (height - textHeight) / 2 + fontMetrics.getAscent();
+
+        // Draw the text in the middle
+        g2d.drawString(infoText, x, y);
+
+        g2d.dispose();
+
+        return dummyImage;
+    }
+
+
+
 
     private static Color getOperationColor(WordInfo word) {
         // Check if there are multiple operations
@@ -89,5 +124,28 @@ public class ImageUtils {
     }
 
 
+    public static String getDummyReportImage() throws IOException {
+        String dirPath = String.format("%s", Config.outputImagePath);
+        String fileName = Texts.NO_DIFF_IMAGE_NAME + FileTypes.IMAGE_EXTENSION;
+        File outputFile = new File(dirPath, fileName);
 
+        // Create the output directory if it doesn't exist
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+
+        // If the dummy image already exists, return its path
+        if (outputFile.exists()) {
+            return outputFile.getAbsolutePath();
+        }
+
+        // A4 dimensions in points (72 DPI): 595 x 842
+        BufferedImage dummyImage = createDummyImage(595, 842, Color.GREEN.darker(), Texts.NO_DIFF_FOUND);
+
+        // Save the image
+        ImageIO.write(dummyImage, FileTypes.IMAGE_TYPE, outputFile);
+
+        return outputFile.getAbsolutePath();
+    }
 }

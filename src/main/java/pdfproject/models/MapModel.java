@@ -8,6 +8,7 @@ public class MapModel {
     private final List<List<String>> alignmentImages;
     private final List<List<String>> contentImages;
     private final String outputImagePath;
+    private String key;
 
     public MapModel(String outputImagePath) {
         // Normalize path separator to forward slash once
@@ -41,5 +42,13 @@ public class MapModel {
 
     public List<List<String>> getContentImages() {
         return contentImages;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

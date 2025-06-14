@@ -6,6 +6,7 @@ import org.apache.pdfbox.text.TextPosition;
 import pdfproject.Config;
 import pdfproject.constants.FileTypes;
 import pdfproject.constants.Operation;
+import pdfproject.constants.Texts;
 import pdfproject.core.StringDiff;
 import pdfproject.models.FontInfoPart;
 import pdfproject.models.InputData;
@@ -54,7 +55,7 @@ public class ContentValidator {
         BufferedImage baseImg2 = images.get(1);
 
         BufferedImage combinedImage;
-        String diffPath = null;
+        String diffPath = ImageUtils.getDummyReportImage();
 
         if (diff.isEmpty()) { // check exception case for one image null
             // No difference – combine raw base images directly
@@ -254,14 +255,14 @@ public class ContentValidator {
         if (img1 == null) {
             int width = img2.getWidth();
             int height = img2.getHeight();
-            img1 = createDummyImage(width, height); // Create dummy image for img1
+            img1 = ImageUtils.createDummyImage(width,height,Color.RED, Texts.PAGE_NOT_FOUND);
         }
 
         // Check if img2 is null
         if (img2 == null) {
             int width = img1.getWidth();
             int height = img1.getHeight();
-            img2 = createDummyImage(width, height); // Create dummy image for img2
+            img2 = ImageUtils.createDummyImage(width,height,Color.RED, Texts.PAGE_NOT_FOUND);
         }
 
         // Combine valid images side by side
@@ -277,33 +278,6 @@ public class ContentValidator {
         return combined;
     }
 
-    private BufferedImage createDummyImage(int width, int height) {
-        // Create a dummy image with the specified width and height
-        BufferedImage dummyImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g2d = dummyImage.createGraphics();
-
-        // Fill the image with white
-        g2d.setColor(Color.WHITE);
-        g2d.fillRect(0, 0, width, height);
-
-        // Set up the "Page Not Found" text
-        g2d.setColor(Color.RED);
-        g2d.setFont(new Font("Arial", Font.BOLD, 30));
-
-        // Calculate the position to center the text horizontally and vertically
-        FontMetrics fontMetrics = g2d.getFontMetrics();
-        int textWidth = fontMetrics.stringWidth("Page Not Found");
-        int textHeight = fontMetrics.getHeight();
-        int x = (width - textWidth) / 2;  // Center text horizontally
-        int y = (height - textHeight) / 2 + fontMetrics.getAscent();  // Center text vertically
-
-        // Draw the text in the middle
-        g2d.drawString("Page Not Found", x, y);
-
-        g2d.dispose();
-
-        return dummyImage;
-    }
 
 
 
