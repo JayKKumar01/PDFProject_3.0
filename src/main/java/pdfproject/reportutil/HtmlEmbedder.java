@@ -45,7 +45,7 @@ public class HtmlEmbedder {
         Pattern pattern = Pattern.compile(
                 "<" + tag + "\\b([^>]*?)\\s" + attr + "=\"([^\"]+)\"([^>]*)>(</" + tag + ">)?", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(html);
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         while (matcher.find()) {
             String fullMatch = matcher.group(0);
