@@ -99,7 +99,8 @@ public class FontInfoUtil {
         }
 
         List<FontInfoPart> parts = new ArrayList<>();
-        parts.add(new FontInfoPart("[FONT_DIFF] ", Color.BLACK));
+        // Track which operations are used
+        EnumSet<Operation> usedOps = EnumSet.noneOf(Operation.class);
 
         StringBuilder chunk = new StringBuilder();
         List<DiffItem> lastDiffs = null;
@@ -117,6 +118,7 @@ public class FontInfoUtil {
             if (!Objects.equals(font1, font2)) {
                 currentDiffs.add(new DiffItem(Operation.FONT, font1, font2));
                 wordInfo.addOperation(Operation.FONT);
+                usedOps.add(Operation.FONT);
             }
 
             int size1 = Math.round(tp1.getFontSize());
@@ -124,6 +126,7 @@ public class FontInfoUtil {
             if (size1 != size2) {
                 currentDiffs.add(new DiffItem(Operation.SIZE, String.valueOf(size1), String.valueOf(size2)));
                 wordInfo.addOperation(Operation.SIZE);
+                usedOps.add(Operation.SIZE);
             }
 
             String style1 = WordUtil.getFontStyle(tp1);
@@ -131,6 +134,7 @@ public class FontInfoUtil {
             if (!Objects.equals(style1, style2)) {
                 currentDiffs.add(new DiffItem(Operation.STYLE, style1, style2));
                 wordInfo.addOperation(Operation.STYLE);
+                usedOps.add(Operation.STYLE);
             }
 
             if (lastDiffs == null || currentDiffs.equals(lastDiffs)) {
@@ -147,12 +151,25 @@ public class FontInfoUtil {
 
         // Final chunk
         if (!chunk.isEmpty()) {
-            if (needChunk) {
-                appendChunkDiff(parts, chunk.toString(), lastDiffs);
-            } else {
-                appendChunkDiff(parts, null, lastDiffs); // Only append diffs
+            appendChunkDiff(parts, needChunk ? chunk.toString() : null, lastDiffs);
+        }
+
+        // Insert operation types at the beginning (with colored operations)
+        parts.add(0, new FontInfoPart("] ", Color.BLACK));
+
+        List<Operation> opList = new ArrayList<>(usedOps);
+        Collections.reverse(opList); // To insert in correct order
+
+        for (int i = 0; i < opList.size(); i++) {
+            Operation op = opList.get(i);
+            Color opColor = OperationColor.get(op);
+            parts.add(0, new FontInfoPart(op.name(), opColor));
+            if (i < opList.size() - 1) {
+                parts.add(0, new FontInfoPart(", ", Color.BLACK));
             }
         }
+
+        parts.add(0, new FontInfoPart("[", Color.BLACK));
 
         wordInfo.setFontInfoParts(parts);
     }
