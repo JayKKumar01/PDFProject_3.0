@@ -9,76 +9,71 @@ import java.util.regex.Pattern;
 public class HtmlEmbedder {
 
     public static void main(String[] args) throws IOException {
-        // Path to your HTML file
-
         Path htmlPath = Paths.get("E:\\ReportProject 2.0\\index.html");
-        Path baseFolder = htmlPath.getParent(); // For resolving relative CSS/JS paths
+        Path baseFolder = htmlPath.getParent();
 
-        // Read raw HTML
         String html = Files.readString(htmlPath, StandardCharsets.UTF_8);
 
-        // Inline CSS and JS (skip "data-map.js" but keep tag)
+        // Inline CSS and JS (but skip specific scripts like 'script/data-map.js')
         html = inlineResources(html, baseFolder, "link", "href", "rel=\"stylesheet\"", "style", "text/css", null);
-        html = inlineResources(html, baseFolder, "script", "src", null, "script", "text/javascript", "data-map.js");
+        html = inlineResources(html, baseFolder, "script", "src", null, "script", "text/javascript", "scripts/data-map.js");
 
-        // Escape for Java string
         String escapedHtml = html
                 .replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\r", "")
                 .replace("\n", "\\n");
 
-        // Generate Java class content
         String classContent =
                 "package pdfproject.reportutil;\n\n" +
                         "public class ReportHtml {\n" +
                         "    public static final String REPORT_HTML = \"" + escapedHtml + "\";\n" +
                         "}";
 
-        // Write to src/main/java/pdfproject/reportutil/ReportHtml.java
         String packagePath = HtmlEmbedder.class.getPackageName().replace('.', File.separatorChar);
         Path outputDir = Paths.get(System.getProperty("user.dir"), "src", "main", "java", packagePath);
         Files.createDirectories(outputDir);
-        Path outputFile = outputDir.resolve("ReportHtml.java");
-        Files.writeString(outputFile, classContent, StandardCharsets.UTF_8);
+        Files.writeString(outputDir.resolve("ReportHtml.java"), classContent, StandardCharsets.UTF_8);
 
-        System.out.println("✅ ReportHtml.java generated at: " + outputFile.toAbsolutePath());
+        System.out.println("✅ ReportHtml.java generated at: " + outputDir.resolve("ReportHtml.java").toAbsolutePath());
     }
 
     private static String inlineResources(String html, Path baseFolder, String tag, String attr,
                                           String filterAttr, String wrapperTag, String typeAttrValue,
-                                          String excludeFilename) throws IOException {
-        Pattern pattern = Pattern.compile("<" + tag + "[^>]*" + attr + "=\"([^\"]+)\"[^>]*>");
+                                          String skipPath) throws IOException {
+
+        Pattern pattern = Pattern.compile(
+                "<" + tag + "\\b([^>]*?)\\s" + attr + "=\"([^\"]+)\"([^>]*)>(</" + tag + ">)?", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(html);
-        StringBuilder result = new StringBuilder();
+        StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
-            String fullTag = matcher.group(0);
-            String relativePath = matcher.group(1);
+            String fullMatch = matcher.group(0);
+            String attrValue = matcher.group(2);  // path from the HTML src/href attribute
 
-            // Skip if tag does not match filter
-            if (filterAttr != null && !fullTag.contains(filterAttr)) {
-                matcher.appendReplacement(result, Matcher.quoteReplacement(fullTag));
+            if (filterAttr != null && !fullMatch.contains(filterAttr)) {
+                matcher.appendReplacement(result, Matcher.quoteReplacement(fullMatch));
                 continue;
             }
 
-            // Skip specific JS file but keep tag
-            if (excludeFilename != null && relativePath.endsWith(excludeFilename)) {
-                System.out.println("⏭ Skipping inlining but keeping tag: " + relativePath);
-                matcher.appendReplacement(result, Matcher.quoteReplacement(fullTag));
+            // ✅ Do not inline the specified JS path (e.g., script/data-map.js)
+            if (skipPath != null && attrValue.replace("\\", "/").equals(skipPath)) {
+                System.out.println("⏭ Skipping inlining for: " + attrValue);
+                matcher.appendReplacement(result, Matcher.quoteReplacement(fullMatch));
                 continue;
             }
 
-            Path resourcePath = baseFolder.resolve(relativePath).normalize();
+            Path resourcePath = baseFolder.resolve(attrValue).normalize();
             if (!Files.exists(resourcePath)) {
                 System.err.println("⚠ Missing file: " + resourcePath);
-                matcher.appendReplacement(result, Matcher.quoteReplacement(fullTag));
+                matcher.appendReplacement(result, Matcher.quoteReplacement(fullMatch));
                 continue;
             }
 
             String content = Files.readString(resourcePath, StandardCharsets.UTF_8);
             String inlineTag = "<" + wrapperTag + " type=\"" + typeAttrValue + "\">\n"
                     + content + "\n</" + wrapperTag + ">";
+
             matcher.appendReplacement(result, Matcher.quoteReplacement(inlineTag));
         }
 
