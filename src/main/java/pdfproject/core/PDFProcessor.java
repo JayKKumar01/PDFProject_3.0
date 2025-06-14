@@ -90,10 +90,15 @@ public class PDFProcessor {
                         p1 >= 0 ? String.valueOf(p1) : "N/A",
                         p2 >= 0 ? String.valueOf(p2) : "N/A");
 
-                List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2, i + 1);
-                contentValidator.validateContent(p1, p2, i + 1, images);
 
-                System.out.printf("✅ Item %d | Page %d: Validation complete.%n", itemIndex + 1, i + 1);
+                try {
+                    List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2, i + 1);
+                    contentValidator.validateContent(p1, p2, i + 1, images);
+                    System.out.printf("✅ Item %d | Page %d: Validation complete.%n", itemIndex + 1, i + 1);
+                } catch (Exception e) {
+                    System.err.printf("❌ Item %d | Page %d: Validation failed - %s%n", itemIndex + 1, i + 1, e.getMessage());
+                    e.printStackTrace(); // Optional: full stack trace for debugging
+                }
             }
 
             System.out.printf("✔️  Item %d: Validation for all pages completed.%n", itemIndex + 1);

@@ -2,7 +2,6 @@ package pdfproject.utils;
 
 import org.apache.pdfbox.text.TextPosition;
 import pdfproject.Config;
-import pdfproject.constants.Operation;
 import pdfproject.constants.OperationColor;
 import pdfproject.models.WordInfo;
 
@@ -80,29 +79,12 @@ public class ImageUtils {
     }
 
 
-    public static Color getOperationColor(WordInfo word) {
+    private static Color getOperationColor(WordInfo word) {
         // Check if there are multiple operations
         if (word.getOperations().size() > 1) {
             return OperationColor.MULTIPLE; // BLACK for multiple operations
         }
-
-        // If only one operation, use switch to determine the color
-        Operation operation = word.getOperations().iterator().next(); // Get the single operation
-
-        switch (operation) {
-            case DELETED:
-                return OperationColor.DELETED; // RED for DELETED
-            case ADDED:
-                return OperationColor.ADDED; // GREEN for ADDED
-            case FONT:
-                return OperationColor.FONT_NAME; // MAGENTA for FONT_NAME
-            case SIZE:
-                return OperationColor.FONT_SIZE; // BLUE for FONT_SIZE
-            case STYLE:
-                return OperationColor.FONT_STYLE; // CYAN for FONT_STYLE
-            default:
-                return OperationColor.MULTIPLE; // BLACK for unknown or unhandled cases
-        }
+        return OperationColor.get(word.getOperations().iterator().next());
 
     }
 

@@ -11,4 +11,24 @@ public final class OperationColor {
     public static Color FONT_SIZE = Color.BLUE;
     public static Color FONT_STYLE = Color.CYAN;
     public static Color MULTIPLE = Color.BLACK;
+
+
+    public static Color get(Operation operation) {
+        if (operation == null) return MULTIPLE;
+        switch (operation) {
+            case FONT:
+                return FONT_NAME;
+            case SIZE:
+                return FONT_SIZE;
+            case STYLE:
+                return FONT_STYLE;
+            case ADDED:
+                return ADDED;
+            case DELETED:
+                return DELETED;
+            default:
+                return MULTIPLE;
+        }
+    }
+
 }

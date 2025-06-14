@@ -7,9 +7,11 @@ import pdfproject.Config;
 import pdfproject.constants.FileTypes;
 import pdfproject.constants.Operation;
 import pdfproject.core.StringDiff;
+import pdfproject.models.FontInfoPart;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.models.WordInfo;
+import pdfproject.utils.FontInfoUtil;
 import pdfproject.utils.ImageUtils;
 
 import javax.imageio.ImageIO;
@@ -124,7 +126,7 @@ public class ContentValidator {
             Rectangle box = word.getBoundingBox();
             if (box.height == 0) continue;
 
-            String info = word.getInfo();
+            String info = FontInfoUtil.getPlainInfo(word);
             float pos = word.getPosition();
 
             if (pos != lastPos || !Objects.equals(info, lastInfo)) {
@@ -173,7 +175,7 @@ public class ContentValidator {
             Rectangle box = word.getBoundingBox();
             if (box.width == 0 || box.height == 0) continue;
 
-            String info = word.getInfo();
+            String info = FontInfoUtil.getPlainInfo(word);
             float pos = word.getPosition();
             boolean shouldWriteInfo = false;
 
@@ -197,10 +199,28 @@ public class ContentValidator {
             g.drawImage(wordImg, x, y, null);
             x += box.width;
 
-            if (shouldWriteInfo && info != null) {
-                g.setColor(ImageUtils.getOperationColor(word));
-                g.drawString(info, padding, y + currentLineHeight + 20); // Draw string below line of cutouts
+            if (shouldWriteInfo && word.getFontInfoParts() != null) {
+                int infoY = y + currentLineHeight + 20;
+                int xCursor = padding;
+
+                List<FontInfoPart> parts = word.getFontInfoParts();
+                int lastIndex = parts.size() - 1;
+
+                for (int i = 0; i <= lastIndex; i++) {
+                    FontInfoPart part = parts.get(i);
+                    String text = part.getText();
+
+                    // Trim trailing comma only for the last part
+                    if (i == lastIndex && text.endsWith(", ")) {
+                        text = text.substring(0, text.length() - 2);
+                    }
+
+                    g.setColor(part.getColor());
+                    g.drawString(text, xCursor, infoY);
+                    xCursor += g.getFontMetrics().stringWidth(text);
+                }
             }
+
 
             lastPos = pos;
             lastInfo = info;

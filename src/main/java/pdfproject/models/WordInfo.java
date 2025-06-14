@@ -17,21 +17,22 @@ public class WordInfo {
     private int line = -1;
     // Store multiple operations
     private final Set<Operation> operations = EnumSet.noneOf(Operation.class);
-    private String info;
     private Rectangle boundingBox;
     private boolean belongsToFirst = false;
+    private List<FontInfoPart> fontInfoParts;
+
+    public void setFontInfoParts(List<FontInfoPart> parts) {
+        this.fontInfoParts = parts;
+    }
+
+    public List<FontInfoPart> getFontInfoParts() {
+        return fontInfoParts;
+    }
+
 
     public WordInfo(String word, List<TextPosition> textPositions) {
         this.word = word;
         this.textPositions = textPositions;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
     }
 
     public int getLine() {

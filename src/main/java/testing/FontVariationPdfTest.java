@@ -39,7 +39,7 @@ public class FontVariationPdfTest {
 
                         System.out.println("📝 Word: " + word.getWord());
                         System.out.println("   ↪ Raw Font: " + rawFont);
-                        System.out.println("   ℹ️ Info: " + word.getInfo());
+                        System.out.println("   ℹ️ Info: " + FontInfoUtil.getPlainInfo(word));
                         System.out.println(); // line break
                     }
                 }
