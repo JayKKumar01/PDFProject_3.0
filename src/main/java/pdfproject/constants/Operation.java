@@ -1,5 +1,5 @@
 package pdfproject.constants;
 
 public enum Operation {
-        DELETED, ADDED, EQUAL, FONT, STYLE, SIZE
+        DELETED, ADDED, EQUAL, FONT, SIZE, STYLE
     }
