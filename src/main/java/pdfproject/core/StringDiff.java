@@ -60,19 +60,14 @@ public class StringDiff {
                 i--;
                 j--;
             } else if (LCSuffix[i - 1][j] > LCSuffix[i][j - 1]) {
-                if(confirmDel(words1,m-i,words2,n-j)) {
-                    wordInfo1.addOperation(Operation.DELETED);
-                    FontInfoUtil.setFontInfo(Operation.DELETED, wordInfo1);
-                    result.add(wordInfo1);
-                }
-
+                wordInfo1.addOperation(Operation.DELETED);
+                FontInfoUtil.setFontInfo(Operation.DELETED, wordInfo1);
+                result.add(wordInfo1);
                 i--;
             } else {
-                if (confirmAdd(words1,m-i,words2,n-j)) {
-                    wordInfo2.addOperation(Operation.ADDED);
-                    FontInfoUtil.setFontInfo(Operation.ADDED, wordInfo2);
-                    result.add(wordInfo2);
-                }
+                wordInfo2.addOperation(Operation.ADDED);
+                FontInfoUtil.setFontInfo(Operation.ADDED, wordInfo2);
+                result.add(wordInfo2);
                 j--;
             }
         }
@@ -94,53 +89,5 @@ public class StringDiff {
             j--;
         }
         return result;
-    }
-
-
-
-    private static boolean confirmAdd(List<WordInfo> words1, int i, List<WordInfo> words2, int j) {
-        if (Config.IGNORE_BROKEN_WORDS){
-            return true;
-        }
-
-        // Check if this word is added when 1st page has parts of this word
-        if (i + 2 > words1.size()) {
-            return true;
-        }
-        String matchingWord = words2.get(j).getWord();
-
-        WordInfo w1 = words1.get(i);
-        WordInfo w2 = words1.get(i + 1);
-
-        if ((w1.getWord() + w2.getWord()).equals(matchingWord)) {
-
-            if (w1.getLine() == w2.getLine()){
-                return false;
-            }else return !w1.getWord().endsWith("-") && !w2.getWord().startsWith("-");
-        }
-        return true;
-    }
-
-    // what if these are edge cases for 20 batch, check if words are not in same line
-    private static boolean confirmDel(List<WordInfo> words1, int i, List<WordInfo> words2, int j) {
-        if (Config.IGNORE_BROKEN_WORDS){
-            return true;
-        }
-        WordInfo wordInfo = words1.get(i);
-        String curWord = wordInfo.getWord();
-
-        if (j < 2) {
-            return true;
-        }
-
-        WordInfo w1 = words2.get(j - 2);
-        WordInfo w2 = words2.get(j - 1);
-        String secondWord = w1.getWord() + w2.getWord();
-        if (curWord.equals(secondWord)){
-            if (w1.getLine() == w2.getLine()){
-                return false;
-            }else return !w1.getWord().endsWith("-") && !w2.getWord().startsWith("-");
-        }
-        return true;
     }
 }

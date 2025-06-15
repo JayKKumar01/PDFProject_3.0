@@ -46,7 +46,7 @@ public class ImageUtils {
         BufferedImage output = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = output.createGraphics();
         g2d.drawImage(image, 0, 0, null);
-        g2d.setStroke(new BasicStroke(3f));
+        g2d.setStroke(new BasicStroke(2.5f));
 
         for (WordInfo word : words) {
             if (word.getTextPositions().isEmpty()) continue;
