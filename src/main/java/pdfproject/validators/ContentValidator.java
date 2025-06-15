@@ -87,7 +87,7 @@ public class ContentValidator {
         String path = saveImage(imagePage, combinedImage);
 
         // Prepare result
-        resultMap.addContentRow(Arrays.asList(path, diffPath));
+        resultMap.addContentRow(Arrays.asList(path, diffPath),imagePage-1);
     }
 
 

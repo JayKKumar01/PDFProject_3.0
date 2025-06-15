@@ -17,6 +17,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Core engine that processes all row-wise PDF/Word document comparisons
@@ -65,7 +68,6 @@ public class PDFProcessor {
     private void processRow(InputData data, int itemIndex, MapModel resultMap) throws Exception {
         System.out.printf("▶️  Processing Item %d...%n", itemIndex + 1);
 
-        // Ensure both paths are PDFs (convert Word to PDF if needed)
         File pdf1 = ensurePdf(data.getPath1());
         File pdf2 = ensurePdf(data.getPath2());
 
@@ -82,7 +84,6 @@ public class PDFProcessor {
             int size2 = range2.size();
             int maxSize = Math.max(size1, size2);
 
-            // Warn if ranges are not of equal length
             if (size1 != size2) {
                 int diff = Math.abs(size1 - size2);
                 System.out.printf("⚠️  [Item %d]: Document %d has %d extra page(s).%n",
@@ -94,7 +95,6 @@ public class PDFProcessor {
 
             System.out.printf("📝 Item %d: Starting validation for %d page(s).%n", itemIndex + 1, maxSize);
 
-            // Setup renderers and validators
             PDFRenderer renderer1 = new PDFRenderer(doc1);
             PDFRenderer renderer2 = new PDFRenderer(doc2);
 
@@ -105,35 +105,66 @@ public class PDFProcessor {
                     data, Config.outputImagePath, itemIndex, doc1, doc2, resultMap
             );
 
-            // Loop through each pair of pages for validation
+            ExecutorService executor = Executors.newFixedThreadPool(4);
+            List<Future<Void>> futures = new ArrayList<>();
+
             for (int i = 0; i < maxSize; i++) {
-                int p1 = i < size1 ? range1.get(i) : -1;
-                int p2 = i < size2 ? range2.get(i) : -1;
+                final int pageIndex = i;
+                final int p1 = pageIndex < size1 ? range1.get(pageIndex) : -1;
+                final int p2 = pageIndex < size2 ? range2.get(pageIndex) : -1;
 
-                System.out.printf("📄 Item %d | Page %d: Doc1 Page %s, Doc2 Page %s%n",
-                        itemIndex + 1, i + 1,
-                        p1 >= 0 ? String.valueOf(p1) : "N/A",
-                        p2 >= 0 ? String.valueOf(p2) : "N/A"
-                );
+                futures.add(executor.submit(() -> {
+                    String pageLabel = "Item " + (itemIndex + 1) + " | Page " + (pageIndex + 1);
+                    int attempt = 0;
+                    while (true) {
+                        try {
+                            System.out.printf("📄 %s: Doc1 Page %s, Doc2 Page %s%n",
+                                    pageLabel,
+                                    p1 >= 0 ? String.valueOf(p1) : "N/A",
+                                    p2 >= 0 ? String.valueOf(p2) : "N/A"
+                            );
 
-                try {
-                    // First, validate alignment to get aligned image pair
-                    List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2, i + 1);
+                            List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2, pageIndex + 1);
+                            contentValidator.validateContent(p1, p2, pageIndex + 1, images);
 
-                    // Then perform content diffing on aligned images
-                    contentValidator.validateContent(p1, p2, i + 1, images);
+                            System.out.printf("✅ %s: Validation complete.%n", pageLabel);
+                            break;
+                        } catch (Throwable e) {
+                            attempt++;
+                            if (isTransientError(e)) {
+                                System.err.printf("🔁 %s: Transient error on attempt %d - retrying: %s%n", pageLabel, attempt, e.getMessage());
+                                Thread.sleep(500); // small delay before retry
+                            } else {
+                                System.err.printf("❌ %s: Validation failed permanently - %s%n", pageLabel, e.getMessage());
+                                e.printStackTrace();
+                                break; // Don't retry non-transient errors
+                            }
+                        }
+                    }
+                    return null;
+                }));
+            }
 
-                    System.out.printf("✅ Item %d | Page %d: Validation complete.%n", itemIndex + 1, i + 1);
-                } catch (Exception e) {
-                    System.err.printf("❌ Item %d | Page %d: Validation failed - %s%n",
-                            itemIndex + 1, i + 1, e.getMessage());
-                    e.printStackTrace(); // Dev debug
-                }
+            // Wait for all page validations to finish
+            for (Future<Void> future : futures) {
+                future.get(); // Blocks until done or error (already handled inside)
             }
 
             System.out.printf("✔️  Item %d: Validation for all pages completed.%n", itemIndex + 1);
         }
     }
+
+    private boolean isTransientError(Throwable e) {
+        // Add more as needed — depending on behavior you observed
+        Throwable root = e;
+        while (root.getCause() != null) root = root.getCause();
+
+        return root instanceof OutOfMemoryError
+                || root instanceof java.awt.image.RasterFormatException
+                || root.getMessage() != null && root.getMessage().toLowerCase().contains("heap space");
+    }
+
+
 
     /**
      * Ensures the given file path is a PDF. If it's a Word document,

@@ -63,7 +63,7 @@ public class AlignmentValidator {
 
         // Save images to disk and record paths in result map
         List<String> paths = saveImages(imagePage, img1, img2, diff);
-        resultMap.addAlignmentRow(paths);
+        resultMap.addAlignmentRow(paths,imagePage-1);
 
         return Arrays.asList(img1, img2, diff);
     }

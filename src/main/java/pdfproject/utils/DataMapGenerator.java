@@ -81,9 +81,7 @@ public class DataMapGenerator {
 
         File destinationFile = new File(outputDir, "report.html");
         try {
-//            InputStream inputStream = DataMapGenerator.class.getResourceAsStream("/assets/report.html");
             Files.writeString(destinationFile.toPath(), ReportHtml.REPORT_HTML);
-//            Files.copy(inputStream, destinationFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             Desktop.getDesktop().browse(destinationFile.toURI());
         } catch (IOException e) {
             System.err.println("Error copying file: " + e.getMessage());
