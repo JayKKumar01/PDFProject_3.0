@@ -48,7 +48,7 @@ public class Launcher {
             result.setKey(data.getKey());
 
             try {
-                PDFProcessor.processRow(data, i, result);
+                PDFProcessor.processRow(launcherListener,data, i, result);
             } catch (Exception e) {
                 System.err.printf("Error in item %d: %s%n", i + 1, e.getMessage());
                 e.printStackTrace();
@@ -56,7 +56,9 @@ public class Launcher {
                 resultList.add(result);
             }
         }
-
+        if (launcherListener.stoppedByUser()){
+            return;
+        }
         DataMapGenerator.generateDataMapJs(resultList, Config.outputImagePath);
     }
 

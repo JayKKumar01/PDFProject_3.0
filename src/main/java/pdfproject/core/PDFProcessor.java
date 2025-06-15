@@ -4,6 +4,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.Config;
 import pdfproject.constants.FileTypes;
+import pdfproject.interfaces.LauncherListener;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.parsers.RangeParser;
@@ -17,7 +18,7 @@ import java.util.List;
 
 public class PDFProcessor {
 
-    public static void processRow(InputData data, int itemIndex, MapModel resultMap) throws Exception {
+    public static void processRow(LauncherListener launcherListener, InputData data, int itemIndex, MapModel resultMap) throws Exception {
         System.out.printf("▶️  Processing Item %d...%n", itemIndex + 1);
 
         File pdf1 = ensurePdf(data.getPath1());
@@ -55,6 +56,9 @@ public class PDFProcessor {
             );
 
             for (int i = 0; i < maxSize; i++) {
+                if (launcherListener != null && launcherListener.stoppedByUser()){
+                    return;
+                }
                 int p1 = i < size1 ? range1.get(i) : -1;
                 int p2 = i < size2 ? range2.get(i) : -1;
 
