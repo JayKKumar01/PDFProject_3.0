@@ -189,7 +189,7 @@ public class Window {
 
         // Default operation colors
         defaultColors.put("Deleted", "Red");
-        defaultColors.put("Added", "Green");
+        defaultColors.put("Added", "Gold");
         defaultColors.put("Font Name", "Magenta");
         defaultColors.put("Font Size", "Blue");
         defaultColors.put("Font Style", "Cyan");
@@ -202,7 +202,7 @@ public class Window {
 
         // Left
         operationBoxes.put("Deleted", addOperationColorSetting(panel, "Deleted", colors, 80, "Red", true));
-        operationBoxes.put("Added", addOperationColorSetting(panel, "Added", colors, 110, "Green", true));
+        operationBoxes.put("Added", addOperationColorSetting(panel, "Added", colors, 110, "Gold", true));
         operationBoxes.put("Font Name", addOperationColorSetting(panel, "Font Name", colors, 140, "Magenta", true));
 
         // Right
