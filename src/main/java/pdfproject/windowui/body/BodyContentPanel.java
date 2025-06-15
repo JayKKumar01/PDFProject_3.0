@@ -4,25 +4,37 @@ import pdfproject.windowui.constants.ThemeColors;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class BodyContentPanel extends JPanel {
 
-    private final LeftPanel leftPanel;
-    private final RightPanel rightPanel;
+    private final JPanel leftWrapper;
+    private final JPanel rightWrapper;
 
     public BodyContentPanel() {
-        setLayout(new BorderLayout());
+        setLayout(null); // We'll manually set bounds
         setBackground(ThemeColors.BACKGROUND);
 
-        leftPanel = new LeftPanel();
-        rightPanel = new RightPanel();
+        leftWrapper = new LeftPanel();
+        rightWrapper = new RightPanel();
 
-        // Combine left and right
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        splitPane.setResizeWeight(0.5); // 50% width each
-        splitPane.setDividerSize(4);
-        splitPane.setBorder(null);
+        add(leftWrapper);
+        add(rightWrapper);
 
-        add(splitPane, BorderLayout.CENTER);
+        // Listen for size changes to recalculate layout
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeSubPanels(getWidth(), getHeight());
+            }
+        });
+    }
+
+    private void resizeSubPanels(int totalWidth, int totalHeight) {
+        int halfWidth = totalWidth / 2;
+
+        leftWrapper.setBounds(0, 0, halfWidth, totalHeight);
+        rightWrapper.setBounds(halfWidth, 0, totalWidth - halfWidth, totalHeight);
     }
 }

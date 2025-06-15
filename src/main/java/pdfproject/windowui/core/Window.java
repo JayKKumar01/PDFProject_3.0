@@ -24,7 +24,7 @@ public class Window {
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
-        frame.setResizable(true);
+        frame.setResizable(false);
         frame.getContentPane().setBackground(ThemeColors.BACKGROUND);
 
         // Set emoji icon

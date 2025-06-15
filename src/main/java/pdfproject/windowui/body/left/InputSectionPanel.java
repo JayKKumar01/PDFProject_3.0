@@ -23,35 +23,26 @@ public class InputSectionPanel extends JPanel {
     private final JLabel fileLabel;
 
     public InputSectionPanel() {
-        // Blue background for entire panel
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
 
-        // Inner content panel with original layout and light background
-        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
-        contentPanel.setBackground(ThemeColors.BACKGROUND);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // --- Centered container panel ---
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        centerPanel.setBackground(ThemeColors.BACKGROUND);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         fileLabel = createFileLabel();
         JButton browseButton = createBrowseButton();
 
-        JPanel topPanel = new JPanel(new BorderLayout(10, 10));
-        topPanel.setBackground(ThemeColors.BACKGROUND);
-        topPanel.add(browseButton, BorderLayout.WEST);
-        topPanel.add(fileLabel, BorderLayout.CENTER);
+        centerPanel.add(browseButton);
+        centerPanel.add(fileLabel);
 
-        contentPanel.add(topPanel, BorderLayout.NORTH);
-
-        // Center the content panel using GridBagConstraints
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.fill = GridBagConstraints.NONE;  // Don't stretch
-        add(contentPanel, gbc);
+        add(centerPanel); // add to GridBagLayout center
 
         enableFileDropSupport();
     }
+
 
     private JLabel createFileLabel() {
         JLabel label = new JLabel("No input data");
