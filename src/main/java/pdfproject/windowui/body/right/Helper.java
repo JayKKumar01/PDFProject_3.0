@@ -68,21 +68,9 @@ public class Helper {
         return "unknown"; // This should never happen as per your note
     }
 
-    private static String capitalize(String input) {
+    public static String capitalize(String input) {
         if (input == null || input.isEmpty()) return "";
         return Character.toUpperCase(input.charAt(0)) + input.substring(1);
-    }
-
-
-
-    public static void setImageQuality(String selectedQuality) {
-        if (selectedQuality == null) return;
-        switch (selectedQuality) {
-            case "Low" -> Config.RENDER_DPI = 72;
-            case "Medium" -> Config.RENDER_DPI = 100;
-            case "High" -> Config.RENDER_DPI = 200;
-        }
-        System.out.println("Image Quality set to: " + selectedQuality + " (" + Config.RENDER_DPI + " DPI)");
     }
 
     public static String[] getAllColorNames() {

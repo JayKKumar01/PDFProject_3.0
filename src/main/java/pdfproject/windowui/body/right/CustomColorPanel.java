@@ -6,6 +6,7 @@ import pdfproject.windowui.utils.ComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -109,21 +110,32 @@ public class CustomColorPanel extends JPanel {
             String label = entry.getKey();
             Color defaultColor = defaultColorMap.get(label);
             String colorName = getColorName(defaultColor);
-            entry.getValue().setSelectedItem(colorName);
+
+            JComboBox<String> dropdown = entry.getValue();
+
+            // Temporarily remove the ActionListener
+            ActionListener[] listeners = dropdown.getActionListeners();
+            for (ActionListener l : listeners) {
+                dropdown.removeActionListener(l);
+            }
+
+            // Set default color and update OperationColor manually
+            dropdown.setSelectedItem(colorName);
             Helper.setOperationColor(label, defaultColor);
+
+            // Reattach ActionListeners
+            for (ActionListener l : listeners) {
+                dropdown.addActionListener(l);
+            }
         }
     }
+
 
     private String getColorName(Color target) {
         return Helper.getAllColorMap().entrySet().stream()
                 .filter(e -> e.getValue().equals(target))
-                .map(e -> capitalize(e.getKey()))
+                .map(e -> Helper.capitalize(e.getKey()))
                 .findFirst()
                 .orElse("Black");
-    }
-
-    private String capitalize(String str) {
-        if (str == null || str.isEmpty()) return "";
-        return Character.toUpperCase(str.charAt(0)) + str.substring(1);
     }
 }
