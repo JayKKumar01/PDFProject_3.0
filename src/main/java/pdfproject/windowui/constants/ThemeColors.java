@@ -4,6 +4,7 @@ import java.awt.*;
 
 public class ThemeColors {
     public static final Color BACKGROUND = new Color(245, 247, 250); // Soft gray-blue
+    public static final Color LAYOUT_BORDER = new Color(232, 240, 253);
     public static final Color CONSOLE_BACKGROUND = new Color(224, 227, 231);
     public static final Color CONSOLE_TEXT_BG = Color.WHITE;
 

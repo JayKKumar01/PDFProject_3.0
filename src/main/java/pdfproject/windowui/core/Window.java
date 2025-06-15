@@ -24,6 +24,7 @@ public class Window {
         frame.setSize(width, height);
         frame.setLocationRelativeTo(null);
         frame.setLayout(new BorderLayout());
+        frame.setResizable(true);
         frame.getContentPane().setBackground(ThemeColors.BACKGROUND);
 
         // Set emoji icon
@@ -32,7 +33,7 @@ public class Window {
         // Body panel and content
         bodyPanel = new JPanel(new BorderLayout());
         bodyPanel.setBackground(ThemeColors.BACKGROUND);
-        bodyPanel.add(new BodyContentPanel(), BorderLayout.CENTER); // ✅ Add body content here
+        bodyPanel.add(new BodyContentPanel(), BorderLayout.CENTER);
 
         // Console panel
         consolePanel = new ConsolePanel();

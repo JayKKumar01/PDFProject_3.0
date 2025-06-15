@@ -1,7 +1,5 @@
 package pdfproject.windowui.utils;
 
-import pdfproject.windowui.constants.ThemeColors;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -9,7 +7,7 @@ import java.awt.event.MouseEvent;
 
 public class ComponentFactory {
 
-    public static JButton createStyledButton(String text) {
+    public static JButton createStyledButton(String text, Color textColor, Color backgroundColor) {
         final JButton button = new JButton(text) {
             private boolean hovered = false;
             private boolean pressed = false;
@@ -48,17 +46,15 @@ public class ComponentFactory {
                 int width = getWidth();
                 int height = getHeight();
 
-                Color topColor = pressed ? new Color(210, 220, 235)
-                                         : new Color(240, 248, 255);
-                Color bottomColor = pressed ? new Color(200, 210, 225)
-                                            : new Color(220, 230, 245);
+                Color topColor = pressed ? darken(backgroundColor, 0.15f) : backgroundColor;
+                Color bottomColor = pressed ? darken(backgroundColor, 0.25f) : brighten(backgroundColor, 0.05f);
 
                 GradientPaint gp = new GradientPaint(0, 0, topColor, 0, height, bottomColor);
                 g2.setPaint(gp);
                 g2.fillRoundRect(0, 0, width, height, 12, 12);
 
-                if (hovered && !pressed) {
-                    g2.setColor(new Color(255, 255, 255, 80)); // Hover overlay
+                if (hovered && !pressed && isEnabled()) {
+                    g2.setColor(new Color(255, 255, 255, 50)); // Hover overlay
                     g2.fillRoundRect(0, 0, width, height, 12, 12);
                 }
 
@@ -69,7 +65,8 @@ public class ComponentFactory {
             @Override
             protected void paintBorder(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
-                g2.setColor(ThemeColors.THEME_BLUE);
+                Color borderColor = isEnabled() ? textColor : Color.GRAY;
+                g2.setColor(borderColor);
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
                 g2.dispose();
@@ -77,14 +74,39 @@ public class ComponentFactory {
         };
 
         button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setForeground(ThemeColors.THEME_BLUE);
+        button.setForeground(textColor);
         button.setContentAreaFilled(false);
         button.setOpaque(false);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        button.setPreferredSize(new Dimension(120, 36));
+
+        // Calculate dynamic width with font metrics and insets
+        FontMetrics metrics = button.getFontMetrics(button.getFont());
+        Insets insets = button.getInsets();
+        int textWidth = metrics.stringWidth(text);
+        int padding = 30;
+        int buttonWidth = textWidth + padding + insets.left + insets.right;
+        int buttonHeight = metrics.getHeight() + 12;
+
+        button.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
 
         return button;
+    }
+
+    private static Color darken(Color color, float factor) {
+        factor = Math.min(1, Math.max(0, factor));
+        int r = (int) (color.getRed() * (1 - factor));
+        int g = (int) (color.getGreen() * (1 - factor));
+        int b = (int) (color.getBlue() * (1 - factor));
+        return new Color(r, g, b, color.getAlpha());
+    }
+
+    private static Color brighten(Color color, float factor) {
+        factor = Math.min(1, Math.max(0, factor));
+        int r = (int) (color.getRed() + (255 - color.getRed()) * factor);
+        int g = (int) (color.getGreen() + (255 - color.getGreen()) * factor);
+        int b = (int) (color.getBlue() + (255 - color.getBlue()) * factor);
+        return new Color(r, g, b, color.getAlpha());
     }
 }

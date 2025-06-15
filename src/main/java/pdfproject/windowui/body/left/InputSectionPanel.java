@@ -6,9 +6,12 @@ import pdfproject.windowui.utils.ComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.dnd.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.util.List;
 
@@ -20,9 +23,14 @@ public class InputSectionPanel extends JPanel {
     private final JLabel fileLabel;
 
     public InputSectionPanel() {
+        // Blue background for entire panel
+        setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Inner content panel with original layout and light background
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        contentPanel.setBackground(ThemeColors.BACKGROUND);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         fileLabel = createFileLabel();
         JButton browseButton = createBrowseButton();
@@ -32,7 +40,16 @@ public class InputSectionPanel extends JPanel {
         topPanel.add(browseButton, BorderLayout.WEST);
         topPanel.add(fileLabel, BorderLayout.CENTER);
 
-        add(topPanel, BorderLayout.NORTH);
+        contentPanel.add(topPanel, BorderLayout.NORTH);
+
+        // Center the content panel using GridBagConstraints
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;  // Don't stretch
+        add(contentPanel, gbc);
+
         enableFileDropSupport();
     }
 
@@ -44,9 +61,13 @@ public class InputSectionPanel extends JPanel {
     }
 
     private JButton createBrowseButton() {
-        JButton button = ComponentFactory.createStyledButton("Choose File");
-        button.addActionListener(e -> openFileDialog());
-        return button;
+        JButton browseButton = ComponentFactory.createStyledButton(
+                "Choose File",
+                ThemeColors.THEME_BLUE,
+                new Color(174, 215, 255)
+        );
+        browseButton.addActionListener(e -> openFileDialog());
+        return browseButton;
     }
 
     private void openFileDialog() {
@@ -103,7 +124,10 @@ public class InputSectionPanel extends JPanel {
 
     private void handleSelectedFile(File file) {
         lastDirectoryPath = file.getParent();
-        fileLabel.setText(ellipsize(file.getName()));
+        String fileName = file.getName();
+        System.out.println("Selected Input Data: \"" + fileName + "\"");
+
+        fileLabel.setText(ellipsize(fileName));
         fileLabel.setToolTipText(file.getAbsolutePath());
         Config.INPUT_PATH = file.getAbsolutePath();
     }
@@ -113,7 +137,7 @@ public class InputSectionPanel extends JPanel {
     }
 
     private String ellipsize(String text) {
-        return (text.length() <= InputSectionPanel.MAX_FILENAME_LENGTH) ? text : text.substring(0, InputSectionPanel.MAX_FILENAME_LENGTH - 3) + "...";
+        return (text.length() <= MAX_FILENAME_LENGTH) ? text : text.substring(0, MAX_FILENAME_LENGTH - 3) + "...";
     }
 
     private void showInvalidFileWarning() {

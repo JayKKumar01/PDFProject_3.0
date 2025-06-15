@@ -3,16 +3,12 @@ package pdfproject.window;
 import pdfproject.Config;
 import pdfproject.Launcher;
 import pdfproject.constants.AppPaths;
-import pdfproject.constants.OperationColor;
-import pdfproject.interfaces.LauncherListener;
 import pdfproject.window.utils.CustomOutputStream;
 import pdfproject.window.utils.Helper;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -133,22 +129,7 @@ public class Window {
         button.addActionListener(e -> service.execute(() -> {
             if (!Config.INPUT_PATH.isEmpty()) {
                 System.out.println("Launcher Started!");
-                Launcher.start(new LauncherListener() {
-                    @Override
-                    public void onStart() {
-                        SwingUtilities.invokeLater(() -> setUIEnabled(false));
-                        System.out.println("Validation started...");
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        SwingUtilities.invokeLater(() -> {
-                            setUIEnabled(true);
-                            checkResetButtonStatus();
-                        });
-                        System.out.println("Validation finished.");
-                    }
-                });
+//                Launcher.start(launcherListener);
             }
         }));
         return button;

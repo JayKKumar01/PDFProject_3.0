@@ -16,7 +16,7 @@ public class ConsolePanel extends JPanel {
 
     public ConsolePanel() {
         setLayout(new BorderLayout());
-        setBackground(ThemeColors.CONSOLE_BACKGROUND);
+        setBackground(ThemeColors.LAYOUT_BORDER);
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
         consolePane = new JTextPane();

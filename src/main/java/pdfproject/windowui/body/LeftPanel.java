@@ -1,6 +1,6 @@
 package pdfproject.windowui.body;
 
-import pdfproject.windowui.body.left.ButtonSectionPanel;
+import pdfproject.windowui.body.left.LauncherSectionPanel;
 import pdfproject.windowui.body.left.InputSectionPanel;
 import pdfproject.windowui.constants.ThemeColors;
 
@@ -9,20 +9,19 @@ import java.awt.*;
 
 public class LeftPanel extends JPanel {
 
-    private final InputSectionPanel inputSectionPanel;
-    private final ButtonSectionPanel buttonSectionPanel;
-
     public LeftPanel() {
-        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-        setBackground(ThemeColors.BACKGROUND);
+        setLayout(new GridLayout(2, 1, 0, 10)); // 2 rows, 10px vertical gap
+        setBackground(ThemeColors.LAYOUT_BORDER);
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        inputSectionPanel = new InputSectionPanel();
-        buttonSectionPanel = new ButtonSectionPanel();
+        InputSectionPanel inputSectionPanel = new InputSectionPanel();
+        LauncherSectionPanel launcherSectionPanel = new LauncherSectionPanel();
 
-        inputSectionPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 0));  // let layout grow vertically
-        buttonSectionPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        // Make sure these panels stretch to fill their 50% height
+        inputSectionPanel.setPreferredSize(null);
+        launcherSectionPanel.setPreferredSize(null);
 
         add(inputSectionPanel);
-        add(buttonSectionPanel);
+        add(launcherSectionPanel);
     }
 }
