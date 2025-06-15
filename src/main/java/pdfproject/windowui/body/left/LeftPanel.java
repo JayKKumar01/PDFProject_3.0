@@ -1,7 +1,5 @@
-package pdfproject.windowui.body;
+package pdfproject.windowui.body.left;
 
-import pdfproject.windowui.body.left.InputSectionPanel;
-import pdfproject.windowui.body.left.LauncherSectionPanel;
 import pdfproject.windowui.constants.ThemeColors;
 
 import javax.swing.*;

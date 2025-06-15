@@ -1,9 +1,10 @@
 package pdfproject.windowui.body;
 
+import pdfproject.windowui.body.left.LeftPanel;
+import pdfproject.windowui.body.right.RightPanel;
 import pdfproject.windowui.constants.ThemeColors;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
