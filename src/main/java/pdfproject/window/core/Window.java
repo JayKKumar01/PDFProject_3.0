@@ -1,8 +1,8 @@
-package pdfproject.windowui.core;
+package pdfproject.window.core;
 
-import pdfproject.windowui.body.BodyContentPanel;
-import pdfproject.windowui.components.ConsolePanel;
-import pdfproject.windowui.constants.ThemeColors;
+import pdfproject.window.body.BodyContentPanel;
+import pdfproject.window.components.ConsolePanel;
+import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
 import java.awt.*;

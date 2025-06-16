@@ -1,8 +1,9 @@
-package pdfproject.windowui.body;
+package pdfproject.window.body;
 
-import pdfproject.windowui.body.left.LeftPanel;
-import pdfproject.windowui.body.right.RightPanel;
-import pdfproject.windowui.constants.ThemeColors;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.body.left.LeftPanel;
+import pdfproject.window.body.right.RightPanel;
+import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;
@@ -10,14 +11,14 @@ import java.awt.event.ComponentEvent;
 
 public class BodyContentPanel extends JPanel {
 
-    private final JPanel leftWrapper;
-    private final JPanel rightWrapper;
+    private final LeftPanel leftWrapper;
+    private final RightPanel rightWrapper;
 
     public BodyContentPanel() {
         setLayout(null); // We'll manually set bounds
         setBackground(ThemeColors.BACKGROUND);
 
-        leftWrapper = new LeftPanel();
+        leftWrapper = new LeftPanel(taskStateListener);
         rightWrapper = new RightPanel();
 
         add(leftWrapper);
@@ -38,4 +39,15 @@ public class BodyContentPanel extends JPanel {
         leftWrapper.setBounds(0, 0, halfWidth, totalHeight);
         rightWrapper.setBounds(halfWidth, 0, totalWidth - halfWidth, totalHeight);
     }
+    private final TaskStateListener taskStateListener = new TaskStateListener() {
+        @Override
+        public void onStart() {
+            rightWrapper.onStart();
+        }
+
+        @Override
+        public void onStop() {
+            rightWrapper.onStop();
+        }
+    };
 }

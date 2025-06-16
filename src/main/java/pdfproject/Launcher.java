@@ -3,7 +3,7 @@ package pdfproject;
 import pdfproject.constants.AppPaths;
 import pdfproject.constants.FileTypes;
 import pdfproject.core.PDFProcessor;
-import pdfproject.interfaces.LauncherListener;
+import pdfproject.interfaces.StopListener;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.utils.DataMapGenerator;
@@ -19,7 +19,7 @@ public class Launcher {
 //        start(null);
     }
 
-    public static void start(LauncherListener launcherListener) {
+    public static void start(StopListener stopListener) {
         List<InputData> inputs = InputDataProvider.load();
 
         if (inputs == null || inputs.isEmpty()) {
@@ -40,7 +40,7 @@ public class Launcher {
         List<MapModel> resultList = new ArrayList<>();
 
         for (int i = 0; i < inputs.size(); i++) {
-            if (launcherListener.stoppedByUser()){
+            if (stopListener.stoppedByUser()){
                 return;
             }
             InputData data = inputs.get(i);
@@ -48,7 +48,7 @@ public class Launcher {
             result.setKey(data.getKey());
 
             try {
-                PDFProcessor.processRow(launcherListener,data, i, result);
+                PDFProcessor.processRow(stopListener,data, i, result);
             } catch (Exception e) {
                 System.err.printf("Error in item %d: %s%n", i + 1, e.getMessage());
                 e.printStackTrace();
@@ -56,7 +56,7 @@ public class Launcher {
                 resultList.add(result);
             }
         }
-        if (launcherListener.stoppedByUser()){
+        if (stopListener.stoppedByUser()){
             return;
         }
         DataMapGenerator.generateDataMapJs(resultList, Config.outputImagePath);

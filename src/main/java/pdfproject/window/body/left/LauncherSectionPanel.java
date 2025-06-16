@@ -1,10 +1,11 @@
-package pdfproject.windowui.body.left;
+package pdfproject.window.body.left;
 
 import pdfproject.Config;
 import pdfproject.Launcher;
-import pdfproject.interfaces.LauncherListener;
-import pdfproject.windowui.constants.ThemeColors;
-import pdfproject.windowui.utils.ComponentFactory;
+import pdfproject.interfaces.StopListener;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.ComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class LauncherSectionPanel extends JPanel {
-
+    private final TaskStateListener taskStateListener;
     private final JButton startButton;
     private final JButton stopButton;
 
@@ -22,7 +23,8 @@ public class LauncherSectionPanel extends JPanel {
     private boolean isValidationRunning = false;
     private boolean stoppedByUser = false;
 
-    public LauncherSectionPanel() {
+    public LauncherSectionPanel(TaskStateListener taskStateListener) {
+        this.taskStateListener = taskStateListener;
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
 
@@ -55,6 +57,7 @@ public class LauncherSectionPanel extends JPanel {
         }
 
         isValidationRunning = true;
+        taskStateListener.onStart();
         stoppedByUser = false;
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
@@ -63,7 +66,7 @@ public class LauncherSectionPanel extends JPanel {
         validationTask = executorService.submit(() -> {
             try {
                 System.out.println("✅ Validation started");
-                Launcher.start(launcherListener);
+                Launcher.start(stopListener);
             } catch (Exception ex) {
                 System.out.println("⚠ Error during validation: " + ex.getMessage());
             } finally {
@@ -88,6 +91,7 @@ public class LauncherSectionPanel extends JPanel {
         if (!isValidationRunning) return;
 
         isValidationRunning = false;
+        taskStateListener.onStop();
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
 
@@ -101,11 +105,5 @@ public class LauncherSectionPanel extends JPanel {
             System.out.println("🛑 Validation finished.");
         }
     }
-
-    private final LauncherListener launcherListener = new LauncherListener() {
-        @Override
-        public boolean stoppedByUser() {
-            return stoppedByUser;
-        }
-    };
+    private final StopListener stopListener = () -> stoppedByUser;
 }

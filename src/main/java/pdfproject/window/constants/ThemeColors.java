@@ -1,4 +1,4 @@
-package pdfproject.windowui.constants;
+package pdfproject.window.constants;
 
 import java.awt.*;
 

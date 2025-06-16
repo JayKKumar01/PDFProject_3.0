@@ -1,12 +1,13 @@
-package pdfproject.windowui.body.right;
+package pdfproject.window.body.right;
 
 import pdfproject.Config;
-import pdfproject.windowui.constants.ThemeColors;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class ImageQualityPanel extends JPanel {
+public class ImageQualityPanel extends JPanel implements TaskStateListener {
 
     private static final String[] QUALITY_LEVELS = {"LOW", "MEDIUM", "HIGH"};
     private static final int[] DPI_VALUES = {100, 150, 200};
@@ -47,4 +48,17 @@ public class ImageQualityPanel extends JPanel {
 
         add(contentPanel); // Centered inside GridBagLayout
     }
+
+
+    @Override
+    public void onStart() {
+        Helper.setEnabledRecursively(this, false);
+    }
+
+    @Override
+    public void onStop() {
+        Helper.setEnabledRecursively(this, true);
+    }
+
+
 }

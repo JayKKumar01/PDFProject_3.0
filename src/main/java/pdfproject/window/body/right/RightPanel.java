@@ -1,11 +1,11 @@
-package pdfproject.windowui.body.right;
+package pdfproject.window.body.right;
 
-import pdfproject.windowui.constants.ThemeColors;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
-import java.awt.*;
 
-public class RightPanel extends JPanel {
+public class RightPanel extends JPanel implements TaskStateListener {
 
     private final ImageQualityPanel imageQualityPanel;
     private final CustomColorPanel customColorPanel;
@@ -39,11 +39,15 @@ public class RightPanel extends JPanel {
         customColorPanel.setBounds(left, PADDING + imageHeight + GAP, contentWidth, colorHeight);
     }
 
-    public ImageQualityPanel getImageQualityPanel() {
-        return imageQualityPanel;
+    @Override
+    public void onStart() {
+        imageQualityPanel.onStart();
+        customColorPanel.onStart();
     }
 
-    public CustomColorPanel getCustomColorPanel() {
-        return customColorPanel;
+    @Override
+    public void onStop() {
+        imageQualityPanel.onStop();
+        customColorPanel.onStop();
     }
 }

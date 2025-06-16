@@ -1,4 +1,4 @@
-package pdfproject.windowui.utils;
+package pdfproject.window.utils;
 
 import javax.swing.*;
 import java.awt.*;

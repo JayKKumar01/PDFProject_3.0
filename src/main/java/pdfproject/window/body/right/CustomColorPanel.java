@@ -1,8 +1,9 @@
-package pdfproject.windowui.body.right;
+package pdfproject.window.body.right;
 
 import pdfproject.constants.OperationColor;
-import pdfproject.windowui.constants.ThemeColors;
-import pdfproject.windowui.utils.ComponentFactory;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.ComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +11,7 @@ import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class CustomColorPanel extends JPanel {
+public class CustomColorPanel extends JPanel implements TaskStateListener {
 
     private final Map<String, JComboBox<String>> dropdownMap = new LinkedHashMap<>();
     private final Map<String, Color> defaultColorMap = new LinkedHashMap<>();
@@ -138,4 +139,17 @@ public class CustomColorPanel extends JPanel {
                 .findFirst()
                 .orElse("Black");
     }
+
+
+    @Override
+    public void onStart() {
+        Helper.setEnabledRecursively(this, false);
+    }
+
+    @Override
+    public void onStop() {
+        Helper.setEnabledRecursively(this, true);
+    }
+
+
 }

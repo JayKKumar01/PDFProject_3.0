@@ -1,7 +1,7 @@
-package pdfproject.windowui.components;
+package pdfproject.window.components;
 
-import pdfproject.windowui.components.stream.CustomOutputStream;
-import pdfproject.windowui.constants.ThemeColors;
+import pdfproject.window.components.stream.CustomOutputStream;
+import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

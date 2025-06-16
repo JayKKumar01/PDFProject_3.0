@@ -1,5 +1,5 @@
 package pdfproject.interfaces;
 
-public interface LauncherListener {
+public interface StopListener {
     boolean stoppedByUser();
 }

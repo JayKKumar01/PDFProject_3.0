@@ -1,8 +1,8 @@
-package pdfproject.windowui.body.left;
+package pdfproject.window.body.left;
 
 import pdfproject.Config;
-import pdfproject.windowui.constants.ThemeColors;
-import pdfproject.windowui.utils.ComponentFactory;
+import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.ComponentFactory;
 
 import javax.swing.*;
 import java.awt.*;

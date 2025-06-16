@@ -1,8 +1,8 @@
-package pdfproject.windowui.body.right;
+package pdfproject.window.body.right;
 
-import pdfproject.Config;
 import pdfproject.constants.OperationColor;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,4 +82,22 @@ public class Helper {
     public static Map<String, Color> getAllColorMap() {
         return colorMap;
     }
+
+    public static void setEnabledRecursively(Component component, boolean enabled) {
+        // Add any components here you want to exclude from being disabled/enabled
+        Class<?>[] exclude = { JLabel.class };
+
+        for (Class<?> type : exclude) {
+            if (type.isInstance(component)) return;
+        }
+
+        component.setEnabled(enabled);
+
+        if (component instanceof Container container) {
+            for (Component child : container.getComponents()) {
+                setEnabledRecursively(child, enabled);
+            }
+        }
+    }
+
 }
