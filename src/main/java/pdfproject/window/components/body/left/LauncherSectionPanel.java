@@ -1,4 +1,4 @@
-package pdfproject.window.body.left;
+package pdfproject.window.components.body.left;
 
 import pdfproject.Config;
 import pdfproject.Launcher;
@@ -14,7 +14,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class LauncherSectionPanel extends JPanel {
-    private final TaskStateListener taskStateListener;
     private final JButton startButton;
     private final JButton stopButton;
 
@@ -23,8 +22,9 @@ public class LauncherSectionPanel extends JPanel {
     private boolean isValidationRunning = false;
     private boolean stoppedByUser = false;
 
-    public LauncherSectionPanel(TaskStateListener taskStateListener) {
-        this.taskStateListener = taskStateListener;
+    private TaskStateListener taskStateListener;
+
+    public LauncherSectionPanel() {
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
 
@@ -57,7 +57,9 @@ public class LauncherSectionPanel extends JPanel {
         }
 
         isValidationRunning = true;
-        taskStateListener.onStart();
+        if (taskStateListener != null) {
+            taskStateListener.onStart();
+        }
         stoppedByUser = false;
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
@@ -91,7 +93,9 @@ public class LauncherSectionPanel extends JPanel {
         if (!isValidationRunning) return;
 
         isValidationRunning = false;
-        taskStateListener.onStop();
+        if (taskStateListener != null) {
+            taskStateListener.onStop();
+        }
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
 
@@ -104,6 +108,9 @@ public class LauncherSectionPanel extends JPanel {
         } else {
             System.out.println("🛑 Validation finished.");
         }
+    }
+    public void setTaskStateListener(TaskStateListener taskStateListener){
+        this.taskStateListener = taskStateListener;
     }
     private final StopListener stopListener = () -> stoppedByUser;
 }

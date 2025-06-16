@@ -1,7 +1,8 @@
 package pdfproject.window.core;
 
-import pdfproject.window.body.BodyContentPanel;
-import pdfproject.window.components.ConsolePanel;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.components.body.BodyContentPanel;
+import pdfproject.window.components.console.ConsolePanel;
 import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
@@ -30,14 +31,31 @@ public class Window {
         // Set emoji icon
         frame.setIconImage(generateIconImage(new Font("Segoe UI Emoji", Font.PLAIN, 48)));
 
+
+
         // Body panel and content
         bodyPanel = new JPanel(new BorderLayout());
         bodyPanel.setBackground(ThemeColors.BACKGROUND);
-        bodyPanel.add(new BodyContentPanel(), BorderLayout.CENTER);
+        BodyContentPanel bodyContentPanel = new BodyContentPanel();
+        bodyPanel.add(bodyContentPanel, BorderLayout.CENTER);
 
         // Console panel
         consolePanel = new ConsolePanel();
         consolePanel.redirectSystemStreams();
+
+        bodyContentPanel.setTaskStateListener(new TaskStateListener() {
+            @Override
+            public void onStart() {
+                consolePanel.onStart();
+                bodyContentPanel.onStart();
+            }
+
+            @Override
+            public void onStop() {
+                consolePanel.onStop();
+                bodyContentPanel.onStop();
+            }
+        });
 
         // Main wrapper layout
         JPanel mainWrapper = new JPanel();
@@ -81,11 +99,5 @@ public class Window {
         return img;
     }
 
-    public JFrame getFrame() {
-        return frame;
-    }
 
-    public JPanel getBodyPanel() {
-        return bodyPanel;
-    }
 }

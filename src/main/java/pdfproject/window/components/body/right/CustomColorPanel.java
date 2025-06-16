@@ -1,4 +1,4 @@
-package pdfproject.window.body.right;
+package pdfproject.window.components.body.right;
 
 import pdfproject.constants.OperationColor;
 import pdfproject.interfaces.TaskStateListener;

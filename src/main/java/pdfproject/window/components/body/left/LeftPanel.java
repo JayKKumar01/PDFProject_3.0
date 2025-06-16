@@ -1,4 +1,4 @@
-package pdfproject.window.body.left;
+package pdfproject.window.components.body.left;
 
 import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.constants.ThemeColors;
@@ -16,8 +16,13 @@ public class LeftPanel extends JPanel {
     private final JPanel inputWrapper;
     private final JPanel launcherWrapper;
     private final JPanel dividerView;
+    private final LauncherSectionPanel launcherSectionPanel;
 
-    public LeftPanel(TaskStateListener taskStateListener) {
+    public void setTaskStateListener(TaskStateListener taskStateListener){
+        launcherSectionPanel.setTaskStateListener(taskStateListener);
+    }
+
+    public LeftPanel() {
         setLayout(null); // Manual layout
         setBackground(ThemeColors.LAYOUT_BORDER);
 
@@ -30,7 +35,8 @@ public class LeftPanel extends JPanel {
 
         launcherWrapper = new JPanel(new BorderLayout());
         launcherWrapper.setBackground(ThemeColors.BACKGROUND);
-        launcherWrapper.add(new LauncherSectionPanel(taskStateListener), BorderLayout.CENTER);
+        launcherSectionPanel = new LauncherSectionPanel();
+        launcherWrapper.add(launcherSectionPanel, BorderLayout.CENTER);
 
         add(inputWrapper);
         add(dividerView);

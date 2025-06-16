@@ -1,4 +1,4 @@
-package pdfproject.window.components.stream;
+package pdfproject.window.components.console.stream;
 
 import javax.swing.*;
 import javax.swing.text.*;

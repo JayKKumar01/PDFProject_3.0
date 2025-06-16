@@ -1,6 +1,7 @@
-package pdfproject.window.components;
+package pdfproject.window.components.console;
 
-import pdfproject.window.components.stream.CustomOutputStream;
+import pdfproject.interfaces.TaskStateListener;
+import pdfproject.window.components.console.stream.CustomOutputStream;
 import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
@@ -8,7 +9,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.PrintStream;
 
-public class ConsolePanel extends JPanel {
+public class ConsolePanel extends JPanel implements TaskStateListener {
 
     private final JTextPane consolePane;
 
@@ -43,5 +44,15 @@ public class ConsolePanel extends JPanel {
 
     public void clear() {
         consolePane.setText("");
+    }
+
+    @Override
+    public void onStart() {
+        clear();
+    }
+
+    @Override
+    public void onStop() {
+
     }
 }

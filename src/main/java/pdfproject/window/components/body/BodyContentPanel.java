@@ -1,24 +1,28 @@
-package pdfproject.window.body;
+package pdfproject.window.components.body;
 
 import pdfproject.interfaces.TaskStateListener;
-import pdfproject.window.body.left.LeftPanel;
-import pdfproject.window.body.right.RightPanel;
+import pdfproject.window.components.body.left.LeftPanel;
+import pdfproject.window.components.body.right.RightPanel;
 import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-public class BodyContentPanel extends JPanel {
+public class BodyContentPanel extends JPanel implements TaskStateListener{
 
     private final LeftPanel leftWrapper;
     private final RightPanel rightWrapper;
 
-    public BodyContentPanel() {
+    public void setTaskStateListener(TaskStateListener taskStateListener){
+        leftWrapper.setTaskStateListener(taskStateListener);
+    }
+
+    public BodyContentPanel(){
         setLayout(null); // We'll manually set bounds
         setBackground(ThemeColors.BACKGROUND);
 
-        leftWrapper = new LeftPanel(taskStateListener);
+        leftWrapper = new LeftPanel();
         rightWrapper = new RightPanel();
 
         add(leftWrapper);
@@ -39,15 +43,14 @@ public class BodyContentPanel extends JPanel {
         leftWrapper.setBounds(0, 0, halfWidth, totalHeight);
         rightWrapper.setBounds(halfWidth, 0, totalWidth - halfWidth, totalHeight);
     }
-    private final TaskStateListener taskStateListener = new TaskStateListener() {
-        @Override
-        public void onStart() {
-            rightWrapper.onStart();
-        }
 
-        @Override
-        public void onStop() {
-            rightWrapper.onStop();
-        }
-    };
+    @Override
+    public void onStart() {
+        rightWrapper.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        rightWrapper.onStop();
+    }
 }

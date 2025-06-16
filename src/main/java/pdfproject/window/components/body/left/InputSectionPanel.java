@@ -1,4 +1,4 @@
-package pdfproject.window.body.left;
+package pdfproject.window.components.body.left;
 
 import pdfproject.Config;
 import pdfproject.window.constants.ThemeColors;
