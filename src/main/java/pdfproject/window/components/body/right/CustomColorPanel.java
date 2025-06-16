@@ -41,8 +41,8 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
         title.setFont(new Font("Segoe UI", Font.BOLD, 14));
         title.setForeground(ThemeColors.THEME_BLUE);
 
-        JButton resetBtn = ComponentFactory.createStyledButton(
-                "Reset", ThemeColors.THEME_BLUE, new Color(230, 240, 255));
+        JButton resetBtn = ComponentFactory.createStyledButton("Reset",
+                ThemeColors.THEME_BLUE, new Color(230, 240, 255));
         resetBtn.addActionListener(e -> resetToDefaults());
 
         JPanel panel = new JPanel(new BorderLayout());
@@ -50,6 +50,7 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
         panel.add(title, BorderLayout.WEST);
         panel.add(resetBtn, BorderLayout.EAST);
+
         return panel;
     }
 
@@ -90,8 +91,13 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
         dropdown.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         dropdown.setPreferredSize(new Dimension(140, 25));
         dropdown.setMaximumSize(dropdown.getPreferredSize());
+        dropdown.setFocusable(false);
+
         dropdown.setSelectedItem(getColorName(defaultColor));
-        dropdown.addActionListener(e -> Helper.setOperationColor(label, Helper.getColorFromName((String) dropdown.getSelectedItem())));
+        dropdown.addActionListener(e -> {
+            String selectedName = (String) dropdown.getSelectedItem();
+            Helper.setOperationColor(label, Helper.getColorFromName(selectedName));
+        });
 
         dropdownMap.put(label, dropdown);
 
@@ -107,30 +113,19 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
     }
 
     private void resetToDefaults() {
-        for (Map.Entry<String, JComboBox<String>> entry : dropdownMap.entrySet()) {
-            String label = entry.getKey();
+        dropdownMap.forEach((label, dropdown) -> {
             Color defaultColor = defaultColorMap.get(label);
-            String colorName = getColorName(defaultColor);
+            String defaultName = getColorName(defaultColor);
 
-            JComboBox<String> dropdown = entry.getValue();
-
-            // Temporarily remove the ActionListener
             ActionListener[] listeners = dropdown.getActionListeners();
-            for (ActionListener l : listeners) {
-                dropdown.removeActionListener(l);
-            }
+            for (ActionListener l : listeners) dropdown.removeActionListener(l);
 
-            // Set default color and update OperationColor manually
-            dropdown.setSelectedItem(colorName);
+            dropdown.setSelectedItem(defaultName);
             Helper.setOperationColor(label, defaultColor);
 
-            // Reattach ActionListeners
-            for (ActionListener l : listeners) {
-                dropdown.addActionListener(l);
-            }
-        }
+            for (ActionListener l : listeners) dropdown.addActionListener(l);
+        });
     }
-
 
     private String getColorName(Color target) {
         return Helper.getAllColorMap().entrySet().stream()
@@ -139,7 +134,6 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
                 .findFirst()
                 .orElse("Black");
     }
-
 
     @Override
     public void onStart() {
@@ -150,6 +144,4 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
     public void onStop() {
         Helper.setEnabledRecursively(this, true);
     }
-
-
 }

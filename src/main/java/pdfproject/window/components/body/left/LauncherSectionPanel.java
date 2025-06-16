@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class LauncherSectionPanel extends JPanel {
+
     private final JButton startButton;
     private final JButton stopButton;
 
@@ -35,40 +36,28 @@ public class LauncherSectionPanel extends JPanel {
         startButton.addActionListener(e -> startValidation());
         stopButton.addActionListener(e -> stopValidation());
 
-        JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        contentPanel.setBackground(ThemeColors.BACKGROUND);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        contentPanel.add(startButton);
-        contentPanel.add(stopButton);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        buttonPanel.setBackground(ThemeColors.BACKGROUND);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        buttonPanel.add(startButton);
+        buttonPanel.add(stopButton);
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(contentPanel, gbc);
+        add(buttonPanel);
     }
 
     private void startValidation() {
-        if (isValidationRunning) return;
-
-        if (Config.INPUT_PATH == null || Config.INPUT_PATH.trim().isEmpty()) {
-            System.out.println("⚠ No input path selected. Validation cannot start.");
-            return;
-        }
+        if (isValidationRunning || !isInputPathValid()) return;
 
         isValidationRunning = true;
-        if (taskStateListener != null) {
-            taskStateListener.onStart();
-        }
         stoppedByUser = false;
-        startButton.setEnabled(false);
-        stopButton.setEnabled(true);
+        toggleButtons(false);
+        notifyTaskStart();
 
         executorService = Executors.newSingleThreadExecutor();
         validationTask = executorService.submit(() -> {
             try {
                 System.out.println("✅ Validation started");
-                Launcher.start(stopListener);
+                Launcher.start(() -> stoppedByUser);
             } catch (Exception ex) {
                 System.out.println("⚠ Error during validation: " + ex.getMessage());
             } finally {
@@ -78,7 +67,7 @@ public class LauncherSectionPanel extends JPanel {
     }
 
     private void stopValidation() {
-        if (!isValidationRunning || executorService == null || executorService.isShutdown()) return;
+        if (!isValidationRunning || executorService == null) return;
 
         System.out.println("🛑 Stop requested.");
         stoppedByUser = true;
@@ -86,6 +75,7 @@ public class LauncherSectionPanel extends JPanel {
         if (validationTask != null && !validationTask.isDone()) {
             validationTask.cancel(true);
         }
+
         executorService.shutdownNow();
     }
 
@@ -93,24 +83,42 @@ public class LauncherSectionPanel extends JPanel {
         if (!isValidationRunning) return;
 
         isValidationRunning = false;
-        if (taskStateListener != null) {
-            taskStateListener.onStop();
-        }
-        startButton.setEnabled(true);
-        stopButton.setEnabled(false);
+        toggleButtons(true);
+        notifyTaskStop();
 
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdownNow();
         }
 
-        if (stoppedByUser) {
-            System.out.println("🛑 Validation stopped by user.");
-        } else {
-            System.out.println("🛑 Validation finished.");
+        System.out.println(stoppedByUser ? "🛑 Validation stopped by user." : "🛑 Validation finished.");
+    }
+
+    private boolean isInputPathValid() {
+        if (Config.INPUT_PATH == null || Config.INPUT_PATH.trim().isEmpty()) {
+            System.out.println("⚠ No input path selected. Validation cannot start.");
+            return false;
+        }
+        return true;
+    }
+
+    private void toggleButtons(boolean startEnabled) {
+        startButton.setEnabled(startEnabled);
+        stopButton.setEnabled(!startEnabled);
+    }
+
+    private void notifyTaskStart() {
+        if (taskStateListener != null) {
+            taskStateListener.onStart();
         }
     }
-    public void setTaskStateListener(TaskStateListener taskStateListener){
+
+    private void notifyTaskStop() {
+        if (taskStateListener != null) {
+            taskStateListener.onStop();
+        }
+    }
+
+    public void setTaskStateListener(TaskStateListener taskStateListener) {
         this.taskStateListener = taskStateListener;
     }
-    private final StopListener stopListener = () -> stoppedByUser;
 }

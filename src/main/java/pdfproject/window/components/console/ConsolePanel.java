@@ -11,25 +11,33 @@ import java.io.PrintStream;
 
 public class ConsolePanel extends JPanel implements TaskStateListener {
 
-    private final JTextPane consolePane;
-
     private static final Font CONSOLE_FONT = new Font("Consolas", Font.PLAIN, 14);
+    private final JTextPane consolePane;
 
     public ConsolePanel() {
         setLayout(new BorderLayout());
         setBackground(ThemeColors.LAYOUT_BORDER);
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        consolePane = new JTextPane();
-        consolePane.setEditable(false);
-        consolePane.setFont(CONSOLE_FONT);
-        consolePane.setBackground(ThemeColors.CONSOLE_TEXT_BG);
-
-        JScrollPane scrollPane = new JScrollPane(consolePane);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        consolePane = createConsolePane();
+        JScrollPane scrollPane = wrapInScrollPane(consolePane);
 
         add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JTextPane createConsolePane() {
+        JTextPane pane = new JTextPane();
+        pane.setEditable(false);
+        pane.setFont(CONSOLE_FONT);
+        pane.setBackground(ThemeColors.CONSOLE_TEXT_BG);
+        return pane;
+    }
+
+    private JScrollPane wrapInScrollPane(JTextPane pane) {
+        JScrollPane scrollPane = new JScrollPane(pane);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        return scrollPane;
     }
 
     public void setDynamicHeight(int height) {
@@ -53,6 +61,6 @@ public class ConsolePanel extends JPanel implements TaskStateListener {
 
     @Override
     public void onStop() {
-
+        // Future behavior on stop can be added here
     }
 }

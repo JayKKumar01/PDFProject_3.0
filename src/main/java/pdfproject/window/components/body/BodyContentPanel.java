@@ -9,48 +9,50 @@ import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-public class BodyContentPanel extends JPanel implements TaskStateListener{
+public class BodyContentPanel extends JPanel implements TaskStateListener {
 
-    private final LeftPanel leftWrapper;
-    private final RightPanel rightWrapper;
+    private final LeftPanel leftPanel;
+    private final RightPanel rightPanel;
 
-    public void setTaskStateListener(TaskStateListener taskStateListener){
-        leftWrapper.setTaskStateListener(taskStateListener);
-    }
-
-    public BodyContentPanel(){
-        setLayout(null); // We'll manually set bounds
+    public BodyContentPanel() {
+        setLayout(null); // Manual layout
         setBackground(ThemeColors.BACKGROUND);
 
-        leftWrapper = new LeftPanel();
-        rightWrapper = new RightPanel();
+        leftPanel = new LeftPanel();
+        rightPanel = new RightPanel();
 
-        add(leftWrapper);
-        add(rightWrapper);
+        add(leftPanel);
+        add(rightPanel);
 
-        // Listen for size changes to recalculate layout
+        setupResizeListener();
+    }
+
+    public void setTaskStateListener(TaskStateListener listener) {
+        leftPanel.setTaskStateListener(listener);
+    }
+
+    private void setupResizeListener() {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                resizeSubPanels(getWidth(), getHeight());
+                resizePanels(getWidth(), getHeight());
             }
         });
     }
 
-    private void resizeSubPanels(int totalWidth, int totalHeight) {
-        int halfWidth = totalWidth / 2;
-
-        leftWrapper.setBounds(0, 0, halfWidth, totalHeight);
-        rightWrapper.setBounds(halfWidth, 0, totalWidth - halfWidth, totalHeight);
+    private void resizePanels(int width, int height) {
+        int halfWidth = width / 2;
+        leftPanel.setBounds(0, 0, halfWidth, height);
+        rightPanel.setBounds(halfWidth, 0, width - halfWidth, height);
     }
 
     @Override
     public void onStart() {
-        rightWrapper.onStart();
+        rightPanel.onStart();
     }
 
     @Override
     public void onStop() {
-        rightWrapper.onStop();
+        rightPanel.onStop();
     }
 }

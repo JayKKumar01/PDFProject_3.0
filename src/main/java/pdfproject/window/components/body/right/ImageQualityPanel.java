@@ -12,6 +12,8 @@ public class ImageQualityPanel extends JPanel implements TaskStateListener {
     private static final String[] QUALITY_LEVELS = {"LOW", "MEDIUM", "HIGH"};
     private static final int[] DPI_VALUES = {100, 150, 200};
 
+    private final JComboBox<String> qualityDropdown;
+
     public ImageQualityPanel() {
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
@@ -24,31 +26,31 @@ public class ImageQualityPanel extends JPanel implements TaskStateListener {
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
         titleLabel.setForeground(ThemeColors.THEME_BLUE);
 
-        JComboBox<String> qualityDropdown = new JComboBox<>(QUALITY_LEVELS);
+        qualityDropdown = new JComboBox<>(QUALITY_LEVELS);
         qualityDropdown.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         qualityDropdown.setBackground(Color.WHITE);
         qualityDropdown.setForeground(Color.DARK_GRAY);
         qualityDropdown.setFocusable(false);
 
-        // Set default
-        qualityDropdown.setSelectedIndex(0);
-        Config.RENDER_DPI = DPI_VALUES[0];
-        System.out.println("Image quality set to LOW (" + DPI_VALUES[0] + " DPI)");
+        qualityDropdown.addActionListener(e -> updateDpiFromSelection());
 
-        qualityDropdown.addActionListener(e -> {
-            int index = qualityDropdown.getSelectedIndex();
-            Config.RENDER_DPI = DPI_VALUES[index];
-            System.out.println("Image quality set to " + QUALITY_LEVELS[index] + " (" + DPI_VALUES[index] + " DPI)");
-        });
+        // Set initial selection and DPI
+        qualityDropdown.setSelectedIndex(0);
+        updateDpiFromSelection();
 
         JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         contentPanel.setBackground(ThemeColors.BACKGROUND);
         contentPanel.add(titleLabel);
         contentPanel.add(qualityDropdown);
 
-        add(contentPanel); // Centered inside GridBagLayout
+        add(contentPanel);
     }
 
+    private void updateDpiFromSelection() {
+        int index = qualityDropdown.getSelectedIndex();
+        Config.RENDER_DPI = DPI_VALUES[index];
+        System.out.println("Image quality set to " + QUALITY_LEVELS[index] + " (" + DPI_VALUES[index] + " DPI)");
+    }
 
     @Override
     public void onStart() {
@@ -59,6 +61,4 @@ public class ImageQualityPanel extends JPanel implements TaskStateListener {
     public void onStop() {
         Helper.setEnabledRecursively(this, true);
     }
-
-
 }

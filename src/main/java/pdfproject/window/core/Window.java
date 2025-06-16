@@ -20,29 +20,11 @@ public class Window {
     public Window(int height) {
         int width = (int) (height * (16.0 / 9));
 
-        frame = new JFrame("PDF Project");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(width, height);
-        frame.setLocationRelativeTo(null);
-        frame.setLayout(new BorderLayout());
-        frame.setResizable(false);
-        frame.getContentPane().setBackground(ThemeColors.BACKGROUND);
-
-        // Set emoji icon
-        frame.setIconImage(generateIconImage(new Font("Segoe UI Emoji", Font.PLAIN, 48)));
-
-
-
-        // Body panel and content
-        bodyPanel = new JPanel(new BorderLayout());
-        bodyPanel.setBackground(ThemeColors.BACKGROUND);
-        BodyContentPanel bodyContentPanel = new BodyContentPanel();
-        bodyPanel.add(bodyContentPanel, BorderLayout.CENTER);
-
-        // Console panel
+        frame = initFrame(width, height);
         consolePanel = new ConsolePanel();
         consolePanel.redirectSystemStreams();
 
+        BodyContentPanel bodyContentPanel = new BodyContentPanel();
         bodyContentPanel.setTaskStateListener(new TaskStateListener() {
             @Override
             public void onStart() {
@@ -57,17 +39,11 @@ public class Window {
             }
         });
 
-        // Main wrapper layout
-        JPanel mainWrapper = new JPanel();
-        mainWrapper.setLayout(new BoxLayout(mainWrapper, BoxLayout.Y_AXIS));
-        mainWrapper.setBackground(ThemeColors.BACKGROUND);
+        bodyPanel = new JPanel(new BorderLayout());
+        bodyPanel.setBackground(ThemeColors.BACKGROUND);
+        bodyPanel.add(bodyContentPanel, BorderLayout.CENTER);
 
-        mainWrapper.add(bodyPanel);
-        mainWrapper.add(consolePanel);
-
-        frame.setContentPane(mainWrapper);
-        frame.setVisible(true);
-
+        frame.setContentPane(initMainLayout());
         resizePanels(height);
 
         frame.addComponentListener(new ComponentAdapter() {
@@ -76,6 +52,28 @@ public class Window {
                 resizePanels(frame.getHeight());
             }
         });
+
+        frame.setVisible(true);
+    }
+
+    private JFrame initFrame(int width, int height) {
+        JFrame f = new JFrame("PDF Project");
+        f.setSize(width, height);
+        f.setLocationRelativeTo(null);
+        f.setResizable(false);
+        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.getContentPane().setBackground(ThemeColors.BACKGROUND);
+        f.setIconImage(generateIconImage(new Font("Segoe UI Emoji", Font.PLAIN, 48)));
+        return f;
+    }
+
+    private JPanel initMainLayout() {
+        JPanel wrapper = new JPanel();
+        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        wrapper.setBackground(ThemeColors.BACKGROUND);
+        wrapper.add(bodyPanel);
+        wrapper.add(consolePanel);
+        return wrapper;
     }
 
     private void resizePanels(int totalHeight) {
@@ -90,14 +88,12 @@ public class Window {
 
     private Image generateIconImage(Font font) {
         BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2d = img.createGraphics();
-        g2d.setFont(font);
-        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2d.setColor(ThemeColors.THEME_BLUE);
-        g2d.drawString("📝🔍", 5, 50);
-        g2d.dispose();
+        Graphics2D g = img.createGraphics();
+        g.setFont(font);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setColor(ThemeColors.THEME_BLUE);
+        g.drawString("📝🔍", 5, 50);
+        g.dispose();
         return img;
     }
-
-
 }

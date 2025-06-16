@@ -8,10 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.*;
 import java.io.File;
 import java.util.List;
 
@@ -26,23 +23,18 @@ public class InputSectionPanel extends JPanel {
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
 
-        // --- Centered container panel ---
-        JPanel centerPanel = new JPanel();
-        centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 0));
-        centerPanel.setBackground(ThemeColors.BACKGROUND);
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
         fileLabel = createFileLabel();
         JButton browseButton = createBrowseButton();
 
+        JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        centerPanel.setBackground(ThemeColors.BACKGROUND);
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         centerPanel.add(browseButton);
         centerPanel.add(fileLabel);
 
-        add(centerPanel); // add to GridBagLayout center
-
-        enableFileDropSupport();
+        add(centerPanel);
+        setupFileDrop();
     }
-
 
     private JLabel createFileLabel() {
         JLabel label = new JLabel("No input data");
@@ -52,13 +44,13 @@ public class InputSectionPanel extends JPanel {
     }
 
     private JButton createBrowseButton() {
-        JButton browseButton = ComponentFactory.createStyledButton(
+        JButton button = ComponentFactory.createStyledButton(
                 "Choose File",
                 ThemeColors.THEME_BLUE,
                 new Color(174, 215, 255)
         );
-        browseButton.addActionListener(e -> openFileDialog());
-        return browseButton;
+        button.addActionListener(e -> openFileDialog());
+        return button;
     }
 
     private void openFileDialog() {
@@ -66,12 +58,13 @@ public class InputSectionPanel extends JPanel {
         FileDialog fileDialog = new FileDialog(parentFrame, "Select Input File", FileDialog.LOAD);
         fileDialog.setFilenameFilter((dir, name) -> name.toLowerCase().endsWith(".xlsx"));
 
-        if (lastDirectoryPath != null)
+        if (lastDirectoryPath != null) {
             fileDialog.setDirectory(lastDirectoryPath);
+        }
 
         fileDialog.setVisible(true);
-
         File selectedFile = getSelectedFile(fileDialog);
+
         if (selectedFile != null) {
             if (isValidExcelFile(selectedFile)) {
                 handleSelectedFile(selectedFile);
@@ -81,13 +74,13 @@ public class InputSectionPanel extends JPanel {
         }
     }
 
-    private File getSelectedFile(FileDialog fileDialog) {
-        String file = fileDialog.getFile();
-        String dir = fileDialog.getDirectory();
-        return (file != null && dir != null) ? new File(dir, file) : null;
+    private File getSelectedFile(FileDialog dialog) {
+        String name = dialog.getFile();
+        String dir = dialog.getDirectory();
+        return (name != null && dir != null) ? new File(dir, name) : null;
     }
 
-    private void enableFileDropSupport() {
+    private void setupFileDrop() {
         new DropTarget(this, DnDConstants.ACTION_COPY, new DropTargetAdapter() {
             @Override
             @SuppressWarnings("unchecked")
@@ -98,13 +91,13 @@ public class InputSectionPanel extends JPanel {
 
                     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                         List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-                        for (File file : files) {
-                            if (isValidExcelFile(file)) {
-                                handleSelectedFile(file);
-                                return;
-                            }
-                        }
-                        showInvalidFileWarning();
+                        files.stream()
+                                .filter(InputSectionPanel.this::isValidExcelFile)
+                                .findFirst()
+                                .ifPresentOrElse(
+                                        InputSectionPanel.this::handleSelectedFile,
+                                        InputSectionPanel.this::showInvalidFileWarning
+                                );
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -115,12 +108,10 @@ public class InputSectionPanel extends JPanel {
 
     private void handleSelectedFile(File file) {
         lastDirectoryPath = file.getParent();
-        String fileName = file.getName();
-        System.out.println("Selected Input Data: \"" + fileName + "\"");
-
-        fileLabel.setText(ellipsize(fileName));
-        fileLabel.setToolTipText(file.getAbsolutePath());
         Config.INPUT_PATH = file.getAbsolutePath();
+        fileLabel.setText(ellipsize(file.getName()));
+        fileLabel.setToolTipText(file.getAbsolutePath());
+        System.out.println("Selected Input Data: \"" + file.getName() + "\"");
     }
 
     private boolean isValidExcelFile(File file) {
@@ -128,13 +119,17 @@ public class InputSectionPanel extends JPanel {
     }
 
     private String ellipsize(String text) {
-        return (text.length() <= MAX_FILENAME_LENGTH) ? text : text.substring(0, MAX_FILENAME_LENGTH - 3) + "...";
+        return (text.length() <= MAX_FILENAME_LENGTH)
+                ? text
+                : text.substring(0, MAX_FILENAME_LENGTH - 3) + "...";
     }
 
     private void showInvalidFileWarning() {
-        JOptionPane.showMessageDialog(this,
+        JOptionPane.showMessageDialog(
+                this,
                 "Only .xlsx files are supported.",
                 "Invalid File Type",
-                JOptionPane.WARNING_MESSAGE);
+                JOptionPane.WARNING_MESSAGE
+        );
     }
 }
