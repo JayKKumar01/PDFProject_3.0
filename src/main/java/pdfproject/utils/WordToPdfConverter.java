@@ -19,6 +19,11 @@ public class WordToPdfConverter {
 
     private static final int TIMEOUT_SECONDS = 120;
     private static final File tempDir = new File(AppPaths.TEMP_WORD_PDF);
+    private static final IConverter converter = LocalConverter.builder().build();
+
+    public static void stopConverter(){
+        converter.shutDown();
+    }
 
     public static File convertToPdf(String wordPath) throws Exception {
         File inputFile = new File(wordPath);
@@ -39,8 +44,6 @@ public class WordToPdfConverter {
         Future<Boolean> future = executor.submit(() -> {
             try (InputStream in = new FileInputStream(cleanedWordFile);
                  OutputStream out = new FileOutputStream(outputFile)) {
-
-                IConverter converter = LocalConverter.builder().build();
                 converter.convert(in).as(DocumentType.MS_WORD)
                         .to(out).as(DocumentType.PDF).execute();
                 converter.shutDown();

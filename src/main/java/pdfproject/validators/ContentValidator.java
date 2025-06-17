@@ -296,6 +296,9 @@ public class ContentValidator {
                 List<TextPosition> currentPositions = new ArrayList<>();
 
                 for (TextPosition tp : textPositions) {
+                    if (tp.getFontSize() < 2){
+                        continue;
+                    }
                     String unicode = tp.getUnicode();
 
                     // Break down combined Unicode characters

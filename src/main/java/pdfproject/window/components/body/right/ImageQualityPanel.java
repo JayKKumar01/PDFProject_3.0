@@ -35,8 +35,8 @@ public class ImageQualityPanel extends JPanel implements TaskStateListener {
         qualityDropdown.addActionListener(e -> updateDpiFromSelection());
 
         // Set initial selection and DPI
-        qualityDropdown.setSelectedIndex(0);
-        updateDpiFromSelection();
+//        qualityDropdown.setSelectedIndex(0);
+//        updateDpiFromSelection();
 
         JPanel contentPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         contentPanel.setBackground(ThemeColors.BACKGROUND);

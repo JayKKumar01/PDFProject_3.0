@@ -35,6 +35,25 @@ public class ProcessUtils {
     }
 
     /**
+     * Attempts to forcefully terminate Microsoft Word if it's running.
+     */
+    public static void killWordProcess() {
+        String os = System.getProperty(ProcessNames.OS_NAME_PROPERTY).toLowerCase();
+
+        try {
+            if (os.contains(ProcessNames.WINDOWS_OS_INDICATOR)) {
+                Process process = Runtime.getRuntime().exec(new String[]{"taskkill", "/F", "/IM", ProcessNames.WORD_PROCESS_WINDOWS});
+                process.waitFor(); // Optional: wait for the process to finish
+                System.out.println("🛑 Microsoft Word was terminated if it was running.");
+            } else {
+                System.out.println("⚠️ Word termination is only supported on Windows.");
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("❌ Failed to kill Microsoft Word process: " + e.getMessage());
+        }
+    }
+
+    /**
      * Executes a process list command and checks if the specified process is running.
      *
      * @param command     command to list running processes

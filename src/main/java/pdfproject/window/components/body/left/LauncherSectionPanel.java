@@ -4,6 +4,8 @@ import pdfproject.Config;
 import pdfproject.Launcher;
 import pdfproject.interfaces.StopListener;
 import pdfproject.interfaces.TaskStateListener;
+import pdfproject.utils.ProcessUtils;
+import pdfproject.utils.WordToPdfConverter;
 import pdfproject.window.constants.ThemeColors;
 import pdfproject.window.utils.ComponentFactory;
 
@@ -90,6 +92,8 @@ public class LauncherSectionPanel extends JPanel {
             executorService.shutdownNow();
         }
 
+//        ProcessUtils.killWordProcess();
+        WordToPdfConverter.stopConverter();
         System.out.println(stoppedByUser ? "🛑 Validation stopped by user." : "🛑 Validation finished.");
     }
 
