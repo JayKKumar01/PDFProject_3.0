@@ -19,11 +19,6 @@ public class WordToPdfConverter {
 
     private static final int TIMEOUT_SECONDS = 120;
     private static final File tempDir = new File(AppPaths.TEMP_WORD_PDF);
-    private static final IConverter converter = LocalConverter.builder().build();
-
-    public static void stopConverter(){
-        converter.shutDown();
-    }
 
     public static File convertToPdf(String wordPath) throws Exception {
         File inputFile = new File(wordPath);
@@ -35,12 +30,13 @@ public class WordToPdfConverter {
         }
 
         // First, remove comments from the Word document
-        File cleanedWordFile = removeCommentsFromWord(inputFile);
+        File cleanedWordFile = isDocx(wordPath) ? removeCommentsFromWord(inputFile) : inputFile;
 
         File outputFile = File.createTempFile("converted_", ".pdf", tempDir);
         long time = System.currentTimeMillis();
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
+        IConverter converter = LocalConverter.builder().build();
         Future<Boolean> future = executor.submit(() -> {
             try (InputStream in = new FileInputStream(cleanedWordFile);
                  OutputStream out = new FileOutputStream(outputFile)) {
@@ -51,6 +47,8 @@ public class WordToPdfConverter {
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
+            }finally {
+                converter.shutDown();
             }
         });
 
@@ -69,6 +67,10 @@ public class WordToPdfConverter {
         System.out.printf("🕒 Total time taken: %.2f seconds%n", elapsedSeconds);
 
         return outputFile;
+    }
+
+    private static boolean isDocx(String wordPath) {
+        return wordPath.toLowerCase().endsWith(".docx");
     }
 
     private static File removeCommentsFromWord(File inputFile) throws Exception {

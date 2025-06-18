@@ -91,9 +91,6 @@ public class LauncherSectionPanel extends JPanel {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdownNow();
         }
-
-//        ProcessUtils.killWordProcess();
-        WordToPdfConverter.stopConverter();
         System.out.println(stoppedByUser ? "🛑 Validation stopped by user." : "🛑 Validation finished.");
     }
 
