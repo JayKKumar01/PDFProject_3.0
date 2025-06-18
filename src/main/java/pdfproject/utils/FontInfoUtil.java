@@ -56,6 +56,7 @@ public class FontInfoUtil {
 
                 parts.add(new FontInfoPart("[" + charGroup + "]: ", Color.BLACK));
                 parts.add(new FontInfoPart(lastFont, OperationColor.get(Operation.FONT)));
+
                 parts.add(new FontInfoPart("/", Color.BLACK));
                 parts.add(new FontInfoPart(String.valueOf(lastSize), OperationColor.get(Operation.SIZE)));
                 parts.add(new FontInfoPart("/", Color.BLACK));
@@ -76,11 +77,11 @@ public class FontInfoUtil {
             if (needChunk) {
                 parts.add(new FontInfoPart("[" + charGroup + "]: ", Color.BLACK));
             }
-            parts.add(new FontInfoPart(lastFont, OperationColor.get(Operation.FONT)));
+            if (lastFont != null) parts.add(new FontInfoPart(lastFont, OperationColor.get(Operation.FONT)));
             parts.add(new FontInfoPart("/", Color.BLACK));
             parts.add(new FontInfoPart(String.valueOf(lastSize), OperationColor.get(Operation.SIZE)));
             parts.add(new FontInfoPart("/", Color.BLACK));
-            parts.add(new FontInfoPart(lastStyle, OperationColor.get(Operation.STYLE)));
+            if (lastStyle !=null) parts.add(new FontInfoPart(lastStyle, OperationColor.get(Operation.STYLE)));
         }
 
         wordInfo.setFontInfoParts(parts);
@@ -176,23 +177,22 @@ public class FontInfoUtil {
 
 
     private static void appendChunkDiff(List<FontInfoPart> parts, String text, List<DiffItem> diffs) {
+        if (text == null || text.isEmpty()) return;
+
+        parts.add(new FontInfoPart("[" + text + "]: ", Color.BLACK));
+
         if (diffs == null || diffs.isEmpty()) {
-            if (text != null) {
-                parts.add(new FontInfoPart("[" + text + "]: ", Color.BLACK));
-            }
             parts.add(new FontInfoPart("same", Color.BLACK));
             parts.add(new FontInfoPart(", ", Color.BLACK));
             return;
         }
 
-        if (text != null) {
-            parts.add(new FontInfoPart("[" + text + "]: ", Color.BLACK));
-        }
-
+        boolean addedAny = false;
         for (int i = 0; i < diffs.size(); i++) {
             DiffItem diff = diffs.get(i);
-            Color color = OperationColor.get(diff.operation());
+            if (diff == null || diff.from() == null || diff.to() == null) continue;
 
+            Color color = OperationColor.get(diff.operation());
             parts.add(new FontInfoPart(diff.from(), color));
             parts.add(new FontInfoPart("→", Color.BLACK));
             parts.add(new FontInfoPart(diff.to(), color));
@@ -200,10 +200,15 @@ public class FontInfoUtil {
             if (i < diffs.size() - 1) {
                 parts.add(new FontInfoPart("/", Color.BLACK));
             }
+
+            addedAny = true;
         }
 
-        parts.add(new FontInfoPart(", ", Color.BLACK));
+        if (addedAny) {
+            parts.add(new FontInfoPart(", ", Color.BLACK));
+        }
     }
+
 
     public static String getPlainInfo(WordInfo word) {
         List<FontInfoPart> parts = word.getFontInfoParts();

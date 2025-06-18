@@ -199,6 +199,9 @@ public class ContentValidator {
                 for (int i = 0; i <= lastIndex; i++) {
                     FontInfoPart part = parts.get(i);
                     String text = part.text();
+                    if (text == null){
+                        continue;
+                    }
 
                     // Trim trailing comma only for the last part
                     if (i == lastIndex && text.endsWith(", ")) {
