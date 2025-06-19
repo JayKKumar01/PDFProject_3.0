@@ -177,9 +177,10 @@ public class FontInfoUtil {
 
 
     private static void appendChunkDiff(List<FontInfoPart> parts, String text, List<DiffItem> diffs) {
-        if (text == null || text.isEmpty()) return;
+        if (text != null && !text.isEmpty()){
+            parts.add(new FontInfoPart("[" + text + "]: ", Color.BLACK));
+        }
 
-        parts.add(new FontInfoPart("[" + text + "]: ", Color.BLACK));
 
         if (diffs == null || diffs.isEmpty()) {
             parts.add(new FontInfoPart("same", Color.BLACK));
