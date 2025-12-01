@@ -15,10 +15,6 @@ import java.util.List;
 
 public class Launcher {
 
-    public static void main(String[] args) {
-//        start(null);
-    }
-
     public static void start(StopListener stopListener) {
         List<InputData> inputs = InputDataProvider.load();
 

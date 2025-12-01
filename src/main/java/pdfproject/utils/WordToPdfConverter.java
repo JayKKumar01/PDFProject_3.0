@@ -30,7 +30,7 @@ public class WordToPdfConverter {
         }
 
         // First, remove comments from the Word document
-        File cleanedWordFile = isDocx(wordPath) ? removeCommentsFromWord(inputFile) : inputFile;
+        File cleanedWordFile = isDocx(inputFile) ? removeCommentsFromWord(inputFile) : inputFile;
 
         File outputFile = File.createTempFile("converted_", ".pdf", tempDir);
         long time = System.currentTimeMillis();
@@ -69,9 +69,26 @@ public class WordToPdfConverter {
         return outputFile;
     }
 
-    private static boolean isDocx(String wordPath) {
-        return wordPath.toLowerCase().endsWith(".docx");
+    private static final byte[] ZIP_MAGIC = { 'P', 'K', 0x03, 0x04 };
+
+    private static boolean isDocx(File file) {
+        if (!file.exists() || !file.isFile()) return false;
+
+        try (FileInputStream fis = new FileInputStream(file)) {
+            byte[] header = new byte[4];
+            if (fis.read(header) != 4) return false;
+
+            // Compare first 4 bytes
+            for (int i = 0; i < 4; i++) {
+                if (header[i] != ZIP_MAGIC[i]) return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
+
 
     private static File removeCommentsFromWord(File inputFile) throws Exception {
         // Load the Word document using Apache POI
