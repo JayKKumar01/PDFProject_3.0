@@ -57,6 +57,7 @@ public class ImagePathPanel extends JPanel implements TaskStateListener {
             if (selectedDir != null){
                 Config.outputImagePath = selectedDir.getAbsolutePath();
                 pathLabel.setText(getCompactPath(Config.outputImagePath));
+                System.out.println(Config.outputImagePath);
                 AppSettings.saveOutputPath(Config.outputImagePath);
             }
         }
@@ -64,6 +65,7 @@ public class ImagePathPanel extends JPanel implements TaskStateListener {
     }
 
     private String getCompactPath(String fullPath) {
+
         if (fullPath == null || fullPath.isEmpty()) return "";
 
         File file = new File(fullPath);

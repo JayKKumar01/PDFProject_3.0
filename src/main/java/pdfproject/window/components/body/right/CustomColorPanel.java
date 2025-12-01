@@ -13,6 +13,9 @@ import java.util.Map;
 
 public class CustomColorPanel extends JPanel implements TaskStateListener {
 
+
+    private static final int DROPDOWN_HEIGHT = 25;
+    private static final int DROPDOWN_WIDTH = 100;
     private final Map<String, JComboBox<String>> dropdownMap = new LinkedHashMap<>();
     private final Map<String, Color> defaultColorMap = new LinkedHashMap<>();
 
@@ -84,13 +87,15 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
     private JPanel createColorRow(String label, Color defaultColor) {
         JLabel nameLabel = new JLabel(label + ":");
         nameLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        nameLabel.setPreferredSize(new Dimension(130, 25));
+        nameLabel.setPreferredSize(new Dimension(130, DROPDOWN_HEIGHT));
         nameLabel.setForeground(ThemeColors.THEME_BLUE);
 
         JComboBox<String> dropdown = new JComboBox<>(Helper.getAllColorNames());
         dropdown.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        dropdown.setPreferredSize(new Dimension(140, 25));
-        dropdown.setMaximumSize(dropdown.getPreferredSize());
+        Dimension dropdownSize = new Dimension(DROPDOWN_WIDTH, DROPDOWN_HEIGHT);
+        dropdown.setPreferredSize(dropdownSize);
+        dropdown.setMaximumSize(dropdownSize);
+        dropdown.setMinimumSize(dropdownSize);
         dropdown.setFocusable(false);
 
         dropdown.setSelectedItem(getColorName(defaultColor));
