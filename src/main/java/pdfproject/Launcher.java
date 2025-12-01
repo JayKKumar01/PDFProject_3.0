@@ -32,7 +32,7 @@ public class Launcher {
         }
 
         System.out.println("✅ Loaded " + inputs.size() + " input rows.");
-        Config.outputImagePath = AppPaths.OUTPUT_IMAGES_BASE + "\\Result - " + System.currentTimeMillis();
+        String outputPath = Config.outputImagePath + "\\Result - " + System.currentTimeMillis();
         List<MapModel> resultList = new ArrayList<>();
 
         for (int i = 0; i < inputs.size(); i++) {
@@ -40,11 +40,11 @@ public class Launcher {
                 return;
             }
             InputData data = inputs.get(i);
-            MapModel result = new MapModel(Config.outputImagePath);
+            MapModel result = new MapModel(outputPath);
             result.setKey(data.getKey());
 
             try {
-                PDFProcessor.processRow(stopListener,data, i, result);
+                PDFProcessor.processRow(stopListener,data, i, result, outputPath);
             } catch (Exception e) {
                 System.err.printf("Error in item %d: %s%n", i + 1, e.getMessage());
                 e.printStackTrace();
@@ -55,7 +55,7 @@ public class Launcher {
         if (stopListener.stoppedByUser()){
             return;
         }
-        DataMapGenerator.generateDataMapJs(resultList, Config.outputImagePath);
+        DataMapGenerator.generateDataMapJs(resultList, outputPath);
     }
 
     private static boolean isPdf(String path) {

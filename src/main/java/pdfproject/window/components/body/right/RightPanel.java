@@ -11,17 +11,17 @@ public class RightPanel extends JPanel implements TaskStateListener {
     private static final int GAP = 10;
     private static final double IMAGE_QUALITY_RATIO = 0.3;
 
-    private final ImageQualityPanel imageQualityPanel;
+    private final ImageOptionPanel imageOptionPanel;
     private final CustomColorPanel customColorPanel;
 
     public RightPanel() {
         setLayout(null);
         setBackground(ThemeColors.LAYOUT_BORDER);
 
-        imageQualityPanel = new ImageQualityPanel();
+        imageOptionPanel = new ImageOptionPanel();
         customColorPanel = new CustomColorPanel();
 
-        add(imageQualityPanel);
+        add(imageOptionPanel);
         add(customColorPanel);
     }
 
@@ -41,19 +41,19 @@ public class RightPanel extends JPanel implements TaskStateListener {
         int yImage = PADDING;
         int yColor = yImage + imageHeight + GAP;
 
-        imageQualityPanel.setBounds(xPos, yImage, contentWidth, imageHeight);
+        imageOptionPanel.setBounds(xPos, yImage, contentWidth, imageHeight);
         customColorPanel.setBounds(xPos, yColor, contentWidth, colorHeight);
     }
 
     @Override
     public void onStart() {
-        imageQualityPanel.onStart();
+        imageOptionPanel.onStart();
         customColorPanel.onStart();
     }
 
     @Override
     public void onStop() {
-        imageQualityPanel.onStop();
+        imageOptionPanel.onStop();
         customColorPanel.onStop();
     }
 }

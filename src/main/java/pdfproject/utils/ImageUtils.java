@@ -124,8 +124,8 @@ public class ImageUtils {
     }
 
 
-    public static String getDummyReportImage() throws IOException {
-        String dirPath = String.format("%s", Config.outputImagePath);
+    public static String getDummyReportImage(String outputImagePath) throws IOException {
+        String dirPath = String.format("%s", outputImagePath);
         String fileName = Texts.NO_DIFF_IMAGE_NAME + FileTypes.IMAGE_EXTENSION;
         File outputFile = new File(dirPath, fileName);
 

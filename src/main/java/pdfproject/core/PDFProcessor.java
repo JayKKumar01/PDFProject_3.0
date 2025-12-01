@@ -18,7 +18,7 @@ import java.util.List;
 
 public class PDFProcessor {
 
-    public static void processRow(StopListener stopListener, InputData data, int itemIndex, MapModel resultMap) throws Exception {
+    public static void processRow(StopListener stopListener, InputData data, int itemIndex, MapModel resultMap, String outputPath) throws Exception {
         System.out.printf("▶️  Processing Item %d...%n", itemIndex + 1);
 
         File pdf1 = ensurePdf(data.getPath1());
@@ -49,10 +49,10 @@ public class PDFProcessor {
             PDFRenderer renderer2 = new PDFRenderer(doc2);
 
             AlignmentValidator alignmentValidator = new AlignmentValidator(
-                    Config.outputImagePath, itemIndex, renderer1, renderer2, resultMap
+                    outputPath, itemIndex, renderer1, renderer2, resultMap
             );
             ContentValidator contentValidator = new ContentValidator(
-                    data, Config.outputImagePath, itemIndex, doc1, doc2, resultMap
+                    data, outputPath, itemIndex, doc1, doc2, resultMap
             );
 
             for (int i = 0; i < maxSize; i++) {

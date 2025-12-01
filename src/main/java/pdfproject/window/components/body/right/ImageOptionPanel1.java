@@ -7,15 +7,14 @@ import pdfproject.window.constants.ThemeColors;
 import javax.swing.*;
 import java.awt.*;
 
-public class ImageQualityPanel extends JPanel implements TaskStateListener {
-
+public class ImageOptionPanel1 extends JPanel implements TaskStateListener {
 
     private static final String[] QUALITY_LEVELS = {"LOW", "MEDIUM", "HIGH"};
     private static final int[] DPI_VALUES = {100, 150, 200};
 
     private final JComboBox<String> qualityDropdown;
 
-    public ImageQualityPanel(){
+    public ImageOptionPanel1() {
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
         setBorder(BorderFactory.createCompoundBorder(

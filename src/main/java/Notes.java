@@ -1,5 +1,4 @@
 public class Notes {
-    //word to pdf converter needs to be updated
-    //maybe the key
+    //frame name, default path
     // add the features
 }

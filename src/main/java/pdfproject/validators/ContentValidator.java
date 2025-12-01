@@ -54,7 +54,7 @@ public class ContentValidator {
         BufferedImage baseImg2 = images.get(1);
 
         BufferedImage combinedImage;
-        String diffPath = ImageUtils.getDummyReportImage();
+        String diffPath = ImageUtils.getDummyReportImage(outputImagePath);
 
         if (diff.isEmpty()) { // check exception case for one image null
             // No difference – combine raw base images directly
