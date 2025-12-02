@@ -28,8 +28,8 @@ public class LauncherSectionPanel extends JPanel {
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
 
-        startButton = ComponentFactory.createStyledButton("Start Validation", new Color(76, 175, 80), Color.WHITE);
-        stopButton = ComponentFactory.createStyledButton("Stop Validation", new Color(244, 67, 54), Color.WHITE);
+        startButton = ComponentFactory.createStyledButton("Start Validation", ThemeColors.THEME_GREEN, ThemeColors.CONSOLE_TEXT_BG);
+        stopButton = ComponentFactory.createStyledButton("Stop Validation", ThemeColors.THEME_RED, ThemeColors.CONSOLE_TEXT_BG);
         stopButton.setEnabled(false);
 
         startButton.addActionListener(e -> startValidation());

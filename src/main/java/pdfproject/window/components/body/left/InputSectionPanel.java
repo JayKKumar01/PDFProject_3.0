@@ -47,7 +47,7 @@ public class InputSectionPanel extends JPanel {
         JButton button = ComponentFactory.createStyledButton(
                 "Choose File",
                 ThemeColors.THEME_BLUE,
-                new Color(174, 215, 255)
+                ThemeColors.THEME_BLUE_LIGHT
         );
         button.addActionListener(e -> openFileDialog());
         return button;

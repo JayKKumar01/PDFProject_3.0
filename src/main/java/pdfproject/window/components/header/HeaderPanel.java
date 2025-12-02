@@ -58,7 +58,7 @@ public class HeaderPanel extends JPanel implements TaskStateListener {
         // OPENED TIME (set immediately)
         openedTimeLabel = new JLabel();
         openedTimeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        openedTimeLabel.setForeground(new Color(125, 125, 125));
+        openedTimeLabel.setForeground(ThemeColors.TEXT_MUTED);
         openedTimeLabel.setBorder(new EmptyBorder(0, 4, 0, 0));
 
         // Set initial time right here
@@ -75,7 +75,7 @@ public class HeaderPanel extends JPanel implements TaskStateListener {
 
         toggleLabel = new JLabel();
         toggleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        toggleLabel.setForeground(new Color(120, 120, 120));
+        toggleLabel.setForeground(ThemeColors.TEXT_MUTED_ALT);
 
         boolean savedDark = AppSettings.loadTheme(false);
         toggleSwitch = new ToggleSwitch(savedDark);

@@ -45,7 +45,7 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
         title.setForeground(ThemeColors.THEME_BLUE);
 
         JButton resetBtn = ComponentFactory.createStyledButton("Reset",
-                ThemeColors.THEME_BLUE, new Color(230, 240, 255));
+                ThemeColors.THEME_BLUE, ThemeColors.THEME_BLUE_LIGHT);
         resetBtn.addActionListener(e -> resetToDefaults());
 
         JPanel panel = new JPanel(new BorderLayout());

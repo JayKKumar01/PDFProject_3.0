@@ -99,8 +99,8 @@ public class ToggleSwitch extends JComponent {
 
         // track (rounded)
         int arc = HEIGHT;
-        Color lightTrack = new Color(220, 224, 230);
-        Color darkTrack = new Color(70, 78, 88);
+        Color lightTrack = ThemeColors.TRACK_LIGHT;
+        Color darkTrack = ThemeColors.TRACK_DARK;
         float p = animPos;
         Color trackCol = lerp(lightTrack, darkTrack, p);
         g2.setColor(trackCol);
@@ -113,11 +113,11 @@ public class ToggleSwitch extends JComponent {
         int knobY = (HEIGHT - KNOB_SIZE) / 2;
 
         // knob shadow (slightly larger for heft)
-        g2.setColor(new Color(0, 0, 0, 55));
+        g2.setColor(ThemeColors.KNOB_SHADOW);
         g2.fillOval(knobX, knobY + 2, KNOB_SIZE, KNOB_SIZE);
 
         // knob fill (white on light, near-theme on dark)
-        Color knobColor = lerp(Color.WHITE, ThemeColors.THEME_BLUE, p);
+        Color knobColor = lerp(ThemeColors.CONSOLE_TEXT_BG, ThemeColors.THEME_BLUE, p);
         g2.setColor(knobColor);
         g2.fillOval(knobX, knobY, KNOB_SIZE, KNOB_SIZE);
 

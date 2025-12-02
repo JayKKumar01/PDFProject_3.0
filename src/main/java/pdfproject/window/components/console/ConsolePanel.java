@@ -36,7 +36,7 @@ public class ConsolePanel extends JPanel implements TaskStateListener {
     private JScrollPane wrapInScrollPane(JTextPane pane) {
         JScrollPane scrollPane = new JScrollPane(pane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        scrollPane.setBorder(BorderFactory.createLineBorder(ThemeColors.CONSOLE_BORDER));
         return scrollPane;
     }
 
@@ -46,8 +46,11 @@ public class ConsolePanel extends JPanel implements TaskStateListener {
     }
 
     public void redirectSystemStreams() {
-        System.setOut(new PrintStream(new CustomOutputStream(consolePane, ThemeColors.THEME_BLUE), true));
-        System.setErr(new PrintStream(new CustomOutputStream(consolePane, ThemeColors.THEME_RED), true));
+        System.setOut(new PrintStream(
+                new CustomOutputStream(consolePane, ThemeColors.THEME_BLUE), true));
+
+        System.setErr(new PrintStream(
+                new CustomOutputStream(consolePane, ThemeColors.THEME_RED), true));
     }
 
     public void clear() {
@@ -61,6 +64,6 @@ public class ConsolePanel extends JPanel implements TaskStateListener {
 
     @Override
     public void onStop() {
-        // Future behavior on stop can be added here
+        // Reserved for future logic
     }
 }
