@@ -21,7 +21,6 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
     public ConsolePanel() {
         setLayout(new BorderLayout());
         setOpaque(true);
-
         setBorder(new EmptyBorder(10, 10, 10, 10));
 
         consolePane = createConsolePane();
@@ -29,10 +28,9 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
 
         add(scrollPane, BorderLayout.CENTER);
 
-        // register to theme manager
         ThemeManager.register(this);
+
         applyTheme(ThemeManager.isDarkMode());
-        // ensure streams are set to initial theme colors
         redirectSystemStreams();
     }
 
@@ -57,8 +55,7 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
     }
 
     /**
-     * Default redirect — uses current theme to pick normal output color
-     * (blue in light, green in dark). Error color remains red.
+     * Redirect stdout/stderr using theme-appropriate colors.
      */
     public void redirectSystemStreams() {
         boolean dark = ThemeManager.isDarkMode();
@@ -71,7 +68,7 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
     }
 
     /**
-     * Overload to explicitly set normal output color
+     * Explicit override if needed.
      */
     public void redirectSystemStreams(Color normalColor) {
         System.setOut(new PrintStream(new CustomOutputStream(consolePane, normalColor), true));
@@ -83,21 +80,23 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
     }
 
     /**
-     * Apply theme colors to visuals (panel, scroll, background)
+     * Apply theme colors to the visual elements.
      */
     private void applyTheme(boolean dark) {
 
-        // outer panel
-        setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.LAYOUT_BORDER);
+        // Outer background — fixed to correct behavior
+        setBackground(dark ? ThemeColors.DARK_LAYOUT_BORDER : ThemeColors.LAYOUT_BORDER);
 
-        // scroll pane
+        // Scroll pane
         scrollPane.setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.CONSOLE_BACKGROUND);
         scrollPane.getViewport().setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.CONSOLE_TEXT_BG);
+
+        // Border — NOW THEME GREEN in DARK MODE (your request)
         scrollPane.setBorder(BorderFactory.createLineBorder(
-                dark ? ThemeColors.DARK_TEXT_MUTED : ThemeColors.CONSOLE_BORDER
+                dark ? ThemeColors.THEME_GREEN : ThemeColors.CONSOLE_BORDER
         ));
 
-        // text area background (foreground handled per-run)
+        // Console background
         consolePane.setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.CONSOLE_TEXT_BG);
 
         revalidate();
@@ -115,13 +114,12 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
     }
 
     /**
-     * ThemeManager listener — recolor previous non-error text and update streams.
+     * Theme changed → recolor previous text + update streams + repaint visuals
      */
     @Override
     public void onThemeChanged(boolean dark) {
         applyTheme(dark);
 
-        // recolor existing non-error text runs
         StyledDocument doc = consolePane.getStyledDocument();
         int len = doc.getLength();
         int pos = 0;
@@ -129,25 +127,20 @@ public class ConsolePanel extends JPanel implements TaskStateListener, ThemeMana
         while (pos < len) {
             Element elem = doc.getCharacterElement(pos);
             AttributeSet attrs = elem.getAttributes();
-            Object isErrorAttr = attrs.getAttribute("isError");
-            boolean isError = Boolean.TRUE.equals(isErrorAttr);
 
+            boolean isError = Boolean.TRUE.equals(attrs.getAttribute("isError"));
             int start = elem.getStartOffset();
             int end = elem.getEndOffset();
-            int length = end - start;
 
-            if (!isError && length > 0) {
-                // apply new foreground for this range; merge with existing attributes
+            if (!isError) {
                 SimpleAttributeSet newAttrs = new SimpleAttributeSet();
                 StyleConstants.setForeground(newAttrs, dark ? ThemeColors.THEME_GREEN : ThemeColors.THEME_BLUE);
-                // do not overwrite the isError marker or other attributes - merge instead
-                doc.setCharacterAttributes(start, length, newAttrs, false);
+                doc.setCharacterAttributes(start, end - start, newAttrs, false);
             }
 
             pos = end;
         }
 
-        // rebind streams so new writes use the new colors
         redirectSystemStreams();
     }
 
