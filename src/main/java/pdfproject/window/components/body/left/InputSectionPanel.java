@@ -3,6 +3,7 @@ package pdfproject.window.components.body.left;
 import pdfproject.Config;
 import pdfproject.window.constants.ThemeColors;
 import pdfproject.window.utils.ComponentFactory;
+import pdfproject.window.utils.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,21 +13,23 @@ import java.awt.dnd.*;
 import java.io.File;
 import java.util.List;
 
-public class InputSectionPanel extends JPanel {
+public class InputSectionPanel extends JPanel implements ThemeManager.ThemeChangeListener {
 
     private static final int MAX_FILENAME_LENGTH = 40;
     private static String lastDirectoryPath;
 
     private final JLabel fileLabel;
+    private final JButton browseButton;
+    private final JPanel centerPanel;
 
     public InputSectionPanel() {
         setLayout(new GridBagLayout());
         setBackground(ThemeColors.BACKGROUND);
 
         fileLabel = createFileLabel();
-        JButton browseButton = createBrowseButton();
+        browseButton = createBrowseButton();
 
-        JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         centerPanel.setBackground(ThemeColors.BACKGROUND);
         centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         centerPanel.add(browseButton);
@@ -34,6 +37,10 @@ public class InputSectionPanel extends JPanel {
 
         add(centerPanel);
         setupFileDrop();
+
+        // register for theme changes and apply current theme
+        ThemeManager.register(this);
+        applyTheme(ThemeManager.isDarkMode());
     }
 
     private JLabel createFileLabel() {
@@ -49,6 +56,8 @@ public class InputSectionPanel extends JPanel {
                 ThemeColors.THEME_BLUE,
                 ThemeColors.THEME_BLUE_LIGHT
         );
+        // allow background override if needed by applyTheme
+        button.setOpaque(false);
         button.addActionListener(e -> openFileDialog());
         return button;
     }
@@ -56,7 +65,11 @@ public class InputSectionPanel extends JPanel {
     private void openFileDialog() {
         Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
         FileDialog fileDialog = new FileDialog(parentFrame, "Select Input File", FileDialog.LOAD);
-        fileDialog.setFilenameFilter((dir, name) -> name.toLowerCase().endsWith(".xlsx"));
+        fileDialog.setFilenameFilter((dir, name) -> {
+            String n = name.toLowerCase();
+            return n.endsWith(".xlsx") || n.endsWith(".json");
+        });
+
 
         if (lastDirectoryPath != null) {
             fileDialog.setDirectory(lastDirectoryPath);
@@ -131,5 +144,51 @@ public class InputSectionPanel extends JPanel {
                 "Invalid File Type",
                 JOptionPane.WARNING_MESSAGE
         );
+    }
+
+    /**
+     * ThemeManager.ThemeChangeListener implementation
+     */
+    @Override
+    public void onThemeChanged(boolean dark) {
+        applyTheme(dark);
+    }
+
+    /**
+     * Apply theme for this panel only (light: blue/white, dark: green/black)
+     */
+    private void applyTheme(boolean dark) {
+        if (dark) {
+            setBackground(ThemeColors.DARK_BACKGROUND);
+            centerPanel.setBackground(ThemeColors.DARK_BACKGROUND);
+
+            fileLabel.setForeground(ThemeColors.THEME_GREEN);
+
+            // Let ComponentFactory handle most button visuals; ensure contrast
+            browseButton.setForeground(ThemeColors.DARK_BACKGROUND);
+            // If the button implementation respects ThemeManager, it will change automatically.
+            // For safety, set its background to the dark variant explicitly if possible:
+            browseButton.setBackground(ThemeColors.THEME_GREEN);
+            browseButton.setOpaque(true);
+        } else {
+            setBackground(ThemeColors.BACKGROUND);
+            centerPanel.setBackground(ThemeColors.BACKGROUND);
+
+            fileLabel.setForeground(ThemeColors.THEME_BLUE);
+
+            browseButton.setForeground(ThemeColors.CONSOLE_TEXT_BG);
+            browseButton.setBackground(ThemeColors.THEME_BLUE);
+            browseButton.setOpaque(true);
+        }
+
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        // unregister from ThemeManager to avoid leaks
+        ThemeManager.unregister(this);
     }
 }
