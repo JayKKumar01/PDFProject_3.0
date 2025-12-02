@@ -2,13 +2,14 @@ package pdfproject.window.components.body.left;
 
 import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-public class LeftPanel extends JPanel {
+public class LeftPanel extends JPanel implements ThemeManager.ThemeChangeListener {
 
     private static final int PADDING = 10;
     private static final int DIVIDER_HEIGHT = 10;
@@ -37,6 +38,10 @@ public class LeftPanel extends JPanel {
                 resizeSections(getWidth(), getHeight());
             }
         });
+
+        // Register for theme changes and apply current theme
+        ThemeManager.register(this);
+        applyTheme(ThemeManager.isDarkMode());
     }
 
     public void setTaskStateListener(TaskStateListener taskStateListener) {
@@ -75,5 +80,35 @@ public class LeftPanel extends JPanel {
         inputWrapper.setBounds(PADDING, inputY, usableWidth, inputHeight);
         dividerView.setBounds(PADDING, dividerY, usableWidth, DIVIDER_HEIGHT);
         launcherWrapper.setBounds(PADDING, launcherY, usableWidth, launcherHeight);
+    }
+
+    /**
+     * ThemeManager.ThemeChangeListener implementation
+     */
+    @Override
+    public void onThemeChanged(boolean dark) {
+        applyTheme(dark);
+    }
+
+    private void applyTheme(boolean dark) {
+        if (dark) {
+            setBackground(ThemeColors.DARK_LAYOUT_BORDER);
+            inputWrapper.setBackground(ThemeColors.DARK_BACKGROUND);
+            launcherWrapper.setBackground(ThemeColors.DARK_BACKGROUND);
+            dividerView.setBackground(ThemeColors.DARK_LAYOUT_BORDER);
+        } else {
+            setBackground(ThemeColors.LAYOUT_BORDER);
+            inputWrapper.setBackground(ThemeColors.BACKGROUND);
+            launcherWrapper.setBackground(ThemeColors.BACKGROUND);
+            dividerView.setBackground(ThemeColors.LAYOUT_BORDER);
+        }
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        ThemeManager.unregister(this);
     }
 }
