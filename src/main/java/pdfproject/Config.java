@@ -9,8 +9,8 @@ public final class Config {
 
     public static final String FRAME_NAME = "PDF Project";
 
-    public static String INPUT_PATH = "";
-    public static int RENDER_DPI = 100;
+    public static String inputPath = "";
+    public static int renderDpi = 100;
 
     public static String outputImagePath = AppSettings.loadOutputPath(AppPaths.HOME_DIR + "\\" + FRAME_NAME + "\\Reports");
 }

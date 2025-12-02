@@ -40,7 +40,7 @@ public class ImageUtils {
         if (words.isEmpty() || image == null){
             return image;
         }
-        float scale = Config.RENDER_DPI / 72f; // PDF default is 72 DPI
+        float scale = Config.renderDpi / 72f; // PDF default is 72 DPI
         float padding = 3.0f; // Padding around the word
 
         BufferedImage output = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);

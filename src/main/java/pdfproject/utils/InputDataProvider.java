@@ -9,8 +9,6 @@ import pdfproject.models.InputData;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,20 +24,20 @@ public class InputDataProvider {
     private static final Logger LOGGER = Logger.getLogger(InputDataProvider.class.getName());
 
     /**
-     * Loads input data from the Excel file defined in {@link Config#INPUT_PATH}.
+     * Loads input data from the Excel file defined in {@link Config#inputPath}.
      *
      * @return a list of {@link InputData} entries (empty list if none or on error)
      */
     public static List<InputData> load() {
-        if (Config.INPUT_PATH == null || Config.INPUT_PATH.isEmpty()) {
-            LOGGER.warning("Config.INPUT_PATH is null or empty.");
+        if (Config.inputPath == null || Config.inputPath.isEmpty()) {
+            LOGGER.warning("Config.inputPath is null or empty.");
             return new ArrayList<>();
         }
 
         List<InputData> inputList = new ArrayList<>();
         DataFormatter formatter = new DataFormatter();
 
-        try (FileInputStream fis = new FileInputStream(Config.INPUT_PATH);
+        try (FileInputStream fis = new FileInputStream(Config.inputPath);
              XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
 
             Iterator<Row> rowIterator = workbook.getSheetAt(0).rowIterator();
@@ -85,7 +83,7 @@ public class InputDataProvider {
             }
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to read Excel input file: " + Config.INPUT_PATH, e);
+            LOGGER.log(Level.SEVERE, "Failed to read Excel input file: " + Config.inputPath, e);
             // return empty list on failure; alternatively rethrow as runtime or custom exception
         }
 

@@ -2,10 +2,7 @@ package pdfproject.window.components.body.left;
 
 import pdfproject.Config;
 import pdfproject.Launcher;
-import pdfproject.interfaces.StopListener;
 import pdfproject.interfaces.TaskStateListener;
-import pdfproject.utils.ProcessUtils;
-import pdfproject.utils.WordToPdfConverter;
 import pdfproject.window.constants.ThemeColors;
 import pdfproject.window.utils.ComponentFactory;
 
@@ -95,7 +92,7 @@ public class LauncherSectionPanel extends JPanel {
     }
 
     private boolean isInputPathValid() {
-        if (Config.INPUT_PATH == null || Config.INPUT_PATH.trim().isEmpty()) {
+        if (Config.inputPath == null || Config.inputPath.trim().isEmpty()) {
             System.out.println("⚠ No input path selected. Validation cannot start.");
             return false;
         }

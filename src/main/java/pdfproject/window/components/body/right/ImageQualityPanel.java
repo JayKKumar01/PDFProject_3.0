@@ -45,7 +45,7 @@ public class ImageQualityPanel extends JPanel implements TaskStateListener {
 
     private void updateDpiFromSelection() {
         int index = qualityDropdown.getSelectedIndex();
-        Config.RENDER_DPI = DPI_VALUES[index];
+        Config.renderDpi = DPI_VALUES[index];
         System.out.println("Image quality set to " + QUALITY_LEVELS[index] + " (" + DPI_VALUES[index] + " DPI)");
     }
 

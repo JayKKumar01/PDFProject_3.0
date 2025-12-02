@@ -3,6 +3,7 @@ package pdfproject.window.core;
 import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.components.body.BodyContentPanel;
 import pdfproject.window.components.console.ConsolePanel;
+import pdfproject.window.components.header.HeaderPanel;
 import pdfproject.window.constants.ThemeColors;
 
 import javax.swing.*;
@@ -14,38 +15,47 @@ import java.awt.image.BufferedImage;
 public class Window {
 
     private final JFrame frame;
+
+    private final HeaderPanel headerPanel;
+    private final BodyContentPanel bodyPanel;
     private final ConsolePanel consolePanel;
-    private final JPanel bodyPanel;
 
     public Window(int height) {
         int width = (int) (height * (16.0 / 9));
 
         frame = initFrame(width, height);
+
+        // Panels
+        headerPanel = new HeaderPanel();
+        bodyPanel = new BodyContentPanel();
         consolePanel = new ConsolePanel();
         consolePanel.redirectSystemStreams();
 
-        BodyContentPanel bodyContentPanel = new BodyContentPanel();
-        bodyContentPanel.setTaskStateListener(new TaskStateListener() {
+        // Wiring task listener
+        bodyPanel.setTaskStateListener(new TaskStateListener() {
             @Override
             public void onStart() {
+                headerPanel.onStart();
                 consolePanel.onStart();
-                bodyContentPanel.onStart();
+                bodyPanel.onStart();
             }
 
             @Override
             public void onStop() {
+                headerPanel.onStop();
                 consolePanel.onStop();
-                bodyContentPanel.onStop();
+                bodyPanel.onStop();
             }
         });
 
-        bodyPanel = new JPanel(new BorderLayout());
-        bodyPanel.setBackground(ThemeColors.BACKGROUND);
-        bodyPanel.add(bodyContentPanel, BorderLayout.CENTER);
 
+        // Main layout container (stack vertically)
         frame.setContentPane(initMainLayout());
+
+        // Initial size distribution
         resizePanels(height);
 
+        // Resize listener
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -60,7 +70,7 @@ public class Window {
         JFrame f = new JFrame("PDF Project");
         f.setSize(width, height);
         f.setLocationRelativeTo(null);
-        f.setResizable(false);
+        f.setResizable(true); // now resizable since proportional layout handles it
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.getContentPane().setBackground(ThemeColors.BACKGROUND);
         f.setIconImage(generateIconImage(new Font("Segoe UI Emoji", Font.PLAIN, 48)));
@@ -71,19 +81,34 @@ public class Window {
         JPanel wrapper = new JPanel();
         wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
         wrapper.setBackground(ThemeColors.BACKGROUND);
+
+        wrapper.add(headerPanel);
         wrapper.add(bodyPanel);
         wrapper.add(consolePanel);
+
         return wrapper;
     }
 
+    /**
+     * Applies proportional layout:
+     * header = 15%,
+     * body = 60%,
+     * console = 25%
+     */
     private void resizePanels(int totalHeight) {
-        int consoleHeight = (int) (totalHeight * 0.4);
-        int bodyHeight = totalHeight - consoleHeight;
 
+        int headerHeight  = (int) (totalHeight * 0.10);
+        int bodyHeight    = (int) (totalHeight * 0.60);
+        int consoleHeight = totalHeight - headerHeight - bodyHeight;
+
+        headerPanel.setPreferredSize(new Dimension(0, headerHeight));
         bodyPanel.setPreferredSize(new Dimension(0, bodyHeight));
         consolePanel.setDynamicHeight(consoleHeight);
 
-        frame.revalidate();
+        headerPanel.revalidate();
+        bodyPanel.revalidate();
+        consolePanel.revalidate();
+        frame.repaint();
     }
 
     private Image generateIconImage(Font font) {

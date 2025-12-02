@@ -108,7 +108,7 @@ public class InputSectionPanel extends JPanel {
 
     private void handleSelectedFile(File file) {
         lastDirectoryPath = file.getParent();
-        Config.INPUT_PATH = file.getAbsolutePath();
+        Config.inputPath = file.getAbsolutePath();
         fileLabel.setText(ellipsize(file.getName()));
         fileLabel.setToolTipText(file.getAbsolutePath());
         System.out.println("Selected Input Data: \"" + file.getName() + "\"");

@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 /**
  * JSON-based provider for InputData.
- * Reads from Config.INPUT_PATH and expects exact property names:
+ * Reads from Config.inputPath and expects exact property names:
  *   Source, Destination, FormPageRange#1, FormPageRange#2
  * Optional boolean/text property: Multiple
  * Top-level JSON must be an object whose property names are required non-empty keys.
@@ -28,12 +28,12 @@ public class JsonDataProvider {
     public static List<InputData> load() {
         List<InputData> list = new ArrayList<>();
 
-        if (Config.INPUT_PATH == null || Config.INPUT_PATH.isBlank()) {
-            LOGGER.severe("Config.INPUT_PATH is not set.");
+        if (Config.inputPath == null || Config.inputPath.isBlank()) {
+            LOGGER.severe("Config.inputPath is not set.");
             return list;
         }
 
-        try (FileInputStream fis = new FileInputStream(Config.INPUT_PATH)) {
+        try (FileInputStream fis = new FileInputStream(Config.inputPath)) {
 
             JsonNode root = MAPPER.readTree(fis);
 
@@ -85,7 +85,7 @@ public class JsonDataProvider {
             }
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to parse JSON at: " + Config.INPUT_PATH, e);
+            LOGGER.log(Level.SEVERE, "Failed to parse JSON at: " + Config.inputPath, e);
         }
 
         return list;

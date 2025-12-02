@@ -54,8 +54,8 @@ public class AlignmentValidator {
     public List<BufferedImage> validateAlignment(int p1, int p2, int imagePage) throws Exception {
         BufferedImage img1 = null, img2 = null, diff = null;
 
-        if (p1 >= 0) img1 = renderer1.renderImageWithDPI(p1 - 1, Config.RENDER_DPI);
-        if (p2 >= 0) img2 = renderer2.renderImageWithDPI(p2 - 1, Config.RENDER_DPI);
+        if (p1 >= 0) img1 = renderer1.renderImageWithDPI(p1 - 1, Config.renderDpi);
+        if (p2 >= 0) img2 = renderer2.renderImageWithDPI(p2 - 1, Config.renderDpi);
 
         if (img1 != null && img2 != null) {
             diff = ImageUtils.generateDiffImage(img1, img2);

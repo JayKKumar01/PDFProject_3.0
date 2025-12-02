@@ -10,4 +10,6 @@ public class ThemeColors {
 
     public static final Color THEME_BLUE = new Color(25, 118, 210); // Used as output color + title/icon
     public static final Color THEME_RED = new Color(211, 47, 47);    // Error color
+    public static final Color TEXT_STRONG = new Color(45, 55, 72);  // Username color
+
 }

@@ -1,6 +1,5 @@
 package pdfproject;
 
-import pdfproject.constants.AppPaths;
 import pdfproject.constants.FileTypes;
 import pdfproject.core.PDFProcessor;
 import pdfproject.interfaces.StopListener;
@@ -17,7 +16,7 @@ import java.util.List;
 public class Launcher {
 
     public static void start(StopListener stopListener) {
-        List<InputData> inputs = Config.INPUT_PATH.toLowerCase().endsWith(".json")
+        List<InputData> inputs = Config.inputPath.toLowerCase().endsWith(".json")
         ? JsonDataProvider.load()
                 :InputDataProvider.load();
 
