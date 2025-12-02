@@ -2,10 +2,11 @@ package pdfproject.window.components.body.right;
 
 import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.ThemeManager;
 
 import javax.swing.*;
 
-public class RightPanel extends JPanel implements TaskStateListener {
+public class RightPanel extends JPanel implements TaskStateListener, ThemeManager.ThemeChangeListener {
 
     private static final int PADDING = 10;
     private static final int GAP = 10;
@@ -23,6 +24,10 @@ public class RightPanel extends JPanel implements TaskStateListener {
 
         add(imageOptionPanel);
         add(customColorPanel);
+
+        // register & apply initial theme
+        ThemeManager.register(this);
+        applyTheme(ThemeManager.isDarkMode());
     }
 
     @Override
@@ -55,5 +60,25 @@ public class RightPanel extends JPanel implements TaskStateListener {
     public void onStop() {
         imageOptionPanel.onStop();
         customColorPanel.onStop();
+    }
+
+    @Override
+    public void onThemeChanged(boolean dark) {
+        applyTheme(dark);
+    }
+
+    private void applyTheme(boolean dark) {
+        setBackground(dark ? ThemeColors.DARK_LAYOUT_BORDER : ThemeColors.LAYOUT_BORDER);
+
+        // children (ImageOptionPanel and CustomColorPanel) already handle their own theme changes
+
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        ThemeManager.unregister(this);
     }
 }
