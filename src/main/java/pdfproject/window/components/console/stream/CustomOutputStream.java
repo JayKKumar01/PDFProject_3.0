@@ -1,5 +1,7 @@
 package pdfproject.window.components.console.stream;
 
+import pdfproject.window.constants.ThemeColors;
+
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
@@ -31,11 +33,17 @@ public class CustomOutputStream extends OutputStream {
 
         SwingUtilities.invokeLater(() -> {
             StyledDocument doc = textPane.getStyledDocument();
-            Style style = textPane.addStyle("ConsoleStyle", null);
-            StyleConstants.setForeground(style, textColor);
+
+            // Build attributes for this run
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setForeground(attrs, textColor);
+            // mark error runs so theme switching can skip recoloring them
+            boolean isError = ThemeColors.THEME_RED.equals(textColor);
+            attrs.addAttribute("isError", isError);
 
             try {
-                doc.insertString(doc.getLength(), text, style);
+                // Insert the text with attributes
+                doc.insertString(doc.getLength(), text, attrs);
                 textPane.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
                 e.printStackTrace();
