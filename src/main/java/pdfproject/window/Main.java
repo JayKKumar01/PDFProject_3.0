@@ -15,7 +15,7 @@ public class Main {
 
         new Window(windowHeight);
 
-        testConsole();
+//        testConsole();
     }
 
     private static void testConsole() {

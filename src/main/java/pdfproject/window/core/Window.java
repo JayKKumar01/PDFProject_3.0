@@ -1,5 +1,6 @@
 package pdfproject.window.core;
 
+import pdfproject.Config;
 import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.components.body.BodyContentPanel;
 import pdfproject.window.components.console.ConsolePanel;
@@ -67,7 +68,7 @@ public class Window {
     }
 
     private JFrame initFrame(int width, int height) {
-        JFrame f = new JFrame("PDF Project");
+        JFrame f = new JFrame(Config.FRAME_NAME);
         f.setSize(width, height);
         f.setLocationRelativeTo(null);
         f.setResizable(true); // now resizable since proportional layout handles it
