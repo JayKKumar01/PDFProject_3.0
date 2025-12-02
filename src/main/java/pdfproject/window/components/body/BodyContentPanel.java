@@ -4,12 +4,13 @@ import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.components.body.left.LeftPanel;
 import pdfproject.window.components.body.right.RightPanel;
 import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.ThemeManager;
 
 import javax.swing.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-public class BodyContentPanel extends JPanel implements TaskStateListener {
+public class BodyContentPanel extends JPanel implements TaskStateListener, ThemeManager.ThemeChangeListener {
 
     private final LeftPanel leftPanel;
     private final RightPanel rightPanel;
@@ -25,6 +26,10 @@ public class BodyContentPanel extends JPanel implements TaskStateListener {
         add(rightPanel);
 
         setupResizeListener();
+
+        // register for theme changes and apply current theme
+        ThemeManager.register(this);
+        applyTheme(ThemeManager.isDarkMode());
     }
 
     public void setTaskStateListener(TaskStateListener listener) {
@@ -54,5 +59,25 @@ public class BodyContentPanel extends JPanel implements TaskStateListener {
     @Override
     public void onStop() {
         rightPanel.onStop();
+    }
+
+    /**
+     * ThemeManager.ThemeChangeListener implementation
+     */
+    @Override
+    public void onThemeChanged(boolean dark) {
+        applyTheme(dark);
+    }
+
+    private void applyTheme(boolean dark) {
+        setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.BACKGROUND);
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        ThemeManager.unregister(this);
     }
 }

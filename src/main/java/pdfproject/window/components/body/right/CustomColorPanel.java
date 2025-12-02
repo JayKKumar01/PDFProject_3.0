@@ -4,6 +4,7 @@ import pdfproject.constants.OperationColor;
 import pdfproject.interfaces.TaskStateListener;
 import pdfproject.window.constants.ThemeColors;
 import pdfproject.window.utils.ComponentFactory;
+import pdfproject.window.utils.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,13 +12,22 @@ import java.awt.event.ActionListener;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class CustomColorPanel extends JPanel implements TaskStateListener {
-
+public class CustomColorPanel extends JPanel implements TaskStateListener, ThemeManager.ThemeChangeListener {
 
     private static final int DROPDOWN_HEIGHT = 25;
     private static final int DROPDOWN_WIDTH = 100;
+
     private final Map<String, JComboBox<String>> dropdownMap = new LinkedHashMap<>();
     private final Map<String, Color> defaultColorMap = new LinkedHashMap<>();
+    private final Map<String, JLabel> labelMap = new LinkedHashMap<>();
+
+    // header fields made instance for theme updates
+    private JPanel headerPanel;      // <- made a field so we can update its background
+    private JLabel titleLabel;
+    private JButton resetBtn;
+
+    // body wrapper so we can control its background as well
+    private JPanel bodyPanel;
 
     public CustomColorPanel() {
         setLayout(new BorderLayout());
@@ -26,8 +36,16 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
 
         initializeDefaultColors();
 
-        add(buildHeader(), BorderLayout.NORTH);
-        add(buildBody(), BorderLayout.CENTER);
+        // build header and body using instance header fields
+        headerPanel = buildHeader();
+        bodyPanel = buildBody();
+
+        add(headerPanel, BorderLayout.NORTH);
+        add(bodyPanel, BorderLayout.CENTER);
+
+        // register for theme changes and apply current theme
+        ThemeManager.register(this);
+        applyTheme(ThemeManager.isDarkMode());
     }
 
     private void initializeDefaultColors() {
@@ -40,24 +58,27 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
     }
 
     private JPanel buildHeader() {
-        JLabel title = new JLabel("Custom Operation Colors");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        title.setForeground(ThemeColors.THEME_BLUE);
+        titleLabel = new JLabel("Custom Operation Colors");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        titleLabel.setForeground(ThemeColors.THEME_BLUE);
 
-        JButton resetBtn = ComponentFactory.createStyledButton("Reset",
+        resetBtn = ComponentFactory.createStyledButton("Reset",
                 ThemeColors.THEME_BLUE, ThemeColors.THEME_BLUE_LIGHT);
         resetBtn.addActionListener(e -> resetToDefaults());
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(getBackground());
+        panel.setOpaque(true); // important so background paints
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
-        panel.add(title, BorderLayout.WEST);
+        panel.add(titleLabel, BorderLayout.WEST);
         panel.add(resetBtn, BorderLayout.EAST);
 
         return panel;
     }
 
     private JPanel buildBody() {
+        // Use a bodyPanel that we can color; inner container still holds layout and rows
+        bodyPanel = new JPanel(new BorderLayout());
+        bodyPanel.setOpaque(true);
         JPanel container = new JPanel(new GridLayout(1, 2, 20, 0));
         container.setOpaque(false);
         container.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -74,7 +95,8 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
 
         container.add(left);
         container.add(right);
-        return container;
+        bodyPanel.add(container, BorderLayout.CENTER);
+        return bodyPanel;
     }
 
     private JPanel createColumnPanel() {
@@ -105,6 +127,7 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
         });
 
         dropdownMap.put(label, dropdown);
+        labelMap.put(label, nameLabel);
 
         JPanel row = new JPanel();
         row.setLayout(new BoxLayout(row, BoxLayout.X_AXIS));
@@ -148,5 +171,59 @@ public class CustomColorPanel extends JPanel implements TaskStateListener {
     @Override
     public void onStop() {
         Helper.setEnabledRecursively(this, true);
+    }
+
+    /**
+     * ThemeManager.ThemeChangeListener impl
+     */
+    @Override
+    public void onThemeChanged(boolean dark) {
+        applyTheme(dark);
+    }
+
+    /**
+     * Apply theme to this panel and inner controls
+     */
+    private void applyTheme(boolean dark) {
+        // panel background
+        setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.BACKGROUND);
+
+        // header background & title & reset button
+        headerPanel.setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.BACKGROUND);
+        titleLabel.setForeground(dark ? ThemeColors.THEME_GREEN : ThemeColors.THEME_BLUE);
+
+        // reset button is theme-aware via ComponentFactory; still ensure contrast
+        if (dark) {
+            resetBtn.setBackground(ThemeColors.THEME_GREEN);
+            resetBtn.setForeground(ThemeColors.DARK_BACKGROUND);
+            resetBtn.setOpaque(true);
+        } else {
+            resetBtn.setBackground(ThemeColors.THEME_BLUE);
+            resetBtn.setForeground(ThemeColors.CONSOLE_TEXT_BG);
+            resetBtn.setOpaque(true);
+        }
+
+        // body panel background so rows don't show light leak
+        bodyPanel.setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.BACKGROUND);
+
+        // body: update each label + dropdown
+        dropdownMap.forEach((label, dropdown) -> {
+            JLabel nameLabel = labelMap.get(label);
+            if (nameLabel != null) {
+                nameLabel.setForeground(dark ? ThemeColors.THEME_GREEN : ThemeColors.THEME_BLUE);
+            }
+            // dropdown background / foreground for contrast
+            dropdown.setBackground(dark ? ThemeColors.DARK_BACKGROUND : ThemeColors.CONSOLE_TEXT_BG);
+            dropdown.setForeground(dark ? ThemeColors.DARK_TEXT_MUTED : ThemeColors.TEXT_MUTED);
+        });
+
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        ThemeManager.unregister(this);
     }
 }
