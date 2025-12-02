@@ -117,7 +117,7 @@ public class ToggleSwitch extends JComponent {
         g2.fillOval(knobX, knobY + 2, KNOB_SIZE, KNOB_SIZE);
 
         // knob fill (white on light, near-theme on dark)
-        Color knobColor = lerp(ThemeColors.CONSOLE_TEXT_BG, ThemeColors.THEME_BLUE, p);
+        Color knobColor = lerp(ThemeColors.CONSOLE_TEXT_BG, ThemeColors.THEME_GREEN, p);
         g2.setColor(knobColor);
         g2.fillOval(knobX, knobY, KNOB_SIZE, KNOB_SIZE);
 
