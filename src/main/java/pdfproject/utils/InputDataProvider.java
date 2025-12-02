@@ -9,99 +9,92 @@ import pdfproject.models.InputData;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Utility class responsible for reading input data from an Excel sheet
  * and converting each valid row into an {@link InputData} model.
- * <p>
- * Expected Excel format (starting from row index 1):
- * <ul>
- *     <li>Column 0: Optional key</li>
- *     <li>Column 1: Path to first file</li>
- *     <li>Column 2: Path to second file</li>
- *     <li>Column 3: Page range for first file (e.g., "1-3" or "5")</li>
- *     <li>Column 4: Page range for second file</li>
- *     <li>Column 5: Multi-column flag ("Yes" for multi-column)</li>
- * </ul>
  */
 public class InputDataProvider {
 
-    private static final DataFormatter FORMATTER = new DataFormatter();
+    private static final Logger LOGGER = Logger.getLogger(InputDataProvider.class.getName());
 
     /**
      * Loads input data from the Excel file defined in {@link Config#INPUT_PATH}.
      *
-     * @return a list of {@link InputData} entries, or null if the file is unreadable
+     * @return a list of {@link InputData} entries (empty list if none or on error)
      */
     public static List<InputData> load() {
-        Iterator<Row> rowIterator = getRowIterator();
-        if (rowIterator == null) return null;
+        if (Config.INPUT_PATH == null || Config.INPUT_PATH.isEmpty()) {
+            LOGGER.warning("Config.INPUT_PATH is null or empty.");
+            return new ArrayList<>();
+        }
 
         List<InputData> inputList = new ArrayList<>();
+        DataFormatter formatter = new DataFormatter();
 
-        // Skip header row
-        if (rowIterator.hasNext()) rowIterator.next();
+        try (FileInputStream fis = new FileInputStream(Config.INPUT_PATH);
+             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
 
-        while (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
+            Iterator<Row> rowIterator = workbook.getSheetAt(0).rowIterator();
 
-            // Read required columns
-            String path1 = getCellValue(row.getCell(1));
-            String path2 = getCellValue(row.getCell(2));
+            // skip header row if present
+            if (rowIterator.hasNext()) rowIterator.next();
 
-            if (path1 == null || path2 == null) continue;
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
 
-            InputData input = new InputData(
-                    path1,
-                    path2,
-                    getCellValue(row.getCell(3)), // range1
-                    getCellValue(row.getCell(4))  // range2
-            );
+                // Read required columns
+                String path1 = getCellValue(formatter, row.getCell(1));
+                String path2 = getCellValue(formatter, row.getCell(2));
 
-            // Optional: Key column
-            input.setKey(getCellValue(row.getCell(0)));
+                // skip rows missing required paths
+                if (path1 == null || path2 == null) {
+                    LOGGER.finer(() -> "Skipping row " + row.getRowNum() + " due to missing path(s).");
+                    continue;
+                }
 
-            // Optional: Multi-column layout flag
-            String layoutFlag = getCellValue(row.getCell(5));
-            if (layoutFlag != null && !layoutFlag.isEmpty()) {
-                input.setSingleColumn(!layoutFlag.equalsIgnoreCase("yes"));
+                // Optional: validate paths exist on disk (uncomment if desired)
+                // if (!Files.exists(Path.of(path1)) || !Files.exists(Path.of(path2))) {
+                //     LOGGER.warning("One or both files referenced in row " + row.getRowNum() + " do not exist.");
+                //     // decide: continue or still add — here we continue
+                //     continue;
+                // }
+
+                InputData input = new InputData(
+                        path1,
+                        path2,
+                        getCellValue(formatter, row.getCell(3)), // range1
+                        getCellValue(formatter, row.getCell(4))  // range2
+                );
+
+                input.setKey(getCellValue(formatter, row.getCell(0)));
+
+                String layoutFlag = getCellValue(formatter, row.getCell(5));
+                if (layoutFlag != null && !layoutFlag.isEmpty()) {
+                    input.setSingleColumn(!layoutFlag.equalsIgnoreCase("yes"));
+                }
+
+                inputList.add(input);
             }
 
-            inputList.add(input);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Failed to read Excel input file: " + Config.INPUT_PATH, e);
+            // return empty list on failure; alternatively rethrow as runtime or custom exception
         }
 
         return inputList;
     }
 
-    /**
-     * Returns the trimmed string value of a cell, or null if empty.
-     */
-    private static String getCellValue(Cell cell) {
+    private static String getCellValue(DataFormatter formatter, Cell cell) {
         if (cell == null) return null;
-        String value = FORMATTER.formatCellValue(cell).trim();
+        String value = formatter.formatCellValue(cell).trim();
         return value.isEmpty() ? null : value;
-    }
-
-    /**
-     * Opens the Excel file at {@link Config#INPUT_PATH} and returns an iterator
-     * over the rows of the first sheet.
-     *
-     * @return Row iterator, or null if file cannot be read
-     */
-    private static Iterator<Row> getRowIterator() {
-        if (Config.INPUT_PATH == null || Config.INPUT_PATH.isEmpty()) return null;
-
-        try (FileInputStream fis = new FileInputStream(Config.INPUT_PATH);
-             XSSFWorkbook workbook = new XSSFWorkbook(fis)) {
-
-            return workbook.getSheetAt(0).rowIterator();
-
-        } catch (IOException e) {
-            System.err.println("❌ Failed to read Excel input file: " + e.getMessage());
-            return null;
-        }
     }
 }

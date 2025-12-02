@@ -8,6 +8,7 @@ import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.utils.DataMapGenerator;
 import pdfproject.utils.InputDataProvider;
+import pdfproject.utils.JsonDataProvider;
 import pdfproject.utils.ProcessUtils;
 
 import java.util.ArrayList;
@@ -16,7 +17,9 @@ import java.util.List;
 public class Launcher {
 
     public static void start(StopListener stopListener) {
-        List<InputData> inputs = InputDataProvider.load();
+        List<InputData> inputs = Config.INPUT_PATH.toLowerCase().endsWith(".json")
+        ? JsonDataProvider.load()
+                :InputDataProvider.load();
 
         if (inputs == null || inputs.isEmpty()) {
             System.out.println("❌ No input data found.");
