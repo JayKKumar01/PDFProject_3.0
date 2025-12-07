@@ -1,5 +1,6 @@
 package pdfproject.window;
 
+
 import pdfproject.window.core.Window;
 
 import java.awt.*;
@@ -14,8 +15,10 @@ public class Main {
         int windowHeight = (int) (screenHeight * 0.75);
 
         new Window(windowHeight);
+//        new Window2(windowHeight);
 
-//        testConsole();
+
+        testConsole();
     }
 
     private static void testConsole() {

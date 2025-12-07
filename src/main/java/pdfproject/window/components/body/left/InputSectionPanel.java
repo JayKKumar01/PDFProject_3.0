@@ -12,10 +12,12 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.*;
 import java.io.File;
 import java.util.List;
+import java.util.Set;
 
 public class InputSectionPanel extends JPanel implements ThemeManager.ThemeChangeListener {
 
     private static final int MAX_FILENAME_LENGTH = 40;
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("xlsx", "json");
     private static String lastDirectoryPath;
 
     private final JLabel fileLabel;
@@ -79,7 +81,7 @@ public class InputSectionPanel extends JPanel implements ThemeManager.ThemeChang
         File selectedFile = getSelectedFile(fileDialog);
 
         if (selectedFile != null) {
-            if (isValidExcelFile(selectedFile)) {
+            if (isValidFile(selectedFile)) {
                 handleSelectedFile(selectedFile);
             } else {
                 showInvalidFileWarning();
@@ -105,7 +107,7 @@ public class InputSectionPanel extends JPanel implements ThemeManager.ThemeChang
                     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                         List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
                         files.stream()
-                                .filter(InputSectionPanel.this::isValidExcelFile)
+                                .filter(InputSectionPanel.this::isValidFile)
                                 .findFirst()
                                 .ifPresentOrElse(
                                         InputSectionPanel.this::handleSelectedFile,
@@ -127,9 +129,19 @@ public class InputSectionPanel extends JPanel implements ThemeManager.ThemeChang
         System.out.println("Selected Input Data: \"" + file.getName() + "\"");
     }
 
-    private boolean isValidExcelFile(File file) {
-        return file.isFile() && file.getName().toLowerCase().endsWith(".xlsx");
+
+
+    private boolean isValidFile(File file) {
+        if (!file.isFile()) return false;
+
+        String name = file.getName();
+        int dotIndex = name.lastIndexOf('.');
+        if (dotIndex == -1 || dotIndex == name.length() - 1) return false;
+
+        String ext = name.substring(dotIndex + 1).toLowerCase();
+        return ALLOWED_EXTENSIONS.contains(ext);
     }
+
 
     private String ellipsize(String text) {
         return (text.length() <= MAX_FILENAME_LENGTH)
