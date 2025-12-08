@@ -10,13 +10,14 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * SplitTwoPanel — manual layout, optimized.
+ * SplitTwoPanel — manual layout, optimized, ratio aware.
  *
  * Horizontal: left | separator | right
  * Vertical:   top  | separator | bottom
  *
- * Separator thickness is specified in dp (logical pixels) and scaled via UiScale.
- * firstFraction in (0,1) determines the fraction for the first child; otherwise equal split.
+ * firstFraction =
+ *   -1.0  => equal split
+ *   0.0–1.0 => fraction of remaining space for first component
  */
 public final class SplitTwoPanel extends JPanel implements PropertyChangeListener {
 
@@ -25,16 +26,11 @@ public final class SplitTwoPanel extends JPanel implements PropertyChangeListene
     private final Orientation orientation;
     private final boolean isHorizontal;
     private final int thicknessDp;
-    private final double firstFraction; // <=0 => equal split
+    private double firstFraction; // now mutable (supports ratio changes)
 
-    // small custom separator that fully paints its bounds to avoid seams
     private final JComponent separator;
+    private Component first, second;
 
-    // children
-    private Component first;
-    private Component second;
-
-    // caches
     private int lastSepPx = -1;
     private Color lastAppliedBg = null;
 
@@ -43,7 +39,7 @@ public final class SplitTwoPanel extends JPanel implements PropertyChangeListene
         this.orientation = orientation == null ? Orientation.HORIZONTAL : orientation;
         this.isHorizontal = this.orientation == Orientation.HORIZONTAL;
         this.thicknessDp = Math.max(1, thicknessDp);
-        this.firstFraction = (firstFraction > 0 && firstFraction < 1) ? firstFraction : -1.0;
+        setFraction(firstFraction);
 
         separator = new JComponent() {
             @Override
@@ -56,11 +52,18 @@ public final class SplitTwoPanel extends JPanel implements PropertyChangeListene
         separator.setBorder(null);
     }
 
+    /** Default: horizontal equal split. */
     public SplitTwoPanel() { this(Orientation.HORIZONTAL, 1, -1.0); }
 
-    /**
-     * Install two components (replaces existing ones).
-     */
+    /** Set ratio dynamically. */
+    public void setFraction(double fraction) {
+        if (fraction > 0 && fraction < 1) this.firstFraction = fraction;
+        else this.firstFraction = -1.0; // equal halves
+        revalidate();
+        repaint();
+    }
+
+    /** Install components. */
     public void setComponents(Component first, Component second) {
         if (this.first != null) remove(this.first);
         if (this.second != null) remove(this.second);
@@ -73,73 +76,61 @@ public final class SplitTwoPanel extends JPanel implements PropertyChangeListene
         add(separator);
         if (second != null) add(second);
 
-        // reset cached bg so applyTheme will reapply to new children
         lastAppliedBg = null;
-
         revalidate();
         repaint();
     }
 
     @Override
     public void doLayout() {
-        Insets insets = getInsets();
-        final int x0 = insets.left;
-        final int y0 = insets.top;
-        final int totalW = Math.max(0, getWidth() - insets.left - insets.right);
-        final int totalH = Math.max(0, getHeight() - insets.top - insets.bottom);
+        Insets ins = getInsets();
+        final int x0 = ins.left;
+        final int y0 = ins.top;
+        final int totalW = Math.max(0, getWidth() - ins.left - ins.right);
+        final int totalH = Math.max(0, getHeight() - ins.top - ins.bottom);
 
         if (totalW <= 0 || totalH <= 0) return;
 
         final int sepPx = sepPx();
-        // ensure separator preferred size is synchronized when sepPx changes
         if (sepPx != lastSepPx) {
             updateSeparatorPreferred(sepPx);
             lastSepPx = sepPx;
         }
 
         if (isHorizontal) {
-            final int remainingW = Math.max(0, totalW - sepPx);
-            final int firstW = (firstFraction > 0) ? (int) Math.round(remainingW * firstFraction) : (remainingW / 2);
-            final int secondW = remainingW - firstW;
+            final int remaining = Math.max(0, totalW - sepPx);
+            final int firstW = (firstFraction > 0) ? (int) Math.round(remaining * firstFraction) : remaining / 2;
+            final int secondW = remaining - firstW;
 
-            final int firstX = x0;
-            final int sepX = firstX + firstW;
-            final int secondX = sepX + sepPx;
+            if (first != null) first.setBounds(x0, y0, firstW, totalH);
+            separator.setBounds(x0 + firstW, y0, sepPx, totalH);
+            if (second != null) second.setBounds(x0 + firstW + sepPx, y0, secondW, totalH);
 
-            if (first != null) first.setBounds(firstX, y0, firstW, totalH);
-            separator.setBounds(sepX, y0, sepPx, totalH);
-            if (second != null) second.setBounds(secondX, y0, secondW, totalH);
         } else {
-            final int remainingH = Math.max(0, totalH - sepPx);
-            final int firstH = (firstFraction > 0) ? (int) Math.round(remainingH * firstFraction) : (remainingH / 2);
-            final int secondH = remainingH - firstH;
+            final int remaining = Math.max(0, totalH - sepPx);
+            final int firstH = (firstFraction > 0) ? (int) Math.round(remaining * firstFraction) : remaining / 2;
+            final int secondH = remaining - firstH;
 
-            final int firstY = y0;
-            final int sepY = firstY + firstH;
-            final int secondY = sepY + sepPx;
-
-            if (first != null) first.setBounds(x0, firstY, totalW, firstH);
-            separator.setBounds(x0, sepY, totalW, sepPx);
-            if (second != null) second.setBounds(x0, secondY, totalW, secondH);
+            if (first != null) first.setBounds(x0, y0, totalW, firstH);
+            separator.setBounds(x0, y0 + firstH, totalW, sepPx);
+            if (second != null) second.setBounds(x0, y0 + firstH + sepPx, totalW, secondH);
         }
     }
 
     private int sepPx() {
-        // small helper to compute DPI-scaled pixel thickness
         return Math.max(1, UiScale.scaleInt(thicknessDp));
     }
 
-    private void updateSeparatorPreferred(int sepPx) {
+    private void updateSeparatorPreferred(int px) {
         if (isHorizontal) {
-            separator.setPreferredSize(new Dimension(sepPx, 1));
-            separator.setMinimumSize(new Dimension(sepPx, 1));
-            separator.setMaximumSize(new Dimension(sepPx, Integer.MAX_VALUE));
+            separator.setPreferredSize(new Dimension(px, 1));
+            separator.setMinimumSize(new Dimension(px, 1));
+            separator.setMaximumSize(new Dimension(px, Integer.MAX_VALUE));
         } else {
-            separator.setPreferredSize(new Dimension(1, sepPx));
-            separator.setMinimumSize(new Dimension(1, sepPx));
-            separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, sepPx));
+            separator.setPreferredSize(new Dimension(1, px));
+            separator.setMinimumSize(new Dimension(1, px));
+            separator.setMaximumSize(new Dimension(Integer.MAX_VALUE, px));
         }
-        // do not call revalidate(); doLayout is driving positioning
     }
 
     @Override
@@ -147,16 +138,18 @@ public final class SplitTwoPanel extends JPanel implements PropertyChangeListene
         Dimension d1 = (first != null) ? first.getPreferredSize() : new Dimension(0, 0);
         Dimension d2 = (second != null) ? second.getPreferredSize() : new Dimension(0, 0);
         final int sep = sepPx();
-        Insets ins = getInsets();
+        Insets i = getInsets();
 
         if (isHorizontal) {
-            final int h = Math.max(d1.height, d2.height);
-            final int w = d1.width + sep + d2.width;
-            return new Dimension(w + ins.left + ins.right, h + ins.top + ins.bottom);
+            return new Dimension(
+                    d1.width + sep + d2.width + i.left + i.right,
+                    Math.max(d1.height, d2.height) + i.top + i.bottom
+            );
         } else {
-            final int w = Math.max(d1.width, d2.width);
-            final int h = d1.height + sep + d2.height;
-            return new Dimension(w + ins.left + ins.right, h + ins.top + ins.bottom);
+            return new Dimension(
+                    Math.max(d1.width, d2.width) + i.left + i.right,
+                    d1.height + sep + d2.height + i.top + i.bottom
+            );
         }
     }
 
@@ -173,27 +166,20 @@ public final class SplitTwoPanel extends JPanel implements PropertyChangeListene
         ThemeManager.unregister(this);
     }
 
-    private void applyTheme(ExperimentTheme theme) {
-        if (theme == null) return;
+    private void applyTheme(ExperimentTheme t) {
+        if (t == null) return;
+        separator.setBackground(t.usernameAccent);
 
-        final Color accent = theme.usernameAccent;
-        separator.setBackground(accent);
-
-        // apply body background to child JComponents only if it changed (few ops)
-        final Color bodyBg = theme.bodyBg;
-        if (bodyBg != lastAppliedBg) {
-            if (first instanceof JComponent) ((JComponent) first).setBackground(bodyBg);
-            if (second instanceof JComponent) ((JComponent) second).setBackground(bodyBg);
-            lastAppliedBg = bodyBg;
+        Color bg = t.bodyBg;
+        if (bg != lastAppliedBg) {
+            if (first instanceof JComponent j1) j1.setBackground(bg);
+            if (second instanceof JComponent j2) j2.setBackground(bg);
+            lastAppliedBg = bg;
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (SwingUtilities.isEventDispatchThread()) {
-            applyTheme(ThemeManager.getTheme());
-        } else {
-            SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
-        }
+        SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
     }
 }

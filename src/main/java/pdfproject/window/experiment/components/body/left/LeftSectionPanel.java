@@ -20,10 +20,12 @@ public class LeftSectionPanel extends JPanel implements PropertyChangeListener {
         inputPanel = new InputPanel();
         launcherPanel = new LauncherPanel();
 
-        // vertical split: top  | separator | bottom
-        // thickness = 1dp (DPI aware)
-        // ratio = -1.0 => equal 50/50 split
-        SplitTwoPanel split = new SplitTwoPanel(SplitTwoPanel.Orientation.VERTICAL, 1, -1.0);
+        // Vertical split: top | 1dp band | bottom, equal halves
+        SplitTwoPanel split = new SplitTwoPanel(
+                SplitTwoPanel.Orientation.VERTICAL,
+                1,
+                -1.0   // <===== equal 50 / 50
+        );
         split.setComponents(inputPanel, launcherPanel);
 
         add(split, BorderLayout.CENTER);
@@ -35,8 +37,6 @@ public class LeftSectionPanel extends JPanel implements PropertyChangeListener {
     private void applyTheme(ExperimentTheme t) {
         if (t == null) return;
         setBackground(t.bodyBg);
-        // children theme via their own handlers
-        repaint();
     }
 
     @Override

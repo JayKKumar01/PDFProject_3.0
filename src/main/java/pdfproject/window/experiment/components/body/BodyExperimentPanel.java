@@ -11,9 +11,6 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-/**
- * Simplified BodyExperimentPanel using the manual-layout SplitTwoPanel to guarantee perfect center.
- */
 public class BodyExperimentPanel extends JPanel implements PropertyChangeListener {
 
     private final LeftSectionPanel left;
@@ -25,8 +22,12 @@ public class BodyExperimentPanel extends JPanel implements PropertyChangeListene
         left = new LeftSectionPanel();
         right = new RightSectionPanel();
 
-        // Use manual layout split — firstFraction <=0 means equal halves
-        SplitTwoPanel split = new SplitTwoPanel(SplitTwoPanel.Orientation.HORIZONTAL, 1, -1.0);
+        // Horizontal split, 1dp separator, 40% left / 60% right
+        SplitTwoPanel split = new SplitTwoPanel(
+                SplitTwoPanel.Orientation.HORIZONTAL,
+                1,
+                0.40    // <===== 40 / 60 split
+        );
         split.setComponents(left, right);
 
         add(split, BorderLayout.CENTER);
@@ -51,12 +52,10 @@ public class BodyExperimentPanel extends JPanel implements PropertyChangeListene
         setBackground(bg);
         left.setBackground(bg);
         right.setBackground(bg);
-        repaint();
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (SwingUtilities.isEventDispatchThread()) applyTheme(ThemeManager.getTheme());
-        else SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
+        SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
     }
 }
