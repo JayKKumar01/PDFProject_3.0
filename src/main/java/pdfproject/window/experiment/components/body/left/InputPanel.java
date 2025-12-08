@@ -4,6 +4,7 @@ import pdfproject.Config;
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
 import pdfproject.window.experiment.components.ValidationAwarePanel;
+import pdfproject.window.experiment.utils.UiScale;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +20,8 @@ import java.util.Set;
 /**
  * Input panel: file chooser + drag-and-drop. Theme-aware and registers with ThemeManager.
  * Validation enabling/disabling is handled by ValidationAwarePanel (single-listener ValidationCenter).
+ *
+ * Uses UiScale for DPI-aware padding, gaps and fonts.
  */
 public class InputPanel extends ValidationAwarePanel implements PropertyChangeListener {
 
@@ -26,23 +29,29 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("xlsx", "json");
     private static String lastDirectoryPath = null;
 
-    private static final Font LABEL_FONT = new Font("Segoe UI", Font.PLAIN, 14);
-    private static final Font BUTTON_FONT = new Font("Segoe UI", Font.PLAIN, 13);
-
     private final JLabel fileLabel;
     private final JButton browseButton;
     private final JPanel centerPanel;
 
     public InputPanel() {
         super(new BorderLayout());
+
+        // DPI-aware padding and layout gaps
+        int pad = UiScale.scaleInt(12);
+        setBorder(BorderFactory.createEmptyBorder(pad, pad, pad, pad));
+
         setLayout(new GridBagLayout());
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         setOpaque(true);
 
-        fileLabel = createFileLabel();
-        browseButton = createBrowseButton();
+        // create scaled fonts at construction time (UiScale should be initialized by Window3)
+        Font labelFont = UiScale.getScaledFont(new Font("Segoe UI", Font.PLAIN, 11));
+        Font buttonFont = UiScale.getScaledFont(new Font("Segoe UI", Font.PLAIN, 10));
 
-        centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 0));
+        fileLabel = createFileLabel(labelFont);
+        browseButton = createBrowseButton(buttonFont);
+
+        int hgap = UiScale.scaleInt(12);
+        centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, hgap, 0));
         centerPanel.setOpaque(false);
         centerPanel.add(browseButton);
         centerPanel.add(fileLabel);
@@ -56,18 +65,17 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
         ThemeManager.register(this);
     }
 
-    private JLabel createFileLabel() {
+    private JLabel createFileLabel(Font f) {
         JLabel label = new JLabel("No input data");
-        label.setFont(LABEL_FONT);
+        if (f != null) label.setFont(f);
         return label;
     }
 
-    private JButton createBrowseButton() {
+    private JButton createBrowseButton(Font f) {
         JButton btn = new JButton("Choose File");
-        btn.setFont(BUTTON_FONT);
+        if (f != null) btn.setFont(f);
         btn.addActionListener(e -> openFileDialog());
         btn.setOpaque(true);
-        // Avoid heavy UI operations on EDT action handler — just show picker
         return btn;
     }
 
@@ -76,10 +84,8 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
      * Save lastDirectoryPath for next time.
      */
     private void openFileDialog() {
-        // get window ancestor (may be null in some contexts)
         Window win = SwingUtilities.getWindowAncestor(this);
 
-        // Try AWT FileDialog first (native look). If ancestor is null or FileDialog fails, fallback.
         if (win instanceof Frame) {
             FileDialog fd = new FileDialog((Frame) win, "Select Input File", FileDialog.LOAD);
             fd.setFilenameFilter((dir, name) -> {
@@ -87,21 +93,15 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
                 return n.endsWith(".xlsx") || n.endsWith(".json");
             });
 
-            if (lastDirectoryPath != null) {
-                fd.setDirectory(lastDirectoryPath);
-            }
+            if (lastDirectoryPath != null) fd.setDirectory(lastDirectoryPath);
 
             fd.setVisible(true);
             File sel = getSelectedFile(fd);
-            if (sel == null) {
-                // nothing selected — fallback not necessary
-                return;
-            }
+            if (sel == null) return;
             processSelectedFile(sel);
             return;
         }
 
-        // Fallback: JFileChooser (safe when no Frame ancestor)
         JFileChooser chooser = new JFileChooser(lastDirectoryPath);
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setAcceptAllFileFilterUsed(false);
@@ -145,7 +145,6 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
      * Setup drag & drop — accept the first valid file dropped.
      */
     private void setupFileDrop() {
-        // keep a reference to DropTarget if you need to remove it later (not necessary here)
         new DropTarget(this, DnDConstants.ACTION_COPY, new DropTargetAdapter() {
             @Override
             @SuppressWarnings("unchecked")
@@ -155,14 +154,12 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
                     Transferable t = event.getTransferable();
                     if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                         List<File> files = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-                        // find first valid file
                         for (File f : files) {
                             if (isValidFile(f)) {
                                 processSelectedFile(f);
                                 return;
                             }
                         }
-                        // none valid
                         showInvalidFileWarning();
                     } else {
                         event.rejectDrop();
@@ -177,7 +174,6 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
     private void handleSelectedFile(File file) {
         if (file == null) return;
         lastDirectoryPath = file.getParent();
-        // best-effort write to Config; swallow errors so UI remains responsive
         try {
             Config.inputPath = file.getAbsolutePath();
         } catch (Throwable ignored) {}

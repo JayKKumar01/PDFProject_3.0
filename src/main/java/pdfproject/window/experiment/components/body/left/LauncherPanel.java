@@ -5,6 +5,7 @@ import pdfproject.Launcher; // keep if you have this entrypoint, otherwise repla
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
 import pdfproject.window.experiment.utils.ValidationCenter;
+import pdfproject.window.experiment.utils.UiScale;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +21,8 @@ import java.util.concurrent.Future;
  * - runs Launcher.start(() -> stoppedByUser) on a background thread
  * - toggles Start/Stop buttons and handles cancellation
  * - notifies ValidationCenter on start/stop
+ *
+ * DPI-aware via UiScale for padding, gaps and fonts.
  */
 public class LauncherPanel extends JPanel implements PropertyChangeListener {
 
@@ -35,10 +38,19 @@ public class LauncherPanel extends JPanel implements PropertyChangeListener {
     public LauncherPanel() {
         // GridBagLayout centers content both vertically and horizontally
         setLayout(new GridBagLayout());
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        // DPI-aware padding
+        int pad = UiScale.scaleInt(12);
+        setBorder(BorderFactory.createEmptyBorder(pad, pad, pad, pad));
+
+        // Create scaled fonts (compact)
+        Font btnFont = UiScale.getScaledFont(new Font("Segoe UI", Font.PLAIN, 11));
 
         startButton = new JButton("Start");
+        startButton.setFont(btnFont);
+
         stopButton  = new JButton("Stop");
+        stopButton.setFont(btnFont);
 
         // wire actions to start/stop methods
         startButton.addActionListener(this::onStartClicked);
@@ -48,7 +60,9 @@ public class LauncherPanel extends JPanel implements PropertyChangeListener {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
 
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
+        // DPI-aware gap for FlowLayout
+        int gap = UiScale.scaleInt(16);
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, gap, 0));
         row.setOpaque(false);
         row.add(startButton);
         row.add(stopButton);
