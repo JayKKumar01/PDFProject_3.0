@@ -1,7 +1,7 @@
 package pdfproject.window.experiment.components.body.right;
 
 import pdfproject.window.experiment.components.ValidationAwarePanel;
-import pdfproject.window.experiment.components.body.left.InputPanel; // keep if needed by imports; otherwise remove
+import pdfproject.window.experiment.components.body.right.option.OptionPanel;
 import pdfproject.window.experiment.components.common.SplitTwoPanel;
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
