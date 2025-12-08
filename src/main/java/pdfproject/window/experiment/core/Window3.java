@@ -50,9 +50,6 @@ public final class Window3 {
         frame.add(console, BorderLayout.SOUTH);
         frame.add(body, BorderLayout.CENTER);
 
-        // compute initial sizes and set preferred sizes for north/south panels
-        applyProportions(frame.getHeight());
-
         // on resize or display change, recompute
         frame.addComponentListener(new ComponentAdapter() {
             @Override
@@ -61,14 +58,36 @@ public final class Window3 {
                 GraphicsConfiguration newGc = frame.getGraphicsConfiguration();
                 if (newGc != null) UiScale.initFromGraphicsConfig(newGc);
 
-                applyProportions(frame.getHeight());
+                applyProportions();
             }
         });
 
+        // show frame first so insets / content sizes are valid, then apply proportions
         frame.setVisible(true);
+
+        // Ensure initial proportioning uses real content height (after frame is realized)
+        applyProportions();
     }
 
-    private void applyProportions(int totalHeight) {
+    /**
+     * Compute available content height and set preferred sizes for header/console.
+     * Uses content pane height when possible; otherwise computes from frame height minus insets.
+     */
+    private void applyProportions() {
+        int totalHeight;
+
+        // Prefer content pane height (already excludes insets). If it's 0 (not realized), fallback.
+        int contentH = frame.getContentPane().getHeight();
+        if (contentH > 0) {
+            totalHeight = contentH;
+        } else {
+            Insets insets = frame.getInsets();
+            totalHeight = frame.getHeight() - insets.top - insets.bottom;
+        }
+
+        // Defensive: if still non-positive, fallback to frame height as last resort
+        if (totalHeight <= 0) totalHeight = Math.max(1, frame.getHeight());
+
         // Use UiScale to ensure minimum sizes scale with DPI
         int minHeader = UiScale.scaleInt(48);
         int minConsole = UiScale.scaleInt(64);

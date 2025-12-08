@@ -21,9 +21,7 @@ public class RightSectionPanel extends ValidationAwarePanel implements PropertyC
     private final ColorPanel colorPanel;
 
     // 20% for the option area, 80% for color area
-    private static final double OPTION_RATIO = 0.20;
-
-    private final SplitTwoPanel split;
+    private static final double OPTION_RATIO = 0.19;
 
     public RightSectionPanel() {
         super(new BorderLayout());
@@ -32,7 +30,7 @@ public class RightSectionPanel extends ValidationAwarePanel implements PropertyC
         colorPanel = new ColorPanel();
 
         // vertical split: top | separator | bottom; 20% top, 80% bottom
-        split = new SplitTwoPanel(SplitTwoPanel.Orientation.VERTICAL, 1, OPTION_RATIO);
+        SplitTwoPanel split = new SplitTwoPanel(SplitTwoPanel.Orientation.VERTICAL, 1, OPTION_RATIO);
         split.setComponents(optionPanel, colorPanel);
 
         add(split, BorderLayout.CENTER);
