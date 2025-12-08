@@ -12,14 +12,12 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Console panel that wires System.out/System.err to a CustomOutputStream.
- * Recolors existing console text on theme changes.
- */
 public class ConsoleExperimentPanel extends JPanel implements PropertyChangeListener {
 
     private final JTextPane consolePane;
     private final JScrollPane scrollPane;
+
+    private final JLabel consoleLabel;  // <-- NEW bold label
 
     private final CustomOutputStream customStream;
     private final PrintStream savedOut;
@@ -28,18 +26,26 @@ public class ConsoleExperimentPanel extends JPanel implements PropertyChangeList
     public ConsoleExperimentPanel() {
         setLayout(new BorderLayout());
 
+        // --- NEW HEADER LABEL ---
+        consoleLabel = new JLabel("CONSOLE");
+        consoleLabel.setFont(new Font("Impact", Font.PLAIN, 22)); // <-- HARD + WIDE
+        consoleLabel.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 0));
+        add(consoleLabel, BorderLayout.NORTH);
+
+
+
+        // --- TEXT PANE ---
         consolePane = new JTextPane();
         consolePane.setEditable(false);
         consolePane.setFont(new Font("Consolas", Font.PLAIN, 13));
+
         scrollPane = new JScrollPane(consolePane);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
         add(scrollPane, BorderLayout.CENTER);
 
-        // Create and wire streams
+        // --- STREAMS ---
         customStream = new CustomOutputStream(consolePane);
 
-        // preserve original streams so we can restore them later
         savedOut = System.out;
         savedErr = System.err;
 
@@ -49,7 +55,7 @@ public class ConsoleExperimentPanel extends JPanel implements PropertyChangeList
         System.setOut(outPrintStream);
         System.setErr(errPrintStream);
 
-        // Apply initial theme and register listener
+        // Apply initial theme and register
         applyTheme(ThemeManager.getTheme());
         ThemeManager.register(this);
     }
@@ -58,16 +64,16 @@ public class ConsoleExperimentPanel extends JPanel implements PropertyChangeList
         try {
             return new PrintStream(os, true, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            // fallback (shouldn't happen)
             return new PrintStream(os);
         }
     }
 
     private void applyTheme(ExperimentTheme t) {
         setBackground(t.consoleBg);
+
+        consoleLabel.setForeground(t.consoleText);   // <-- NEW label styling
         consolePane.setBackground(t.consoleBg);
         consolePane.setForeground(t.consoleText);
-        // scroll viewport background
         scrollPane.getViewport().setBackground(t.consoleBg);
 
         revalidate();
@@ -76,7 +82,7 @@ public class ConsoleExperimentPanel extends JPanel implements PropertyChangeList
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // update visuals and recolor existing text
+        // Visual + Recolor text
         SwingUtilities.invokeLater(() -> {
             ExperimentTheme theme = ThemeManager.getTheme();
             applyTheme(theme);

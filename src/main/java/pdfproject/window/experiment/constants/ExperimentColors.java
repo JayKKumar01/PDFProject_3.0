@@ -2,20 +2,6 @@ package pdfproject.window.experiment.constants;
 
 import java.awt.Color;
 
-/**
- * Experiment color tokens (flat constants).
- *
- * Naming convention:
- *   <AREA>_<ROLE>_<MODE>
- *
- * 12 base tokens:
- *   Header (bg/text, light/dark) = 4
- *   Body   (bg/text, light/dark) = 4
- *   Console(bg/text, light/dark) = 4
- *
- * Additional extra tokens:
- *   CONSOLE_ERROR_COLOR (always red, independent of theme)
- */
 public final class ExperimentColors {
 
     // -------------------------
@@ -23,16 +9,19 @@ public final class ExperimentColors {
     // -------------------------
 
     // Header
-    public static final Color HEADER_BG_LIGHT   = new Color(0xF1F6FF);  // light bluish
-    public static final Color HEADER_TEXT_LIGHT = new Color(0x1E5AFF);  // blue
+    public static final Color HEADER_BG_LIGHT      = new Color(0xF1F6FF);
+    public static final Color HEADER_TEXT_LIGHT    = new Color(0x1E5AFF);
+
+    // Username accent (LIGHT)
+    public static final Color USERNAME_ACCENT_LIGHT = new Color(0x0A41C2); // deeper blue
 
     // Body
-    public static final Color BODY_BG_LIGHT     = new Color(0xFFFFFF);  // white
-    public static final Color BODY_TEXT_LIGHT   = new Color(0x222222);  // dark gray
+    public static final Color BODY_BG_LIGHT        = new Color(0xFFFFFF);
+    public static final Color BODY_TEXT_LIGHT      = new Color(0x222222);
 
     // Console
-    public static final Color CONSOLE_BG_LIGHT   = new Color(0xF7F7FB); // very light
-    public static final Color CONSOLE_TEXT_LIGHT = new Color(0x0B6EFD); // console blue
+    public static final Color CONSOLE_BG_LIGHT     = new Color(0xF7F7FB);
+    public static final Color CONSOLE_TEXT_LIGHT   = new Color(0x0B6EFD);
 
 
     // -------------------------
@@ -40,25 +29,25 @@ public final class ExperimentColors {
     // -------------------------
 
     // Header
-    public static final Color HEADER_BG_DARK   = new Color(0x0F1720);   // very dark
-    public static final Color HEADER_TEXT_DARK = new Color(0x7BE495);   // green-ish
+    public static final Color HEADER_BG_DARK       = new Color(0x0F1720);
+    public static final Color HEADER_TEXT_DARK     = new Color(0x7BE495);
+
+    // Username accent (DARK)
+    public static final Color USERNAME_ACCENT_DARK = new Color(0x9BFFD1); // bright mint
 
     // Body
-    public static final Color BODY_BG_DARK     = new Color(0x0B0E12);   // near-black
-    public static final Color BODY_TEXT_DARK   = new Color(0xD8EBD7);   // light green-ish
+    public static final Color BODY_BG_DARK         = new Color(0x0B0E12);
+    public static final Color BODY_TEXT_DARK       = new Color(0xD8EBD7);
 
     // Console
-    public static final Color CONSOLE_BG_DARK   = new Color(0x071018);  // dark teal
-    public static final Color CONSOLE_TEXT_DARK = new Color(0x9BE6C9);  // muted green
-
+    public static final Color CONSOLE_BG_DARK      = new Color(0x071018);
+    public static final Color CONSOLE_TEXT_DARK    = new Color(0x9BE6C9);
 
     // -------------------------
-    // Extra Colors (Fixed)
+    // Extra fixed color
     // -------------------------
 
-    /** Error text in console — NOT theme dependent */
-    public static final Color CONSOLE_ERROR = new Color(0xFF3B30); // Apple red
-
+    public static final Color CONSOLE_ERROR        = new Color(0xFF3B30);
 
     private ExperimentColors() { }
 }

@@ -4,8 +4,8 @@ import pdfproject.Config;
 import pdfproject.window.constants.ThemeColors;
 import pdfproject.window.experiment.components.BodyExperimentPanel;
 import pdfproject.window.experiment.components.ConsoleExperimentPanel;
-import pdfproject.window.experiment.components.HeaderExperimentPanel;
-import pdfproject.window.utils.ThemeManager;
+import pdfproject.window.experiment.components.header.HeaderExperimentPanel;
+import pdfproject.window.experiment.utils.UiScale;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,23 +13,17 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 /**
- * Window3: responsive, three-part app window.
- * - Header (NORTH) fixed percentage height
- * - Console (SOUTH) fixed percentage height
- * - Body (CENTER) fills remaining space
- *
- * Panels are normal Swing components that update themselves when ThemeManager fires events.
+ * Window3: responsive, three-part app window with DPI-aware UI scaling.
  */
 public final class Window3 {
 
     private final JFrame frame;
     private final HeaderExperimentPanel header;
-    private final BodyExperimentPanel body;
     private final ConsoleExperimentPanel console;
 
     // percentages (header, console) — body is the remainder
-    private static final double HEADER_RATIO = 0.15;
-    private static final double CONSOLE_RATIO = 0.20;
+    private static final double HEADER_RATIO = 0.10;
+    private static final double CONSOLE_RATIO = 0.30;
 
     public Window3(int preferredHeight) {
         int preferredWidth = (int) (preferredHeight * (16.0 / 9));
@@ -41,8 +35,13 @@ public final class Window3 {
         frame.getContentPane().setBackground(ThemeColors.BACKGROUND);
         frame.setLayout(new BorderLayout());
 
+        // Initialize UiScale from frame's GraphicsConfiguration (best practice)
+        GraphicsConfiguration gc = frame.getGraphicsConfiguration();
+        if (gc != null) UiScale.initFromGraphicsConfig(gc);
+        else UiScale.initFromDefaultScreen();
+
         header = new HeaderExperimentPanel();
-        body = new BodyExperimentPanel();
+        BodyExperimentPanel body = new BodyExperimentPanel();
         console = new ConsoleExperimentPanel();
 
         // header at top, console at bottom, body center
@@ -53,10 +52,14 @@ public final class Window3 {
         // compute initial sizes and set preferred sizes for north/south panels
         applyProportions(frame.getHeight());
 
-        // on resize, recompute preferred sizes (no manual child positioning)
+        // on resize or display change, recompute
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
+                // Re-evaluate scale in case the window moved to another monitor with different DPI:
+                GraphicsConfiguration newGc = frame.getGraphicsConfiguration();
+                if (newGc != null) UiScale.initFromGraphicsConfig(newGc);
+
                 applyProportions(frame.getHeight());
             }
         });
@@ -65,16 +68,18 @@ public final class Window3 {
     }
 
     private void applyProportions(int totalHeight) {
-        int headerH = (int) Math.max(48, totalHeight * HEADER_RATIO); // ensure minimum
-        int consoleH = (int) Math.max(64, totalHeight * CONSOLE_RATIO);
+        // Use UiScale to ensure minimum sizes scale with DPI
+        int minHeader = UiScale.scaleInt(48);
+        int minConsole = UiScale.scaleInt(64);
+
+        int headerH = Math.max(minHeader, Math.round((float) totalHeight * (float) HEADER_RATIO));
+        int consoleH = Math.max(minConsole, Math.round((float) totalHeight * (float) CONSOLE_RATIO));
 
         header.setPreferredSize(new Dimension(0, headerH));
         console.setPreferredSize(new Dimension(0, consoleH));
 
-        // revalidate only the top-level containers that changed
         header.revalidate();
         console.revalidate();
-        // body will be resized by layout manager automatically
         frame.revalidate();
         frame.repaint();
     }
