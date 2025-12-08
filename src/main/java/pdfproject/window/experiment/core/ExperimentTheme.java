@@ -19,6 +19,10 @@ public final class ExperimentTheme {
     public static final Color CONSOLE_BG_LIGHT       = new Color(0xF7F7FB);
     public static final Color CONSOLE_TEXT_LIGHT     = new Color(0x0B6EFD);
 
+    // new start/stop button colors (light)
+    public static final Color START_BUTTON_LIGHT     = new Color(0x0A84FF); // accent-ish blue
+    public static final Color STOP_BUTTON_LIGHT      = new Color(0xFF3B30); // red/error
+
     // -------------------------
     // Dark theme tokens
     // -------------------------
@@ -29,6 +33,10 @@ public final class ExperimentTheme {
     public static final Color BODY_TEXT_DARK         = new Color(0xD8EBD7);
     public static final Color CONSOLE_BG_DARK        = new Color(0x071018);
     public static final Color CONSOLE_TEXT_DARK      = new Color(0x9BE6C9);
+
+    // new start/stop button colors (dark)
+    public static final Color START_BUTTON_DARK      = new Color(0x7BE495);
+    public static final Color STOP_BUTTON_DARK       = new Color(0xFF3B30);
 
     // -------------------------
     // Shared tokens
@@ -66,9 +74,14 @@ public final class ExperimentTheme {
     public final Color consoleBg;
     public final Color consoleText;
 
+    // new per-theme button colors
+    public final Color startButtonColor;
+    public final Color stopButtonColor;
+
     private ExperimentTheme(Color headerBg, Color headerText, Color usernameAccent,
                             Color bodyBg, Color bodyText,
-                            Color consoleBg, Color consoleText) {
+                            Color consoleBg, Color consoleText,
+                            Color startButtonColor, Color stopButtonColor) {
         this.headerBg = headerBg;
         this.headerText = headerText;
         this.usernameAccent = usernameAccent;
@@ -76,18 +89,22 @@ public final class ExperimentTheme {
         this.bodyText = bodyText;
         this.consoleBg = consoleBg;
         this.consoleText = consoleText;
+        this.startButtonColor = startButtonColor;
+        this.stopButtonColor = stopButtonColor;
     }
 
     public static final ExperimentTheme LIGHT = new ExperimentTheme(
             HEADER_BG_LIGHT, HEADER_TEXT_LIGHT, USERNAME_ACCENT_LIGHT,
             BODY_BG_LIGHT, BODY_TEXT_LIGHT,
-            CONSOLE_BG_LIGHT, CONSOLE_TEXT_LIGHT
+            CONSOLE_BG_LIGHT, CONSOLE_TEXT_LIGHT,
+            START_BUTTON_LIGHT, STOP_BUTTON_LIGHT
     );
 
     public static final ExperimentTheme DARK = new ExperimentTheme(
             HEADER_BG_DARK, HEADER_TEXT_DARK, USERNAME_ACCENT_DARK,
             BODY_BG_DARK, BODY_TEXT_DARK,
-            CONSOLE_BG_DARK, CONSOLE_TEXT_DARK
+            CONSOLE_BG_DARK, CONSOLE_TEXT_DARK,
+            START_BUTTON_DARK, STOP_BUTTON_DARK
     );
 
     // -------------------------

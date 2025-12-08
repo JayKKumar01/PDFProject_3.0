@@ -1,41 +1,192 @@
 package pdfproject.window.experiment.components.body.left;
 
+import pdfproject.Config;
+import pdfproject.Launcher; // keep if you have this entrypoint, otherwise replace the call inside startOperation()
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
+import pdfproject.window.experiment.utils.ValidationCenter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
- * Minimal empty launcher panel (clean, theme-aware, ready to add controls later).
+ * LauncherPanel with Start / Stop behavior wired in.
+ * - runs Launcher.start(() -> stoppedByUser) on a background thread
+ * - toggles Start/Stop buttons and handles cancellation
+ * - notifies ValidationCenter on start/stop
  */
 public class LauncherPanel extends JPanel implements PropertyChangeListener {
 
-    private final JLabel titleLabel;
+    private final JButton startButton;
+    private final JButton stopButton;
+
+    // background execution state
+    private ExecutorService executorService;
+    private Future<?> taskFuture;
+    private volatile boolean isRunning = false;
+    private volatile boolean stoppedByUser = false;
 
     public LauncherPanel() {
-        setLayout(new BorderLayout());
-        setBorder(BorderFactory.createEmptyBorder(6, 12, 12, 6));
+        // GridBagLayout centers content both vertically and horizontally
+        setLayout(new GridBagLayout());
+        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        titleLabel = new JLabel("Launcher", SwingConstants.LEFT);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        startButton = new JButton("Start");
+        stopButton  = new JButton("Stop");
 
-        add(titleLabel, BorderLayout.NORTH);
+        // wire actions to start/stop methods
+        startButton.addActionListener(this::onStartClicked);
+        stopButton.addActionListener(this::onStopClicked);
 
-        // Placeholder empty space
-        JPanel empty = new JPanel();
-        empty.setOpaque(false);
-        add(empty, BorderLayout.CENTER);
+        // initial state
+        startButton.setEnabled(true);
+        stopButton.setEnabled(false);
+
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
+        row.setOpaque(false);
+        row.add(startButton);
+        row.add(stopButton);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.weightx = 1;
+        gbc.weighty = 1;
+
+        add(row, gbc);
 
         applyTheme(ThemeManager.getTheme());
         ThemeManager.register(this);
     }
 
+    // Action handlers
+    private void onStartClicked(ActionEvent ignored) {
+        startOperation();
+    }
+
+    private void onStopClicked(ActionEvent ignored) {
+        stopOperation();
+    }
+
+    // --- Start / Stop behavior (background execution) ---
+
+    private void startOperation() {
+        if (isRunning) return;
+        if (!isInputPathValid()) {
+            // optional: alert user via dialog or console
+            System.out.println("⚠ No input path selected. Operation cannot start.");
+            return;
+        }
+
+        isRunning = true;
+        stoppedByUser = false;
+        toggleButtons(false);
+
+        // notify global center that validation started
+        ValidationCenter.notifyStart();
+
+        executorService = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "launcher-worker");
+            t.setDaemon(true);
+            return t;
+        });
+
+        taskFuture = executorService.submit(() -> {
+            try {
+                System.out.println("✅ Operation started");
+                // Keep same contract as your old code — replace if needed
+                Launcher.start(() -> stoppedByUser);
+            } catch (Exception ex) {
+                System.err.println("⚠ Error during operation: " + ex.getMessage());
+                ex.printStackTrace();
+            } finally {
+                // ensure UI updates happen on EDT
+                SwingUtilities.invokeLater(this::notifyOperationFinished);
+            }
+        });
+    }
+
+    private void stopOperation() {
+        if (!isRunning) return;
+
+        System.out.println("🛑 Stop requested.");
+        stoppedByUser = true;
+
+        if (taskFuture != null && !taskFuture.isDone()) {
+            taskFuture.cancel(true);
+        }
+
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdownNow();
+        }
+
+        // notify global center that user requested stop
+        ValidationCenter.notifyStop();
+
+        // UI will be updated when the background task terminates (notifyOperationFinished)
+    }
+
+    private void notifyOperationFinished() {
+        if (!isRunning) return;
+
+        isRunning = false;
+        toggleButtons(true);
+
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdownNow();
+        }
+
+        System.out.println(stoppedByUser ? "🛑 Operation stopped by user." : "✅ Operation finished.");
+
+        // final notify to global center that operation finished
+        ValidationCenter.notifyStop();
+    }
+
+    private boolean isInputPathValid() {
+        try {
+            return Config.inputPath != null && !Config.inputPath.trim().isEmpty();
+        } catch (Throwable t) {
+            // If Config is not available for some reason, treat as invalid
+            return false;
+        }
+    }
+
+    private void toggleButtons(boolean startEnabled) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            startButton.setEnabled(startEnabled);
+            stopButton.setEnabled(!startEnabled);
+        } else {
+            SwingUtilities.invokeLater(() -> {
+                startButton.setEnabled(startEnabled);
+                stopButton.setEnabled(!startEnabled);
+            });
+        }
+    }
+
+    // --- theming & lifecycle ---
+
     private void applyTheme(ExperimentTheme t) {
+        if (t == null) return;
         setBackground(t.bodyBg);
-        titleLabel.setForeground(t.headerText);
+
+        Color startBg = t.startButtonColor != null ? t.startButtonColor : t.usernameAccent;
+        Color stopBg  = t.stopButtonColor  != null ? t.stopButtonColor  : t.headerText;
+
+        startButton.setBackground(startBg);
+        startButton.setForeground(ExperimentTheme.readableForeground(startBg));
+        startButton.setOpaque(true);
+
+        stopButton.setBackground(stopBg);
+        stopButton.setForeground(ExperimentTheme.readableForeground(stopBg));
+        stopButton.setOpaque(true);
+
         repaint();
     }
 
@@ -48,5 +199,13 @@ public class LauncherPanel extends JPanel implements PropertyChangeListener {
     public void removeNotify() {
         super.removeNotify();
         ThemeManager.unregister(this);
+
+        // ensure background thread is shutdown if panel removed
+        if (taskFuture != null && !taskFuture.isDone()) {
+            taskFuture.cancel(true);
+        }
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdownNow();
+        }
     }
 }
