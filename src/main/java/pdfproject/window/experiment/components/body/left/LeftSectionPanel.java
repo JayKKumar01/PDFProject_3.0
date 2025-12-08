@@ -9,25 +9,23 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * Left half of the body area. Lightweight, themed panel intended to hold controls/settings.
+ * LeftSectionPanel composes InputPanel (top) and LauncherPanel (bottom)
+ * in an exact 50/50 layout and draws a horizontal divider in the middle.
  */
 public class LeftSectionPanel extends JPanel implements PropertyChangeListener {
 
-    private final JLabel titleLabel;
+    private final InputPanel inputPanel;
+    private final LauncherPanel launcherPanel;
 
     public LeftSectionPanel() {
-        setLayout(new BorderLayout(8, 8));
-        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 6));
+        // exact halves top/bottom
+        setLayout(new GridLayout(2, 1, 0, 0));
 
-        titleLabel = new JLabel("Left — Settings", SwingConstants.LEFT);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        inputPanel = new InputPanel();
+        launcherPanel = new LauncherPanel();
 
-        // Example placeholder center area (you'll replace with real controls)
-        JLabel placeholder = new JLabel("<html><i>controls go here</i></html>", SwingConstants.CENTER);
-        placeholder.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-
-        add(titleLabel, BorderLayout.NORTH);
-        add(placeholder, BorderLayout.CENTER);
+        add(inputPanel);
+        add(launcherPanel);
 
         applyTheme(ThemeManager.getTheme());
         ThemeManager.register(this);
@@ -35,13 +33,44 @@ public class LeftSectionPanel extends JPanel implements PropertyChangeListener {
 
     private void applyTheme(ExperimentTheme t) {
         setBackground(t.bodyBg);
-        titleLabel.setForeground(t.headerText);
+        // let children update themselves via their own ThemeManager-registration
+        repaint();
+    }
+
+    /**
+     * Draw the horizontal divider AFTER painting children so it appears above them.
+     */
+    @Override
+    protected void paintChildren(Graphics g) {
+        super.paintChildren(g);
+
+        int y = getHeight() / 2;
+
+        Color fg = ExperimentTheme.readableForeground(getBackground());
+        Color lineColor = new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 180);
+
+        Graphics2D g2 = (Graphics2D) g.create();
+        try {
+            // crisp 1px horizontal line
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+            g2.setColor(lineColor);
+            g2.setStroke(new BasicStroke(1f));
+
+            // inset left/right to match typical padding
+            int inset = 12;
+            g2.drawLine(inset, y, getWidth() - inset, y);
+        } finally {
+            g2.dispose();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // ensure theme application happens on EDT
-        SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
+        SwingUtilities.invokeLater(() -> {
+            applyTheme(ThemeManager.getTheme());
+            inputPanel.repaint();
+            launcherPanel.repaint();
+        });
     }
 
     @Override
@@ -49,4 +78,8 @@ public class LeftSectionPanel extends JPanel implements PropertyChangeListener {
         super.removeNotify();
         ThemeManager.unregister(this);
     }
+
+    // Exposure methods to allow external wiring if needed
+    public InputPanel getInputPanel() { return inputPanel; }
+    public LauncherPanel getLauncherPanel() { return launcherPanel; }
 }
