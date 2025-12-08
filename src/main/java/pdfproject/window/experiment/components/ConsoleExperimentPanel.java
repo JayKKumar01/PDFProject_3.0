@@ -12,10 +12,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class ConsoleExperimentPanel extends JPanel implements PropertyChangeListener {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final JTextPane consolePane;

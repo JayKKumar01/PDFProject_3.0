@@ -1,4 +1,4 @@
-package pdfproject.window.experiment.components;
+package pdfproject.window.experiment.components.body;
 
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
@@ -8,23 +8,23 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class BodyExperimentPanel extends JPanel implements PropertyChangeListener {
+/**
+ * A simple themed vertical line divider.
+ */
+public class VerticalDivider extends JPanel implements PropertyChangeListener {
 
-    private final JLabel label;
-
-    public BodyExperimentPanel() {
-        setLayout(new BorderLayout());
-        label = new JLabel("Body (Window3)", SwingConstants.CENTER);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 15));
-        add(label, BorderLayout.CENTER);
-
+    public VerticalDivider() {
+        setPreferredSize(new Dimension(1, 1));
         applyTheme(ThemeManager.getTheme());
         ThemeManager.register(this);
     }
 
     private void applyTheme(ExperimentTheme t) {
-        setBackground(t.bodyBg);
-        label.setForeground(t.bodyText);
+        // A very subtle divider using readableForeground at ~30% opacity
+        Color fg = ExperimentTheme.readableForeground(t.bodyBg);
+        Color line = new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 60); // translucent
+
+        setBackground(line);
     }
 
     @Override

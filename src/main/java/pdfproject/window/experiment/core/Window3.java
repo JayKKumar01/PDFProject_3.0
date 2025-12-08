@@ -2,7 +2,7 @@ package pdfproject.window.experiment.core;
 
 import pdfproject.Config;
 import pdfproject.window.constants.ThemeColors;
-import pdfproject.window.experiment.components.BodyExperimentPanel;
+import pdfproject.window.experiment.components.body.BodyExperimentPanel;
 import pdfproject.window.experiment.components.ConsoleExperimentPanel;
 import pdfproject.window.experiment.components.header.HeaderExperimentPanel;
 import pdfproject.window.experiment.utils.UiScale;
