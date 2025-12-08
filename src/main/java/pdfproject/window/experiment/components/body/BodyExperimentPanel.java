@@ -2,6 +2,7 @@ package pdfproject.window.experiment.components.body;
 
 import pdfproject.window.experiment.components.body.left.LeftSectionPanel;
 import pdfproject.window.experiment.components.body.right.RightSectionPanel;
+import pdfproject.window.experiment.components.common.SplitTwoPanel;
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
 
@@ -11,8 +12,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * Exact 50/50 left/right using GridLayout(1,2).
- * A vertical line is painted exactly at the middle and ABOVE the children.
+ * Simplified BodyExperimentPanel using the manual-layout SplitTwoPanel to guarantee perfect center.
  */
 public class BodyExperimentPanel extends JPanel implements PropertyChangeListener {
 
@@ -20,64 +20,43 @@ public class BodyExperimentPanel extends JPanel implements PropertyChangeListene
     private final RightSectionPanel right;
 
     public BodyExperimentPanel() {
-        // GridLayout guarantees exact halves
-        setLayout(new GridLayout(1, 2, 0, 0));
+        super(new BorderLayout());
 
         left = new LeftSectionPanel();
         right = new RightSectionPanel();
 
-        add(left);
-        add(right);
+        // Use manual layout split — firstFraction <=0 means equal halves
+        SplitTwoPanel split = new SplitTwoPanel(SplitTwoPanel.Orientation.HORIZONTAL, 1, -1.0);
+        split.setComponents(left, right);
 
-        applyTheme(ThemeManager.getTheme());
+        add(split, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
         ThemeManager.register(this);
-    }
-
-    private void applyTheme(ExperimentTheme t) {
-        setBackground(t.bodyBg);
-        repaint();
-    }
-
-    /**
-     * We override paintChildren() so the line is drawn ABOVE
-     * the child panels, making it always visible.
-     */
-    @Override
-    protected void paintChildren(Graphics g) {
-        super.paintChildren(g);
-
-        int x = getWidth() / 2;
-
-        // readableForeground ensures good contrast on both light and dark themes
-        Color fg = ExperimentTheme.readableForeground(getBackground());
-        Color lineColor = new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 200); // more visible opacity
-
-        Graphics2D g2 = (Graphics2D) g.create();
-        try {
-            // crisp 1px vertical line → no antialiasing
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-            g2.setColor(lineColor);
-            g2.setStroke(new BasicStroke(1f));
-
-            // draw the line centered in the panel
-            g2.drawLine(x, 8, x, getHeight() - 8);
-        } finally {
-            g2.dispose();
-        }
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        SwingUtilities.invokeLater(() -> {
-            applyTheme(ThemeManager.getTheme());
-            left.repaint();
-            right.repaint();
-        });
+        applyTheme(ThemeManager.getTheme());
     }
 
     @Override
     public void removeNotify() {
         super.removeNotify();
         ThemeManager.unregister(this);
+    }
+
+    private void applyTheme(ExperimentTheme t) {
+        if (t == null) return;
+        Color bg = t.bodyBg;
+        setBackground(bg);
+        left.setBackground(bg);
+        right.setBackground(bg);
+        repaint();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (SwingUtilities.isEventDispatchThread()) applyTheme(ThemeManager.getTheme());
+        else SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
     }
 }

@@ -16,11 +16,6 @@ import java.util.List;
 public class Launcher {
 
     public static void start(StopListener stopListener) {
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         List<InputData> inputs = Config.inputPath.toLowerCase().endsWith(".json")
         ? JsonDataProvider.load()
                 :InputDataProvider.load();

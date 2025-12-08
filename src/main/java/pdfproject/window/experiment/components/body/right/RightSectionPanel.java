@@ -1,8 +1,8 @@
 package pdfproject.window.experiment.components.body.right;
 
+import pdfproject.window.experiment.components.ValidationAwarePanel;
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
-import pdfproject.window.experiment.components.ValidationAwarePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,39 +10,37 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
- * Right half of the body area.
- * Validation enable/disable is handled by ValidationAwarePanel.
- * This panel only manages theming and its own UI.
+ * RightSectionPanel with OptionPanel (20%) and ColorPanel (80%).
+ * Uses GridBagLayout with weighty to achieve proportional sizing.
+ * Divider is drawn at the 20% mark and painted after children so it appears above them.
  */
 public class RightSectionPanel extends ValidationAwarePanel implements PropertyChangeListener {
 
-    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 14);
-    private static final Font BODY_FONT = new Font("Segoe UI", Font.PLAIN, 13);
+    private final OptionPanel optionPanel;
+    private final ColorPanel colorPanel;
 
-    private final JLabel titleLabel;
-    private final JTextArea preview;
+    private static final double OPTION_RATIO = 0.20;
 
     public RightSectionPanel() {
-        super();
-        setLayout(new BorderLayout(8, 8));
-        setBorder(BorderFactory.createEmptyBorder(12, 6, 12, 12));
-        setOpaque(true);
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.insets = new Insets(0, 0, 0, 0);
 
-        titleLabel = new JLabel("Right — Preview / Status", SwingConstants.LEFT);
-        titleLabel.setFont(TITLE_FONT);
+        optionPanel = new OptionPanel();
+        colorPanel = new ColorPanel();
 
-        preview = new JTextArea();
-        preview.setEditable(false);
-        preview.setText("Preview / progress / logs will appear here.");
-        preview.setFont(BODY_FONT);
-        preview.setOpaque(false);
-        preview.setLineWrap(true);
-        preview.setWrapStyleWord(true);
+        // OptionPanel (20%)
+        gbc.gridy = 0;
+        gbc.weighty = OPTION_RATIO;
+        add(optionPanel, gbc);
 
-        add(titleLabel, BorderLayout.NORTH);
-        add(new JScrollPane(preview,
-                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
+        // ColorPanel (80%)
+        gbc.gridy = 1;
+        gbc.weighty = 1.0 - OPTION_RATIO;
+        add(colorPanel, gbc);
 
         applyTheme(ThemeManager.getTheme());
         ThemeManager.register(this);
@@ -51,24 +49,54 @@ public class RightSectionPanel extends ValidationAwarePanel implements PropertyC
     private void applyTheme(ExperimentTheme t) {
         if (t == null) return;
         setBackground(t.bodyBg);
-        titleLabel.setForeground(t.headerText);
-        preview.setForeground(t.bodyText);
-        revalidate();
+        // children update themselves; repaint to reflect background change
         repaint();
+    }
+
+    /**
+     * Draw the horizontal divider AFTER painting children so it appears above them.
+     * Divider is positioned at OPTION_RATIO of the height.
+     */
+    @Override
+    protected void paintChildren(Graphics g) {
+        super.paintChildren(g);
+
+        int y = (int) (getHeight() * OPTION_RATIO);
+
+        Color fg = ExperimentTheme.readableForeground(getBackground());
+        Color lineColor = new Color(fg.getRed(), fg.getGreen(), fg.getBlue(), 180);
+
+        Graphics2D g2 = (Graphics2D) g.create();
+        try {
+            // crisp 1px horizontal line
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+            g2.setColor(lineColor);
+            g2.setStroke(new BasicStroke(1f));
+
+            // inset left/right to match typical padding
+            int inset = 12;
+            g2.drawLine(inset, y, getWidth() - inset, y);
+        } finally {
+            g2.dispose();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // ThemeManager fires property changes — update on EDT
-        SwingUtilities.invokeLater(() -> applyTheme(ThemeManager.getTheme()));
+        SwingUtilities.invokeLater(() -> {
+            applyTheme(ThemeManager.getTheme());
+            optionPanel.repaint();
+            colorPanel.repaint();
+        });
     }
 
-    /**
-     * Ensure ThemeManager unregistered; validation lifecycle handled by ValidationAwarePanel.
-     */
     @Override
     public void removeNotify() {
-        ThemeManager.unregister(this);
         super.removeNotify();
+        ThemeManager.unregister(this);
     }
+
+    // Exposure methods to allow external wiring if needed
+    public OptionPanel getOptionPanel() { return optionPanel; }
+    public ColorPanel getColorPanel() { return colorPanel; }
 }
