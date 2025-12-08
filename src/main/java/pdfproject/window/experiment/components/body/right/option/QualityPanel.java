@@ -3,6 +3,7 @@ package pdfproject.window.experiment.components.body.right.option;
 import pdfproject.Config;
 import pdfproject.window.experiment.core.ExperimentTheme;
 import pdfproject.window.experiment.utils.ThemeManager;
+import pdfproject.window.experiment.utils.UiScale;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,9 @@ public class QualityPanel extends JPanel implements PropertyChangeListener {
         setLayout(new GridBagLayout());
         setOpaque(true);
 
-        label = new JLabel("Image Quality");
+        label = new JLabel("Image Quality :");
+        label.setFont(UiScale.getScaledFont(new Font("Segoe UI", Font.PLAIN, 10)));
+
         combo = new JComboBox<>(new String[]{"Low", "Medium", "High"});
         combo.setFocusable(true);
         combo.setBorder(null);

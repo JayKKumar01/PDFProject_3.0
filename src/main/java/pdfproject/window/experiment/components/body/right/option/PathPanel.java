@@ -34,7 +34,7 @@ public class PathPanel extends JPanel implements PropertyChangeListener {
         // -----------------------
         titleLabel = new JLabel("Output Images Path", SwingConstants.CENTER);
         titleLabel.setFont(
-                UiScale.getScaledFont(new Font("Segoe UI", Font.BOLD, 11))   // SMALL
+                UiScale.getScaledFont(new Font("Segoe UI", Font.BOLD, 10))   // SMALL
         );
 
         pathLabel = new JLabel(getCompactPath(Config.outputImagePath));
