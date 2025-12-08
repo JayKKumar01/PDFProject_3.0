@@ -30,6 +30,7 @@ public final class Window3 {
 
         frame = new JFrame(Config.FRAME_NAME + " - Window3");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
         frame.setSize(preferredWidth, preferredHeight);
         frame.setLocationRelativeTo(null);
         frame.getContentPane().setBackground(ThemeColors.BACKGROUND);
