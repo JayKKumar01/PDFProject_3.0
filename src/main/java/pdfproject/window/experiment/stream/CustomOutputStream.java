@@ -1,7 +1,6 @@
 package pdfproject.window.experiment.stream;
 
 import pdfproject.window.experiment.core.ExperimentTheme;
-import pdfproject.window.experiment.constants.ExperimentColors;
 import pdfproject.window.experiment.utils.ThemeManager;
 
 import javax.swing.*;
@@ -20,7 +19,7 @@ public final class CustomOutputStream extends OutputStream {
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream(256);
 
     // Error color is fixed (always uses ExperimentColors.CONSOLE_ERROR).
-    private static final Color ERROR_COLOR = ExperimentColors.CONSOLE_ERROR;
+    private static final Color ERROR_COLOR = ExperimentTheme.CONSOLE_ERROR;
 
     public CustomOutputStream(JTextPane textPane) {
         this.textPane = textPane;
