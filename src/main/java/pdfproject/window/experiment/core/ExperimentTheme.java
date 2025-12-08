@@ -15,7 +15,7 @@ public final class ExperimentTheme {
     public static final Color HEADER_TEXT_LIGHT      = new Color(0x1E5AFF);
     public static final Color USERNAME_ACCENT_LIGHT  = new Color(0x0A41C2);
     public static final Color BODY_BG_LIGHT          = new Color(0xFFFFFF);
-    public static final Color BODY_TEXT_LIGHT        = new Color(0x222222);
+    public static final Color BODY_TEXT_LIGHT        = new Color(0x1B3A73);
     public static final Color CONSOLE_BG_LIGHT       = new Color(0xF7F7FB);
     public static final Color CONSOLE_TEXT_LIGHT     = new Color(0x0B6EFD);
 
