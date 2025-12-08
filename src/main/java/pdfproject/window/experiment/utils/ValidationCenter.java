@@ -1,14 +1,18 @@
 package pdfproject.window.experiment.utils;
 
 import javax.swing.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Centralized notifier with only two events: onStart and onStop.
- * Any class can register one global listener.
+ * Supports multiple listeners in a thread-safe way.
+ *
+ * Backwards-compat: setListener(l) will add(l); setListener(null) clears all listeners.
+ * Prefer addListener/removeListener in new code.
  */
 public final class ValidationCenter {
 
-    private static ValidationListener listener;
+    private static final CopyOnWriteArrayList<ValidationListener> listeners = new CopyOnWriteArrayList<>();
 
     private ValidationCenter() {}
 
@@ -18,22 +22,55 @@ public final class ValidationCenter {
         void onStop();
     }
 
-    /** Set the single global listener. */
+    /**
+     * Backwards-compatible setter:
+     * - if l != null -> add it to the listener set (idempotent)
+     * - if l == null -> clear all listeners (keeps old behaviour of clearing the single listener)
+     */
+    @Deprecated
     public static void setListener(ValidationListener l) {
-        listener = l;
+        if (l == null) {
+            listeners.clear();
+        } else {
+            addListener(l);
+        }
+    }
+
+    /** Register a listener (idempotent). */
+    public static void addListener(ValidationListener l) {
+        if (l != null) listeners.addIfAbsent(l);
+    }
+
+    /** Unregister a listener. */
+    public static void removeListener(ValidationListener l) {
+        if (l != null) listeners.remove(l);
     }
 
     /** Fired by LauncherPanel or any trigger. */
     public static void notifyStart() {
-        if (listener != null) {
-            SwingUtilities.invokeLater(listener::onStart);
-        }
+        if (listeners.isEmpty()) return;
+        SwingUtilities.invokeLater(() -> {
+            for (ValidationListener l : listeners) {
+                try {
+                    l.onStart();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
     }
 
     /** Fired by LauncherPanel or any trigger. */
     public static void notifyStop() {
-        if (listener != null) {
-            SwingUtilities.invokeLater(listener::onStop);
-        }
+        if (listeners.isEmpty()) return;
+        SwingUtilities.invokeLater(() -> {
+            for (ValidationListener l : listeners) {
+                try {
+                    l.onStop();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
     }
 }
