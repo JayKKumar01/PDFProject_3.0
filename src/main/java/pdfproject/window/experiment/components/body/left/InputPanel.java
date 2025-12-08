@@ -14,7 +14,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -35,7 +34,7 @@ public class InputPanel extends ValidationAwarePanel implements PropertyChangeLi
     private final JPanel centerPanel;
 
     public InputPanel() {
-        super();
+        super(new BorderLayout());
         setLayout(new GridBagLayout());
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
         setOpaque(true);

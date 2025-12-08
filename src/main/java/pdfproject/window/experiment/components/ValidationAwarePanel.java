@@ -15,8 +15,8 @@ import java.awt.*;
  */
 public abstract class ValidationAwarePanel extends JPanel implements ValidationCenter.ValidationListener {
 
-    public ValidationAwarePanel() {
-        super();
+    public ValidationAwarePanel(BorderLayout borderLayout) {
+        super(borderLayout);
     }
 
     @Override
