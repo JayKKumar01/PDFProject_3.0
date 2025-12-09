@@ -1,6 +1,7 @@
 package pdfproject.window.experiment.components.body.right;
 
 import pdfproject.window.experiment.components.ValidationAwarePanel;
+import pdfproject.window.experiment.components.body.right.color.ColorPanel;
 import pdfproject.window.experiment.components.body.right.option.OptionPanel;
 import pdfproject.window.experiment.components.common.SplitTwoPanel;
 import pdfproject.window.experiment.core.ExperimentTheme;
