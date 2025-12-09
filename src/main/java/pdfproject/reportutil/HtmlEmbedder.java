@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class HtmlEmbedder {
 
     public static void main(String[] args) throws IOException {
-        Path htmlPath = Paths.get("E:\\ReportProject 2.0\\index.html");
+        Path htmlPath = Paths.get("D:\\React\\Report-Design\\index.html");
         Path baseFolder = htmlPath.getParent();
 
         String html = Files.readString(htmlPath, StandardCharsets.UTF_8);
