@@ -13,32 +13,31 @@ import java.util.List;
 public class DataMapGenerator {
 
     public static void generateDataMapJs(List<MapModel> models, String outputDir) {
-        // Ensure output directory exists
         File dir = new File(outputDir);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        if (!dir.exists()) dir.mkdirs();
 
-        // File path for data-map.js
         String filePath = outputDir + File.separator + "data-map.js";
 
-        // StringBuilder to store JavaScript content
         StringBuilder jsContent = new StringBuilder();
         jsContent.append("// Map to store the item image data\n");
         jsContent.append("const itemImageMap = new Map([\n");
 
-        int itemNumber = 1; // Start numbering items from 1
+        int itemNumber = 1;
 
         for (MapModel model : models) {
             List<List<String>> validationImages = model.getContentImages();
             List<List<String>> alignmentImages = model.getAlignmentImages();
 
             String key = model.getKey();
-            if (key == null || key.trim().isEmpty()){
-                key = "Item "+itemNumber;
+            if (key == null || key.trim().isEmpty()) {
+                key = "Item_" + itemNumber;
             }
 
-            jsContent.append("    [\"").append(key).append("\", {\n");
+            jsContent.append("    [")
+                    .append(itemNumber)
+                    .append(", {\n");
+
+            jsContent.append("        name: \"").append(key).append("\",\n");
 
             // Validation images
             jsContent.append("        validationImages: [\n");
@@ -52,18 +51,38 @@ public class DataMapGenerator {
             for (List<String> alignment : alignmentImages) {
                 jsContent.append("            ").append(alignment.toString()).append(",\n");
             }
+            jsContent.append("        ],\n");
+
+            // --- New Prodigy Validation Logic ---
+            jsContent.append("        prodigyValidation: [\n");
+
+            if (!alignmentImages.isEmpty() && alignmentImages.get(0).size() >= 2) {
+                String sourceImg = alignmentImages.get(0).get(0);
+                String targetImg = alignmentImages.get(0).get(1);
+
+                jsContent.append("            {\n");
+                jsContent.append("                source: {\n");
+                jsContent.append("                    image: \"").append(sourceImg).append("\",\n");
+                jsContent.append("                    pairs: []\n");
+                jsContent.append("                },\n");
+                jsContent.append("                target: {\n");
+                jsContent.append("                    image: \"").append(targetImg).append("\",\n");
+                jsContent.append("                    pairs: []\n");
+                jsContent.append("                }\n");
+                jsContent.append("            }\n");
+            }
+
             jsContent.append("        ]\n");
+            // -------------------------------------
 
             jsContent.append("    }],\n");
 
-            itemNumber++; // Increment for next item
+            itemNumber++;
         }
 
         jsContent.append("]);\n\n");
-        jsContent.append("// Example: Log the map to check the result\n");
         jsContent.append("console.log(itemImageMap);\n");
 
-        // Write to file
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write(jsContent.toString());
             System.out.println("data-map.js generated successfully!");
@@ -71,14 +90,11 @@ public class DataMapGenerator {
             System.err.println("Error writing to file: " + e.getMessage());
         }
 
-        // Copy predefined files
         createReport(outputDir);
-
         System.out.println("File Generated Successfully!");
     }
 
     private static void createReport(String outputDir) {
-
         File destinationFile = new File(outputDir, "report.html");
         try {
             Files.writeString(destinationFile.toPath(), ReportHtml.REPORT_HTML);
@@ -87,5 +103,4 @@ public class DataMapGenerator {
             System.err.println("Error copying file: " + e.getMessage());
         }
     }
-
 }
