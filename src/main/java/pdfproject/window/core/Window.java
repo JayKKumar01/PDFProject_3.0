@@ -1,125 +1,105 @@
 package pdfproject.window.core;
 
 import pdfproject.Config;
-import pdfproject.interfaces.TaskStateListener;
-import pdfproject.window.components.body.BodyContentPanel;
-import pdfproject.window.components.console.ConsolePanel;
+import pdfproject.window.components.body.BodyPanel;
+import pdfproject.window.components.ConsolePanel;
 import pdfproject.window.components.header.HeaderPanel;
-import pdfproject.window.constants.ThemeColors;
+import pdfproject.window.utils.UiScale;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.image.BufferedImage;
 
-public class Window {
+/**
+ * Window3: responsive, three-part app window with DPI-aware UI scaling.
+ */
+public final class Window {
 
     private final JFrame frame;
+    private final HeaderPanel header;
+    private final ConsolePanel console;
 
-    private final HeaderPanel headerPanel;
-    private final BodyContentPanel bodyPanel;
-    private final ConsolePanel consolePanel;
+    // percentages (header, console) — body is the remainder
+    private static final double HEADER_RATIO = 0.10;
+    private static final double CONSOLE_RATIO = 0.30;
 
-    public Window(int height) {
-        int width = (int) (height * (16.0 / 9));
+    public Window(int preferredHeight) {
+        int preferredWidth = (int) (preferredHeight * (16.0 / 9));
 
-        frame = initFrame(width, height);
+        frame = new JFrame(Config.FRAME_NAME + " - Window3");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.setSize(preferredWidth, preferredHeight);
+        frame.setLocationRelativeTo(null);
+        frame.getContentPane().setBackground(Theme.HEADER_BG_LIGHT);
+        frame.setLayout(new BorderLayout());
 
-        // Panels
-        headerPanel = new HeaderPanel();
-        bodyPanel = new BodyContentPanel();
-        consolePanel = new ConsolePanel();
-        consolePanel.redirectSystemStreams();
+        // Initialize UiScale from frame's GraphicsConfiguration (best practice)
+        GraphicsConfiguration gc = frame.getGraphicsConfiguration();
+        if (gc != null) UiScale.initFromGraphicsConfig(gc);
+        else UiScale.initFromDefaultScreen();
 
-        // Wiring task listener
-        bodyPanel.setTaskStateListener(new TaskStateListener() {
-            @Override
-            public void onStart() {
-                headerPanel.onStart();
-                consolePanel.onStart();
-                bodyPanel.onStart();
-            }
+        header = new HeaderPanel();
+        BodyPanel body = new BodyPanel();
+        console = new ConsolePanel();
 
-            @Override
-            public void onStop() {
-                headerPanel.onStop();
-                consolePanel.onStop();
-                bodyPanel.onStop();
-            }
-        });
+        // header at top, console at bottom, body center
+        frame.add(header, BorderLayout.NORTH);
+        frame.add(console, BorderLayout.SOUTH);
+        frame.add(body, BorderLayout.CENTER);
 
-
-        // Main layout container (stack vertically)
-        frame.setContentPane(initMainLayout());
-
-        // Initial size distribution
-        resizePanels(height);
-
-        // Resize listener
+        // on resize or display change, recompute
         frame.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                resizePanels(frame.getHeight());
+                // Re-evaluate scale in case the window moved to another monitor with different DPI:
+                GraphicsConfiguration newGc = frame.getGraphicsConfiguration();
+                if (newGc != null) UiScale.initFromGraphicsConfig(newGc);
+
+                applyProportions();
             }
         });
 
+        // show frame first so insets / content sizes are valid, then apply proportions
         frame.setVisible(true);
-    }
 
-    private JFrame initFrame(int width, int height) {
-        JFrame f = new JFrame(Config.FRAME_NAME);
-        f.setSize(width, height);
-        f.setLocationRelativeTo(null);
-        f.setResizable(true); // now resizable since proportional layout handles it
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.getContentPane().setBackground(ThemeColors.BACKGROUND);
-        f.setIconImage(generateIconImage(new Font("Segoe UI Emoji", Font.PLAIN, 48)));
-        return f;
-    }
-
-    private JPanel initMainLayout() {
-        JPanel wrapper = new JPanel();
-        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
-        wrapper.setBackground(ThemeColors.BACKGROUND);
-
-        wrapper.add(headerPanel);
-        wrapper.add(bodyPanel);
-        wrapper.add(consolePanel);
-
-        return wrapper;
+        // Ensure initial proportioning uses real content height (after frame is realized)
+        applyProportions();
     }
 
     /**
-     * Applies proportional layout:
-     * header = 15%,
-     * body = 60%,
-     * console = 25%
+     * Compute available content height and set preferred sizes for header/console.
+     * Uses content pane height when possible; otherwise computes from frame height minus insets.
      */
-    private void resizePanels(int totalHeight) {
+    private void applyProportions() {
+        int totalHeight;
 
-        int headerHeight  = (int) (totalHeight * 0.10);
-        int bodyHeight    = (int) (totalHeight * 0.60);
-        int consoleHeight = totalHeight - headerHeight - bodyHeight;
+        // Prefer content pane height (already excludes insets). If it's 0 (not realized), fallback.
+        int contentH = frame.getContentPane().getHeight();
+        if (contentH > 0) {
+            totalHeight = contentH;
+        } else {
+            Insets insets = frame.getInsets();
+            totalHeight = frame.getHeight() - insets.top - insets.bottom;
+        }
 
-        headerPanel.setPreferredSize(new Dimension(0, headerHeight));
-        bodyPanel.setPreferredSize(new Dimension(0, bodyHeight));
-        consolePanel.setDynamicHeight(consoleHeight);
+        // Defensive: if still non-positive, fallback to frame height as last resort
+        if (totalHeight <= 0) totalHeight = Math.max(1, frame.getHeight());
 
-        headerPanel.revalidate();
-        bodyPanel.revalidate();
-        consolePanel.revalidate();
+        // Use UiScale to ensure minimum sizes scale with DPI
+        int minHeader = UiScale.scaleInt(48);
+        int minConsole = UiScale.scaleInt(64);
+
+        int headerH = Math.max(minHeader, Math.round((float) totalHeight * (float) HEADER_RATIO));
+        int consoleH = Math.max(minConsole, Math.round((float) totalHeight * (float) CONSOLE_RATIO));
+
+        header.setPreferredSize(new Dimension(0, headerH));
+        console.setPreferredSize(new Dimension(0, consoleH));
+
+        header.revalidate();
+        console.revalidate();
+        frame.revalidate();
         frame.repaint();
-    }
-
-    private Image generateIconImage(Font font) {
-        BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = img.createGraphics();
-        g.setFont(font);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.setColor(ThemeColors.THEME_BLUE);
-        g.drawString("📝🔍", 5, 50);
-        g.dispose();
-        return img;
     }
 }

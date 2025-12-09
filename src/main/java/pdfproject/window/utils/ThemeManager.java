@@ -1,54 +1,76 @@
 package pdfproject.window.utils;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import pdfproject.utils.AppSettings;
+import pdfproject.window.core.Theme;
+
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Small global theme manager for the app.
- * Components can register as ThemeChangeListener to receive updates when theme changes.
- *
- * Note: This is intentionally minimal — extend as needed (e.g., persistence hooks).
+ * ThemeManager: central theme state. Notifies listeners on property "dark" when theme flips.
+ * Persists choice using AppSettings on a background thread to avoid blocking EDT.
  */
 public final class ThemeManager {
-    public interface ThemeChangeListener {
-        /**
-         * Called when theme changes. 'dark' == true means dark theme active.
-         */
-        void onThemeChanged(boolean dark);
+    private static final PropertyChangeSupport pcs = new PropertyChangeSupport(ThemeManager.class);
+    private static final AtomicBoolean dark = new AtomicBoolean(false);
+    private static volatile Theme currentTheme = Theme.LIGHT;
+
+    // single-thread executor for persistence tasks
+    private static final ExecutorService ioExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "theme-persistence");
+        t.setDaemon(true);
+        return t;
+    });
+
+    // initialize from AppSettings (call once at startup)
+    public static void initFromSettings(boolean defaultDark) {
+        boolean loaded = AppSettings.loadTheme(defaultDark);
+        dark.set(loaded);
+        currentTheme = loaded ? Theme.DARK : Theme.LIGHT;
     }
 
-    private static final List<ThemeChangeListener> listeners = new CopyOnWriteArrayList<>();
-    private static volatile boolean darkMode = false;
-
-    private ThemeManager() {}
-
     public static boolean isDarkMode() {
-        return darkMode;
+        return dark.get();
+    }
+
+    public static Theme getTheme() {
+        return currentTheme;
     }
 
     /**
-     * Set global dark mode and notify listeners (if changed).
+     * Set dark mode; no-op if same value. Notifies listeners on the calling thread,
+     * but UI listeners should wrap UI updates in SwingUtilities.invokeLater for safety.
      */
-    public static void setDarkMode(boolean dark) {
-        boolean prev = darkMode;
-        darkMode = dark;
-        if (prev != dark) {
-            for (ThemeChangeListener l : listeners) {
-                try {
-                    l.onThemeChanged(dark);
-                } catch (Exception ex) {
-                    // swallow to avoid affecting other listeners
-                    ex.printStackTrace();
-                }
-            }
-        }
+    public static void setDarkMode(boolean value) {
+        boolean old = dark.getAndSet(value);
+        if (old == value) return; // avoid notifications if unchanged
+
+        currentTheme = value ? Theme.DARK : Theme.LIGHT;
+
+        // notify listeners (property name "dark" with old/new boolean)
+        pcs.firePropertyChange("dark", old, value);
+
+        // persist off-EDT
+        ioExecutor.submit(() -> {
+            try {
+                AppSettings.saveTheme(value);
+            } catch (Exception ignore) { /* don't block UI for persistence errors */ }
+        });
     }
 
-    public static void register(ThemeChangeListener l) {
-        if (l != null) listeners.add(l);
+    public static void register(PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(listener);
     }
 
-    public static void unregister(ThemeChangeListener l) {
-        listeners.remove(l);
+    public static void unregister(PropertyChangeListener listener) {
+        pcs.removePropertyChangeListener(listener);
+    }
+
+    // call on app shutdown to stop executor (optional)
+    public static void shutdown() {
+        ioExecutor.shutdownNow();
     }
 }
