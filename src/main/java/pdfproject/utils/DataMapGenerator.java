@@ -37,43 +37,48 @@ public class DataMapGenerator {
                     .append(itemNumber)
                     .append(", {\n");
 
-            jsContent.append("        name: \"").append(key).append("\",\n");
+            jsContent.append("        name: \"").append(escapeQuotes(key)).append("\",\n");
 
             // Validation images
             jsContent.append("        validationImages: [\n");
-            for (List<String> validation : validationImages) {
-                jsContent.append("            ").append(validation.toString()).append(",\n");
+            if (validationImages != null) {
+                for (List<String> validation : validationImages) {
+                    jsContent.append("            ").append(jsArraySanitized(validation)).append(",\n");
+                }
             }
             jsContent.append("        ],\n");
 
             // Alignment images
             jsContent.append("        alignmentImages: [\n");
-            for (List<String> alignment : alignmentImages) {
-                jsContent.append("            ").append(alignment.toString()).append(",\n");
+            if (alignmentImages != null) {
+                for (List<String> alignment : alignmentImages) {
+                    jsContent.append("            ").append(jsArraySanitized(alignment)).append(",\n");
+                }
             }
             jsContent.append("        ],\n");
 
-            // --- New Prodigy Validation Logic ---
+            // Prodigy validation (one block per alignment row/page)
             jsContent.append("        prodigyValidation: [\n");
+            if (alignmentImages != null) {
+                for (List<String> alignment : alignmentImages) {
+                    if (alignment != null && alignment.size() >= 2) {
+                        String sourceImg = sanitizePath(alignment.get(0));
+                        String targetImg = sanitizePath(alignment.get(1));
 
-            if (!alignmentImages.isEmpty() && alignmentImages.get(0).size() >= 2) {
-                String sourceImg = alignmentImages.get(0).get(0);
-                String targetImg = alignmentImages.get(0).get(1);
-
-                jsContent.append("            {\n");
-                jsContent.append("                source: {\n");
-                jsContent.append("                    image: \"").append(sourceImg).append("\",\n");
-                jsContent.append("                    pairs: []\n");
-                jsContent.append("                },\n");
-                jsContent.append("                target: {\n");
-                jsContent.append("                    image: \"").append(targetImg).append("\",\n");
-                jsContent.append("                    pairs: []\n");
-                jsContent.append("                }\n");
-                jsContent.append("            }\n");
+                        jsContent.append("            {\n");
+                        jsContent.append("                source: {\n");
+                        jsContent.append("                    image: \"").append(sourceImg).append("\",\n");
+                        jsContent.append("                    pairs: []\n");
+                        jsContent.append("                },\n");
+                        jsContent.append("                target: {\n");
+                        jsContent.append("                    image: \"").append(targetImg).append("\",\n");
+                        jsContent.append("                    pairs: []\n");
+                        jsContent.append("                }\n");
+                        jsContent.append("            },\n");
+                    }
+                }
             }
-
             jsContent.append("        ]\n");
-            // -------------------------------------
 
             jsContent.append("    }],\n");
 
@@ -92,6 +97,37 @@ public class DataMapGenerator {
 
         createReport(outputDir);
         System.out.println("File Generated Successfully!");
+    }
+
+    // Converts list to JS array, sanitizing each element to remove stray quotes
+    private static String jsArraySanitized(List<String> list) {
+        if (list == null) return "[]";
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < list.size(); i++) {
+            String sanitized = sanitizePath(list.get(i));
+            sb.append("\"").append(sanitized).append("\"");
+            if (i < list.size() - 1) sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    // Remove leading/trailing quotes and unescape any \" sequences
+    private static String sanitizePath(String s) {
+        if (s == null) return "";
+        // Unescape escaped quotes first
+        String r = s.replace("\\\"", "\"");
+        // Remove any surrounding quotes (one or many)
+        r = r.replaceAll("^\"+","").replaceAll("\"+$","");
+        // Trim whitespace
+        r = r.trim();
+        return r;
+    }
+
+    // Escape double quotes inside the name (unlikely but safe)
+    private static String escapeQuotes(String s) {
+        if (s == null) return "";
+        return s.replace("\"", "\\\"");
     }
 
     private static void createReport(String outputDir) {
