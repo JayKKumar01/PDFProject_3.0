@@ -1,5 +1,6 @@
 package pdfproject.validators;
 
+import org.apache.commons.math3.util.Pair;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
@@ -13,6 +14,7 @@ import pdfproject.models.MapModel;
 import pdfproject.models.WordInfo;
 import pdfproject.utils.FontInfoUtil;
 import pdfproject.utils.ImageUtils;
+import pdfproject.utils.SentenceUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -43,8 +45,8 @@ public class ContentValidator {
 
     public void validateContent(int p1, int p2, int imagePage, List<BufferedImage> images) throws Exception {
         // Extract words from both PDFs
-        List<WordInfo> words1 = extractWords(doc1, p1);
-        List<WordInfo> words2 = extractWords(doc2, p2);
+        List<WordInfo> words1 = extractWords(doc1, p1,true);
+        List<WordInfo> words2 = extractWords(doc2, p2, false);
 
         // Compare words
         List<WordInfo> diff = StringDiff.compare(words1, words2);
@@ -285,7 +287,7 @@ public class ContentValidator {
         return combinedFile.getPath();
     }
 
-    private List<WordInfo> extractWords(PDDocument document, int pageNum) throws IOException {
+    private List<WordInfo> extractWords(PDDocument document, int pageNum, boolean isSource) throws IOException {
         List<WordInfo> wordInfoList = new ArrayList<>();
         if (document == null || pageNum == -1) return wordInfoList;
 
@@ -346,6 +348,13 @@ public class ContentValidator {
         stripper.setEndPage(pageNum);
         stripper.setSortByPosition(data.isSingleColumn());
         stripper.getText(document);
+
+        //if source then add the response to source
+
+        String mimicProdigyResponse = SentenceUtils.jsonString();
+
+        List<Pair<String, String>> pairList = SentenceUtils.extractPairs(mimicProdigyResponse);
+        resultMap.addListOfPairs(pairList,isSource);
 
         return wordInfoList;
     }

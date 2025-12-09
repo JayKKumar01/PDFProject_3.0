@@ -1,5 +1,7 @@
 package pdfproject.models;
 
+import org.apache.commons.math3.util.Pair;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,8 @@ import java.util.stream.Collectors;
 public class MapModel {
     private final List<List<String>> alignmentImages;
     private final List<List<String>> contentImages;
+    private final List<List<Pair<String,String>>> sourceTexts;
+    private final List<List<Pair<String,String>>> targetTexts;
     private final String outputImagePath;
     private String key;
 
@@ -15,6 +19,8 @@ public class MapModel {
         this.outputImagePath = outputImagePath.replace("\\", "/");
         this.alignmentImages = Collections.synchronizedList(new ArrayList<>());
         this.contentImages = Collections.synchronizedList(new ArrayList<>());
+        this.sourceTexts = Collections.synchronizedList(new ArrayList<>());
+        this.targetTexts = Collections.synchronizedList(new ArrayList<>());
     }
 
     public void addAlignmentRow(List<String> row, int index) {
@@ -32,6 +38,24 @@ public class MapModel {
             contentImages.set(index, trimmedRow);
         }
     }
+
+    public void addListOfPairs(List<Pair<String,String>> pairList, boolean isSource) {
+        if (pairList == null) return;
+
+        // Convert Pair<String,String> → List<Pair<String,String>>
+        List<Pair<String,String>> copyList = new ArrayList<>(pairList);
+
+        if (isSource) {
+            synchronized (sourceTexts) {
+                sourceTexts.add(copyList);
+            }
+        } else {
+            synchronized (targetTexts) {
+                targetTexts.add(copyList);
+            }
+        }
+    }
+
 
     private void ensureCapacity(List<List<String>> list, int index) {
         while (list.size() <= index) {
@@ -56,6 +80,15 @@ public class MapModel {
     public List<List<String>> getContentImages() {
         return contentImages;
     }
+
+    public List<List<Pair<String, String>>> getSourceTexts() {
+        return sourceTexts;
+    }
+
+    public List<List<Pair<String, String>>> getTargetTexts() {
+        return targetTexts;
+    }
+
 
     public String getKey() {
         return key;

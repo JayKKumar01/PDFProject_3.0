@@ -2,6 +2,7 @@ package pdfproject.utils;
 
 import pdfproject.models.MapModel;
 import pdfproject.reportutil.ReportHtml;
+import org.apache.commons.math3.util.Pair;
 
 import java.awt.*;
 import java.io.File;
@@ -27,6 +28,8 @@ public class DataMapGenerator {
         for (MapModel model : models) {
             List<List<String>> validationImages = model.getContentImages();
             List<List<String>> alignmentImages = model.getAlignmentImages();
+            List<List<Pair<String, String>>> sourceTexts = model.getSourceTexts();
+            List<List<Pair<String, String>>> targetTexts = model.getTargetTexts();
 
             String key = model.getKey();
             if (key == null || key.trim().isEmpty()) {
@@ -60,19 +63,31 @@ public class DataMapGenerator {
             // Prodigy validation (one block per alignment row/page)
             jsContent.append("        prodigyValidation: [\n");
             if (alignmentImages != null) {
-                for (List<String> alignment : alignmentImages) {
+                for (int i = 0; i < alignmentImages.size(); i++) {
+                    List<String> alignment = alignmentImages.get(i);
                     if (alignment != null && alignment.size() >= 2) {
                         String sourceImg = sanitizePath(alignment.get(0));
                         String targetImg = sanitizePath(alignment.get(1));
 
+                        // get corresponding source/target pairs (if available)
+                        List<Pair<String, String>> srcPairs = null;
+                        List<Pair<String, String>> tgtPairs = null;
+
+                        if (sourceTexts != null && i < sourceTexts.size()) {
+                            srcPairs = sourceTexts.get(i);
+                        }
+                        if (targetTexts != null && i < targetTexts.size()) {
+                            tgtPairs = targetTexts.get(i);
+                        }
+
                         jsContent.append("            {\n");
                         jsContent.append("                source: {\n");
                         jsContent.append("                    image: \"").append(sourceImg).append("\",\n");
-                        jsContent.append("                    pairs: []\n");
+                        jsContent.append("                    pairs: ").append(jsPairsFromPairList(srcPairs)).append("\n");
                         jsContent.append("                },\n");
                         jsContent.append("                target: {\n");
                         jsContent.append("                    image: \"").append(targetImg).append("\",\n");
-                        jsContent.append("                    pairs: []\n");
+                        jsContent.append("                    pairs: ").append(jsPairsFromPairList(tgtPairs)).append("\n");
                         jsContent.append("                }\n");
                         jsContent.append("            },\n");
                     }
@@ -105,8 +120,30 @@ public class DataMapGenerator {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < list.size(); i++) {
             String sanitized = sanitizePath(list.get(i));
-            sb.append("\"").append(sanitized).append("\"");
+            sb.append("\"").append(escapeForJs(sanitized)).append("\"");
             if (i < list.size() - 1) sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    // Convert List<Pair<String,String>> to JS array of arrays: [["orig","corr"], ...]
+    private static String jsPairsFromPairList(List<Pair<String, String>> pairs) {
+        if (pairs == null || pairs.isEmpty()) return "[]";
+
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < pairs.size(); i++) {
+            Pair<String, String> p = pairs.get(i);
+            String orig = p == null || p.getFirst() == null ? "" : p.getFirst();
+            String corr = p == null || p.getSecond() == null ? "" : p.getSecond();
+
+            sb.append("[\"")
+                    .append(escapeForJs(orig))
+                    .append("\", \"")
+                    .append(escapeForJs(corr))
+                    .append("\"]");
+
+            if (i < pairs.size() - 1) sb.append(", ");
         }
         sb.append("]");
         return sb.toString();
@@ -121,6 +158,19 @@ public class DataMapGenerator {
         r = r.replaceAll("^\"+","").replaceAll("\"+$","");
         // Trim whitespace
         r = r.trim();
+        return r;
+    }
+
+    // Escape string content for safe JS double-quoted string literal
+    private static String escapeForJs(String s) {
+        if (s == null) return "";
+        String r = s;
+        // Escape backslashes first
+        r = r.replace("\\", "\\\\");
+        // Escape double quotes
+        r = r.replace("\"", "\\\"");
+        // Replace newlines/tabs with escaped sequences
+        r = r.replace("\r\n", "\\n").replace("\n", "\\n").replace("\t", "\\t");
         return r;
     }
 
