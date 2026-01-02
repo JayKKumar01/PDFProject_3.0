@@ -301,9 +301,9 @@ public class ContentValidator {
                 List<TextPosition> currentPositions = new ArrayList<>();
 
                 for (TextPosition tp : textPositions) {
-                    if (tp.getFontSize() < 2){
-                        continue;
-                    }
+//                    if (tp.getFontSize() < 2){
+//                        continue;
+//                    }
                     String unicode = tp.getUnicode();
 
                     // Break down combined Unicode characters
@@ -350,6 +350,13 @@ public class ContentValidator {
         stripper.getText(document);
 
         //if source then add the response to source
+
+        StringBuilder builder = new StringBuilder();
+        for (WordInfo wordInfo: wordInfoList){
+            builder.append(wordInfo.getWord()).append(" ");
+        }
+
+        String response  = builder.toString(); // do something with this string for response
 
         String mimicProdigyResponse = SentenceUtils.jsonString();
 

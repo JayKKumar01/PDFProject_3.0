@@ -1,7 +1,7 @@
 package pdfproject.utils;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import pdfproject.Config;
 import pdfproject.models.InputData;
 
@@ -23,7 +23,6 @@ import java.util.logging.Logger;
 public class JsonDataProvider {
 
     private static final Logger LOGGER = Logger.getLogger(JsonDataProvider.class.getName());
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static List<InputData> load() {
         List<InputData> list = new ArrayList<>();
@@ -35,14 +34,9 @@ public class JsonDataProvider {
 
         try (FileInputStream fis = new FileInputStream(Config.inputPath)) {
 
-            JsonNode root = MAPPER.readTree(fis);
+            JSONObject root = new JSONObject(new JSONTokener(fis));
 
-            if (!root.isObject()) {
-                LOGGER.severe("Root JSON must be an object.");
-                return list;
-            }
-
-            Iterator<String> keys = root.fieldNames();
+            Iterator<String> keys = root.keys();
 
             while (keys.hasNext()) {
                 String key = keys.next();
@@ -53,13 +47,13 @@ public class JsonDataProvider {
                     continue;
                 }
 
-                JsonNode node = root.get(key);
-                if (node == null || !node.isObject()) {
+                Object raw = root.opt(key);
+                if (!(raw instanceof JSONObject node)) {
                     LOGGER.fine("Skipping key '" + key + "' because its value is not an object.");
                     continue;
                 }
 
-                // exact property names as requested
+                // exact property names
                 String source = text(node, "Source");
                 String dest   = text(node, "Destination");
 
@@ -86,6 +80,9 @@ public class JsonDataProvider {
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to parse JSON at: " + Config.inputPath, e);
+        } catch (Exception e) {
+            // org.json throws RuntimeExceptions for malformed JSON
+            LOGGER.log(Level.SEVERE, "Invalid JSON format at: " + Config.inputPath, e);
         }
 
         return list;
@@ -93,24 +90,38 @@ public class JsonDataProvider {
 
     // -------- helper methods for exact names --------
 
-    private static String text(JsonNode node, String name) {
-        JsonNode v = node.get(name);
-        if (v == null) return null;
-        if (v.isValueNode()) {
-            String s = v.asText().trim();
+    private static String text(JSONObject node, String name) {
+        if (!node.has(name)) return null;
+
+        Object v = node.opt(name);
+        if (v instanceof String s) {
+            s = s.trim();
             return s.isEmpty() ? null : s;
         }
+
+        // match Jackson's asText() behavior
+        if (v != null && !(v instanceof JSONObject)) {
+            String s = String.valueOf(v).trim();
+            return s.isEmpty() ? null : s;
+        }
+
         return null;
     }
 
-    private static Boolean booleanValue(JsonNode node) {
-        JsonNode v = node.get("Multiple");
+    private static Boolean booleanValue(JSONObject node) {
+        if (!node.has("Multiple")) return null;
+
+        Object v = node.opt("Multiple");
         if (v == null) return null;
 
-        if (v.isBoolean()) return v.asBoolean();
+        if (v instanceof Boolean b) return b;
 
-        if (v.isTextual()) {
-            String t = v.asText().trim().toLowerCase();
+        if (v instanceof Number n) {
+            return n.intValue() != 0;
+        }
+
+        if (v instanceof String s) {
+            String t = s.trim().toLowerCase();
             return switch (t) {
                 case "" -> null;
                 case "yes", "true", "1" -> true;
@@ -119,11 +130,6 @@ public class JsonDataProvider {
                     // unknown non-empty textual -> treat as true (conservative)
                         true;
             };
-        }
-
-        if (v.isNumber()) {
-            int n = v.intValue();
-            return n != 0;
         }
 
         return null;

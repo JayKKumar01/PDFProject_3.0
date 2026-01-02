@@ -122,8 +122,8 @@ public class FontInfoUtil {
                 usedOps.add(Operation.FONT);
             }
 
-            float size1 = tp1.getFontSize(); //Math.round(tp1.getFontSize());
-            float size2 = tp2.getFontSize();//Math.round(tp2.getFontSize());
+            float size1 = Math.round(tp1.getFontSize());
+            float size2 = Math.round(tp2.getFontSize());
             if (size1 != size2) {
                 currentDiffs.add(new DiffItem(Operation.SIZE, String.valueOf(size1), String.valueOf(size2)));
                 wordInfo.addOperation(Operation.SIZE);
