@@ -4,6 +4,7 @@ import org.apache.commons.math3.util.Pair;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.TextPosition;
+import pdfproject.Config;
 import pdfproject.constants.FileTypes;
 import pdfproject.constants.Operation;
 import pdfproject.constants.Texts;
@@ -349,19 +350,22 @@ public class ContentValidator {
         stripper.setSortByPosition(data.isSingleColumn());
         stripper.getText(document);
 
-        //if source then add the response to source
+        if (Config.isProdigyValidation) {
 
-        StringBuilder builder = new StringBuilder();
-        for (WordInfo wordInfo: wordInfoList){
-            builder.append(wordInfo.getWord()).append(" ");
+            //if source then add the response to source
+
+            StringBuilder builder = new StringBuilder();
+            for (WordInfo wordInfo : wordInfoList) {
+                builder.append(wordInfo.getWord()).append(" ");
+            }
+
+            String response = builder.toString(); // do something with this string for response
+
+            String mimicProdigyResponse = SentenceUtils.jsonString();
+
+            List<Pair<String, String>> pairList = SentenceUtils.extractPairs(mimicProdigyResponse);
+            resultMap.addListOfPairs(pairList, isSource);
         }
-
-        String response  = builder.toString(); // do something with this string for response
-
-        String mimicProdigyResponse = SentenceUtils.jsonString();
-
-        List<Pair<String, String>> pairList = SentenceUtils.extractPairs(mimicProdigyResponse);
-        resultMap.addListOfPairs(pairList,isSource);
 
         return wordInfoList;
     }

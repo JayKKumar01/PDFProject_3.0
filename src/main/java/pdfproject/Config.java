@@ -11,6 +11,6 @@ public final class Config {
 
     public static String inputPath = "";
     public static int renderDpi = 100;
-
+    public static boolean isProdigyValidation;
     public static String outputImagePath = AppSettings.loadOutputPath(AppPaths.HOME_DIR + "\\" + FRAME_NAME + "\\Reports");
 }

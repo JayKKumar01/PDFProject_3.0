@@ -1,5 +1,6 @@
 package pdfproject.window2.components.header;
 
+import pdfproject.Config;
 import pdfproject.utils.AppSettings;
 import pdfproject.window2.theme.ThemeManager;
 
@@ -17,11 +18,20 @@ public class HeaderRightPanel extends JPanel {
         label.putClientProperty("FlatLaf.style", "font: 13");
 
         boolean enabled = AppSettings.loadProdigyValidation(false);
+
+        // ✅ initialize runtime config
+        Config.isProdigyValidation = enabled;
+
         ToggleSwitch toggle = new ToggleSwitch(enabled);
 
         toggle.addItemListener(e -> {
             boolean selected = toggle.isSelected();
+
+            // ✅ persist
             AppSettings.saveProdigyValidation(selected);
+
+            // ✅ update runtime state
+            Config.isProdigyValidation = selected;
 
             System.out.println(
                     "Prodigy Validation has been " + (selected ? "enabled." : "disabled.")
