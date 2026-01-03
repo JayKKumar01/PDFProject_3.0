@@ -11,7 +11,7 @@ import java.awt.*;
  */
 public class Main {
     public static void main(String[] args) {
-        boolean defaultDark = false;
+        boolean defaultDark = true;
         ThemeManager.initFromSettings(defaultDark);
 
         SwingUtilities.invokeLater(() -> {
@@ -21,7 +21,7 @@ public class Main {
 
             int height = Math.max(480, (int) (usable.height * 0.75)); // enforce a sensible min height
             new Window(height);
-            testConsole();
+//            testConsole();
         });
     }
     private static void testConsole() {

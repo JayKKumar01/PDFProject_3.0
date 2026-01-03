@@ -27,7 +27,7 @@ public final class Window {
     public Window(int preferredHeight) {
         int preferredWidth = (int) (preferredHeight * (16.0 / 9));
 
-        frame = new JFrame(Config.FRAME_NAME + " - Window3");
+        frame = new JFrame(Config.FRAME_NAME);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setSize(preferredWidth, preferredHeight);
