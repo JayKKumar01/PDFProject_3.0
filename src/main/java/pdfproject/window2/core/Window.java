@@ -1,7 +1,7 @@
 package pdfproject.window2.core;
 
 import pdfproject.Config;
-import pdfproject.window2.components.ContentPanel;
+import pdfproject.window2.components.content.ContentPanel;
 import pdfproject.window2.components.ConsolePanel;
 import pdfproject.window2.components.header.HeaderPanel;
 
@@ -40,7 +40,7 @@ public class Window extends JFrame {
         HeaderPanel header = new HeaderPanel();
         header.setPreferredSize(new Dimension(10, headerHeight));
 
-        ContentPanel content = new ContentPanel();
+        ContentPanel content = new ContentPanel(contentHeight);
         content.setPreferredSize(new Dimension(10, contentHeight));
 
         ConsolePanel console = new ConsolePanel();
