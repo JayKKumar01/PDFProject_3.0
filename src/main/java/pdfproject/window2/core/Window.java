@@ -11,9 +11,8 @@ import java.awt.*;
 public class Window extends JFrame {
 
     // ---- Height ratios ----
-    private static final float HEADER_RATIO  = 0.08f;
-    private static final float CONTENT_RATIO = 0.72f;
-    private static final float CONSOLE_RATIO = 0.20f;
+    private static final float HEADER_RATIO  = 0.1f;
+    private static final float CONTENT_RATIO = 0.65f;
 
     public Window(int height) {
         setTitle(Config.FRAME_NAME);
@@ -29,9 +28,13 @@ public class Window extends JFrame {
         setLocationRelativeTo(null);
 
         // ---- Calculate heights ----
-        int headerHeight  = Math.round(height * HEADER_RATIO);
+        int headerHeight  = Math.max(64, Math.round(height * HEADER_RATIO));
         int contentHeight = Math.round(height * CONTENT_RATIO);
-        int consoleHeight = Math.round(height * CONSOLE_RATIO);
+
+        int consoleHeight = Math.max(
+                120,
+                height - headerHeight - contentHeight
+        );
 
         // ---- Panels ----
         HeaderPanel header = new HeaderPanel();

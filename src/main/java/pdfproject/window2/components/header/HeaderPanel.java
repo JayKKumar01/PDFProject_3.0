@@ -13,7 +13,17 @@ public class HeaderPanel extends JPanel {
         setBackground(ThemeManager.HEADER_BG);
         setBorder(new EmptyBorder(12, 16, 12, 16));
 
-        add(new HeaderLeftPanel(), BorderLayout.WEST);
-        add(new HeaderRightPanel(), BorderLayout.EAST);
+        add(wrapVertically(new HeaderLeftPanel()), BorderLayout.WEST);
+        add(wrapVertically(new HeaderRightPanel()), BorderLayout.EAST);
+    }
+
+    /**
+     * Wraps a component so it is vertically centered.
+     */
+    private JComponent wrapVertically(JComponent child) {
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.setOpaque(false);
+        wrapper.add(child);
+        return wrapper;
     }
 }
