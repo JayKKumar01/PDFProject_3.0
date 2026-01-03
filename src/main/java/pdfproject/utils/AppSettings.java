@@ -12,6 +12,8 @@ public class AppSettings {
     private static final String SETTING_FILE = AppPaths.APP_HOME + "\\app_settings.properties";
     private static final String OUTPUT_PATH_KEY = "outputImagesPath";
     private static final String THEME_DARK_KEY = "themeDark";
+    private static final String PRODIGY_VALIDATION_KEY = "prodigyValidation";
+
 
     public static void saveOutputPath(String path){
         Properties props = loadAll();
@@ -74,4 +76,25 @@ public class AppSettings {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Save prodigy validation toggle state
+     */
+    public static void saveProdigyValidation(boolean enabled) {
+        Properties props = loadAll();
+        props.setProperty(PRODIGY_VALIDATION_KEY, Boolean.toString(enabled));
+        store(props);
+    }
+
+    /**
+     * Load prodigy validation toggle state.
+     * Defaults to false if missing.
+     */
+    public static boolean loadProdigyValidation(boolean defaultValue) {
+        Properties props = loadAll();
+        String v = props.getProperty(PRODIGY_VALIDATION_KEY);
+        if (v == null) return defaultValue;
+        return Boolean.parseBoolean(v);
+    }
+
 }
