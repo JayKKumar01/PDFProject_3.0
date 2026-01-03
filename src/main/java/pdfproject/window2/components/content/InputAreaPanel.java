@@ -28,10 +28,10 @@ public class InputAreaPanel extends JPanel {
         setBackground(ThemeManager.CONTENT_BG);
 
         // Bottom separator
-        setBorder(BorderFactory.createMatteBorder(
-                0, 0, 1, 0,
-                ThemeManager.ACCENT_PRIMARY
-        ));
+//        setBorder(BorderFactory.createMatteBorder(
+//                0, 0, 1, 0,
+//                ThemeManager.ACCENT_SOFT
+//        ));
 
         fileLabel = new JLabel("No input file selected");
         fileLabel.setForeground(ThemeManager.CONTENT_TEXT);

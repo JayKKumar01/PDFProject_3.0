@@ -18,7 +18,7 @@ public class ContentPanel extends JPanel {
         setBackground(ThemeManager.CONTENT_BG);
 
         MatteBorder border = new MatteBorder(
-                1, 1, 0, 1,
+                3, 3, 0, 3,
                 ThemeManager.ACCENT_PRIMARY
         );
         setBorder(border);

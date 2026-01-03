@@ -28,7 +28,7 @@ public class ActionPanel extends JPanel {
 
         setOpaque(true);
         setLayout(new GridBagLayout());
-        setBackground(ThemeManager.CONTENT_BG);
+        setBackground(ThemeManager.CONSOLE_BG);
 
         startButton = new JButton("Start");
         stopButton  = new JButton("Stop");

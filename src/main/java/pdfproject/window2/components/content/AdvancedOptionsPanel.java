@@ -14,10 +14,10 @@ public class AdvancedOptionsPanel extends JPanel {
         setBackground(ThemeManager.CONTENT_BG);
 
         // Bottom separator
-        setBorder(new MatteBorder(
-                0, 0, 1, 0,
-                ThemeManager.ACCENT_PRIMARY
-        ));
+//        setBorder(new MatteBorder(
+//                0, 0, 1, 0,
+//                ThemeManager.ACCENT_PRIMARY
+//        ));
 
         // TEMP
         add(new JLabel("Advanced Options", SwingConstants.CENTER), BorderLayout.CENTER);
