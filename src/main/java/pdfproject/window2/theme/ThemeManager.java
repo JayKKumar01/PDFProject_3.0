@@ -21,4 +21,14 @@ public final class ThemeManager {
     public static final Color ACCENT_SOFT    = new Color(0x9BFFD1); // lighter green
 
     public static final Color CONSOLE_ERROR          = new Color(0xFF3B30);
+
+    // Toggle
+    public static final Color TOGGLE_OFF_BG = new Color(0x2A3441);
+    public static final Color TOGGLE_ON_BG  = ACCENT_PRIMARY;
+    public static final Color TOGGLE_KNOB   = new Color(0xE6EDF3);
+
+    // User highlight
+    public static final Color USERNAME_HIGHLIGHT = new Color(0xF6A04D);
+
+
 }

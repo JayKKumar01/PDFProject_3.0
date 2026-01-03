@@ -3,7 +3,7 @@ package pdfproject.window2.core;
 import pdfproject.Config;
 import pdfproject.window2.components.ContentPanel;
 import pdfproject.window2.components.ConsolePanel;
-import pdfproject.window2.components.HeaderPanel;
+import pdfproject.window2.components.header.HeaderPanel;
 
 import javax.swing.*;
 import java.awt.*;
