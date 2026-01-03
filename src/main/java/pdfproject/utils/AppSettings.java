@@ -13,6 +13,7 @@ public class AppSettings {
     private static final String OUTPUT_PATH_KEY = "outputImagesPath";
     private static final String THEME_DARK_KEY = "themeDark";
     private static final String PRODIGY_VALIDATION_KEY = "prodigyValidation";
+    private static final String IMAGE_QUALITY_KEY = "imageQualityIndex";
 
 
     public static void saveOutputPath(String path){
@@ -95,6 +96,31 @@ public class AppSettings {
         String v = props.getProperty(PRODIGY_VALIDATION_KEY);
         if (v == null) return defaultValue;
         return Boolean.parseBoolean(v);
+    }
+
+
+    /**
+     * Save selected image quality index (0 = Low, 1 = Medium, 2 = High)
+     */
+    public static void saveImageQualityIndex(int index) {
+        Properties props = loadAll();
+        props.setProperty(IMAGE_QUALITY_KEY, Integer.toString(index));
+        store(props);
+    }
+
+    /**
+     * Load selected image quality index.
+     * Defaults to provided value if missing or invalid.
+     */
+    public static int loadImageQualityIndex(int defaultIndex) {
+        Properties props = loadAll();
+        String v = props.getProperty(IMAGE_QUALITY_KEY);
+        if (v == null) return defaultIndex;
+        try {
+            return Integer.parseInt(v);
+        } catch (NumberFormatException e) {
+            return defaultIndex;
+        }
     }
 
 }

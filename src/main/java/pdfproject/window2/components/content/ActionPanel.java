@@ -122,7 +122,20 @@ public class ActionPanel extends JPanel {
 
     private void setPanelsEnabled(boolean enabled) {
         for (JComponent panel : panelsToDisable) {
-            panel.setEnabled(enabled);
+            setComponentTreeEnabled(panel, enabled);
+        }
+    }
+
+    /**
+     * Recursively enables/disables a component and all its children.
+     */
+    private void setComponentTreeEnabled(Component component, boolean enabled) {
+        component.setEnabled(enabled);
+
+        if (component instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                setComponentTreeEnabled(child, enabled);
+            }
         }
     }
 }

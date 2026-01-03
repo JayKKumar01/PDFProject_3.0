@@ -37,19 +37,33 @@ public class OutputQualityPanel extends JPanel {
         qualityCombo.setBackground(ThemeManager.CONSOLE_BG);
         qualityCombo.setForeground(ThemeManager.HEADER_TEXT);
 
-        int index = indexForDpi(Config.renderDpi);
-        if (index >= 0) qualityCombo.setSelectedIndex(index);
+        // restore saved quality
+        int savedIndex = AppSettings.loadImageQualityIndex(indexForDpi(Config.renderDpi));
+        if (savedIndex >= 0 && savedIndex < DPI_VALUES.length) {
+            qualityCombo.setSelectedIndex(savedIndex);
+            Config.renderDpi = DPI_VALUES[savedIndex];
+        }
 
+        // save on change
         qualityCombo.addActionListener(e -> {
             int i = qualityCombo.getSelectedIndex();
             if (i >= 0 && i < DPI_VALUES.length) {
                 Config.renderDpi = DPI_VALUES[i];
+                AppSettings.saveImageQualityIndex(i);
+
+                System.out.println(
+                        "Selected image quality: " +
+                                qualityCombo.getSelectedItem() +
+                                " -> renderDpi=" + Config.renderDpi
+                );
             }
         });
+
 
         qualityPanel.add(qualityLabel);
         qualityPanel.add(qualityCombo);
         qualityWrapper.add(qualityPanel);
+
 
         // =====================================================
         // RIGHT : Output Path (FULL WIDTH, CORRECT ALIGNMENT)
