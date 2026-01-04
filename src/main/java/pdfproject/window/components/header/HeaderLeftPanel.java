@@ -1,5 +1,7 @@
 package pdfproject.window.components.header;
 
+import pdfproject.models.UserTimeRecord;
+import pdfproject.services.UserTimeRecordService;
 import pdfproject.window.theme.ThemeManager;
 
 import javax.swing.*;
@@ -16,20 +18,30 @@ public class HeaderLeftPanel extends JPanel {
         setOpaque(false);
         setLayout(new FlowLayout(FlowLayout.LEFT, 6, 0));
 
-        String userName = System.getProperty("user.name", "User");
+        // Create model
+        UserTimeRecord record = new UserTimeRecord(
+                System.getProperty("user.name", "User"),
+                LocalDateTime.now()
+        );
+
+        // Future DB save point
+        UserTimeRecordService service = new UserTimeRecordService();
+        service.save(record);
 
         JLabel welcomeLabel = new JLabel("Welcome,");
         welcomeLabel.setForeground(ThemeManager.ACCENT_SOFT);
         welcomeLabel.putClientProperty("FlatLaf.style", "font: 15");
 
-        JLabel userLabel = new JLabel(userName);
+        JLabel userLabel = new JLabel(record.getUsername());
         userLabel.setForeground(ThemeManager.USERNAME_HIGHLIGHT);
         userLabel.putClientProperty("FlatLaf.style", "font: 15 bold");
 
         JLabel separator = new JLabel("•");
         separator.setForeground(ThemeManager.CONTENT_TEXT);
 
-        JLabel timeLabel = new JLabel(LocalDateTime.now().format(FORMATTER));
+        JLabel timeLabel = new JLabel(
+                record.getTimestamp().format(FORMATTER)
+        );
         timeLabel.setForeground(ThemeManager.CONTENT_TEXT);
         timeLabel.putClientProperty("FlatLaf.style", "font: 11");
 
