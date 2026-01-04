@@ -40,7 +40,7 @@ public class OutputQualityPanel extends JPanel {
         qualityWrapper.setBackground(ThemeManager.CONSOLE_BG);
         qualityWrapper.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(
-                        2, 0,
+                        1, 0,
                         1, 5,
                         ThemeManager.ACCENT_PRIMARY
                 ),
@@ -83,7 +83,7 @@ public class OutputQualityPanel extends JPanel {
         pathPanel.setBackground(ThemeManager.CONSOLE_BG);
         pathPanel.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(
-                        2, 5,
+                        1, 5,
                         1, 0,
                         ThemeManager.ACCENT_PRIMARY
                 ),

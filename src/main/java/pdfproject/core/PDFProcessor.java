@@ -1,5 +1,6 @@
 package pdfproject.core;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import pdfproject.constants.FileTypes;
@@ -17,14 +18,21 @@ import java.util.List;
 
 public class PDFProcessor {
 
-    public static void processRow(StopListener stopListener, InputData data, int itemIndex, MapModel resultMap, String outputPath) throws Exception {
+    public static void processRow(
+            StopListener stopListener,
+            InputData data,
+            int itemIndex,
+            MapModel resultMap,
+            String outputPath
+    ) throws Exception {
+
         System.out.printf("▶️  Processing Item %d...%n", itemIndex + 1);
 
         File pdf1 = ensurePdf(data.getPath1());
         File pdf2 = ensurePdf(data.getPath2());
 
-        try (PDDocument doc1 = PDDocument.load(pdf1);
-             PDDocument doc2 = PDDocument.load(pdf2)) {
+        try (PDDocument doc1 = Loader.loadPDF(pdf1);
+             PDDocument doc2 = Loader.loadPDF(pdf2)) {
 
             int total1 = doc1.getNumberOfPages();
             int total2 = doc2.getNumberOfPages();
@@ -38,11 +46,16 @@ public class PDFProcessor {
 
             if (size1 != size2) {
                 int diff = Math.abs(size1 - size2);
-                System.out.printf("⚠️  [Item %d]: Document %d has %d extra page(s).%n",
-                        itemIndex + 1, size1 > size2 ? 1 : 2, diff);
+                System.out.printf(
+                        "⚠️  [Item %d]: Document %d has %d extra page(s).%n",
+                        itemIndex + 1, size1 > size2 ? 1 : 2, diff
+                );
             }
 
-            System.out.printf("📝 Item %d: Starting validation for %d page(s).%n", itemIndex + 1, maxSize);
+            System.out.printf(
+                    "📝 Item %d: Starting validation for %d page(s).%n",
+                    itemIndex + 1, maxSize
+            );
 
             PDFRenderer renderer1 = new PDFRenderer(doc1);
             PDFRenderer renderer2 = new PDFRenderer(doc2);
@@ -55,30 +68,43 @@ public class PDFProcessor {
             );
 
             for (int i = 0; i < maxSize; i++) {
-                if (stopListener != null && stopListener.stoppedByUser()){
+                if (stopListener != null && stopListener.stoppedByUser()) {
                     return;
                 }
+
                 int p1 = i < size1 ? range1.get(i) : -1;
                 int p2 = i < size2 ? range2.get(i) : -1;
 
-                System.out.printf("📄 Item %d | Page %d: Doc1 Page %s, Doc2 Page %s%n",
+                System.out.printf(
+                        "📄 Item %d | Page %d: Doc1 Page %s, Doc2 Page %s%n",
                         itemIndex + 1, i + 1,
                         p1 >= 0 ? String.valueOf(p1) : "N/A",
                         p2 >= 0 ? String.valueOf(p2) : "N/A"
                 );
 
                 try {
-                    List<BufferedImage> images = alignmentValidator.validateAlignment(p1, p2, i + 1);
+                    List<BufferedImage> images =
+                            alignmentValidator.validateAlignment(p1, p2, i + 1);
+
                     contentValidator.validateContent(p1, p2, i + 1, images);
-                    System.out.printf("✅ Item %d | Page %d: Validation complete.%n", itemIndex + 1, i + 1);
+
+                    System.out.printf(
+                            "✅ Item %d | Page %d: Validation complete.%n",
+                            itemIndex + 1, i + 1
+                    );
                 } catch (Exception e) {
-                    System.err.printf("❌ Item %d | Page %d: Validation failed - %s%n",
-                            itemIndex + 1, i + 1, e.getMessage());
+                    System.err.printf(
+                            "❌ Item %d | Page %d: Validation failed - %s%n",
+                            itemIndex + 1, i + 1, e.getMessage()
+                    );
                     e.printStackTrace();
                 }
             }
 
-            System.out.printf("✔️  Item %d: Validation for all pages completed.%n", itemIndex + 1);
+            System.out.printf(
+                    "✔️  Item %d: Validation for all pages completed.%n",
+                    itemIndex + 1
+            );
         }
     }
 
