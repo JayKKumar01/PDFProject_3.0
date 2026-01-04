@@ -14,7 +14,7 @@ public class OutputQualityPanel extends JPanel {
     // =====================================================
     // Layout constants (single source of truth)
     // =====================================================
-    private static final int ROOT_H_GAP     = 10;
+    private static final int ROOT_H_GAP     = 15;
     private static final int SECTION_PAD_Y  = 8;
     private static final int SECTION_PAD_X  = 12;
     private static final int ROW_V_GAP      = 6;
@@ -40,8 +40,8 @@ public class OutputQualityPanel extends JPanel {
         qualityWrapper.setBackground(ThemeManager.CONSOLE_BG);
         qualityWrapper.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(
-                        BORDER, 0,
-                        BORDER, BORDER,
+                        2, 0,
+                        1, 5,
                         ThemeManager.ACCENT_PRIMARY
                 ),
                 BorderFactory.createEmptyBorder(
@@ -83,8 +83,8 @@ public class OutputQualityPanel extends JPanel {
         pathPanel.setBackground(ThemeManager.CONSOLE_BG);
         pathPanel.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(
-                        BORDER, BORDER,
-                        BORDER, 0,
+                        2, 5,
+                        1, 0,
                         ThemeManager.ACCENT_PRIMARY
                 ),
                 BorderFactory.createEmptyBorder(

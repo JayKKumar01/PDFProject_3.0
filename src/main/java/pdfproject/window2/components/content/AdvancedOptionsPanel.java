@@ -49,7 +49,7 @@ public class AdvancedOptionsPanel extends JPanel {
         top.setOpaque(false);
 
         JLabel title = new JLabel("Color Options");
-        title.setForeground(ThemeManager.CONTENT_TEXT);
+        title.setForeground(ThemeManager.ACCENT_SOFT);
         title.setFont(title.getFont().deriveFont(Font.BOLD));
 
         JButton reset = new JButton("Reset");

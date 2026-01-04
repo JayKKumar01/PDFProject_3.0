@@ -14,7 +14,7 @@ public class HeaderRightPanel extends JPanel {
         setLayout(new FlowLayout(FlowLayout.RIGHT, 8, 0));
 
         JLabel label = new JLabel("Prodigy Validation");
-        label.setForeground(ThemeManager.HEADER_TEXT);
+        label.setForeground(ThemeManager.ACCENT_SOFT);
         label.putClientProperty("FlatLaf.style", "font: 13");
 
         boolean enabled = AppSettings.loadProdigyValidation(false);

@@ -11,8 +11,8 @@ public class ContentPanel extends JPanel {
     // ---- Height ratios ----
     private static final float INPUT_RATIO  = 0.30f;
     private static final float OUTPUT_RATIO = 0.15f;
-    private static final float ACTION_RATIO = 0.15f;
-    // remaining → AdvancedOptionsPanel (flexible)
+    // remaining → AdvancedOptionsPanel
+    // ActionPanel → natural height
 
     public ContentPanel(int h) {
         setLayout(new BorderLayout());
@@ -26,57 +26,52 @@ public class ContentPanel extends JPanel {
         setBorder(border);
 
         // ----------------------------
-        // Usable height (inside border)
+        // Calculate usable height
         // ----------------------------
         Insets insets = border.getBorderInsets(this);
         int usableHeight = h - insets.top - insets.bottom;
 
         int inputHeight  = Math.round(usableHeight * INPUT_RATIO);
         int outputHeight = Math.round(usableHeight * OUTPUT_RATIO);
-        int actionHeight = Math.round(usableHeight * ACTION_RATIO);
-
-        int advancedHeight =
-                usableHeight
-                        - inputHeight
-                        - outputHeight
-                        - actionHeight;
-
-        if (advancedHeight < 0) advancedHeight = 0;
-
-        // ----------------------------
-        // Stack container
-        // ----------------------------
-        JPanel stack = new JPanel();
-        stack.setLayout(new BoxLayout(stack, BoxLayout.Y_AXIS));
-        stack.setOpaque(false);
 
         // ----------------------------
         // Panels
         // ----------------------------
         InputAreaPanel inputArea = new InputAreaPanel();
-        inputArea.setPreferredSize(new Dimension(10, inputHeight));
+        inputArea.setPreferredSize(new Dimension(Integer.MAX_VALUE, inputHeight));
+        inputArea.setMaximumSize(new Dimension(Integer.MAX_VALUE, inputHeight));
 
         OutputQualityPanel outputQuality = new OutputQualityPanel();
-        outputQuality.setPreferredSize(new Dimension(10, outputHeight));
+        outputQuality.setPreferredSize(new Dimension(Integer.MAX_VALUE, outputHeight));
+        outputQuality.setMaximumSize(new Dimension(Integer.MAX_VALUE, outputHeight));
 
         AdvancedOptionsPanel advancedOptions = new AdvancedOptionsPanel();
-        advancedOptions.setPreferredSize(new Dimension(10, advancedHeight)); // flexible
+        // flexible – no preferred size
 
+        // ----------------------------
+        // Center stack
+        // ----------------------------
+        JPanel center = new JPanel();
+        center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
+        center.setOpaque(false);
+
+        center.add(inputArea);
+        center.add(outputQuality);
+        center.add(advancedOptions);
+
+        // ----------------------------
+        // Action panel (receives panels)
+        // ----------------------------
         ActionPanel actionPanel = new ActionPanel(
                 inputArea,
                 outputQuality,
                 advancedOptions
         );
-        actionPanel.setPreferredSize(new Dimension(10, actionHeight));
 
         // ----------------------------
-        // Assembly (order matters)
+        // Assemble
         // ----------------------------
-        stack.add(inputArea);
-        stack.add(outputQuality);
-        stack.add(advancedOptions);
-        stack.add(actionPanel); // always touches bottom
-
-        add(stack, BorderLayout.CENTER);
+        add(center, BorderLayout.CENTER);
+        add(actionPanel, BorderLayout.SOUTH); // always touches bottom
     }
 }
