@@ -19,7 +19,7 @@ public class OutputQualityPanel extends JPanel {
     private static final int SECTION_PAD_X  = 12;
     private static final int ROW_V_GAP      = 6;
     private static final int INLINE_H_GAP   = 8;
-    private static final int BORDER_WIDTH  = 1;
+    private static final int BORDER = 1;
 
     private static final int[] DPI_VALUES = {100, 150, 200};
 
@@ -40,8 +40,8 @@ public class OutputQualityPanel extends JPanel {
         qualityWrapper.setBackground(ThemeManager.CONSOLE_BG);
         qualityWrapper.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(
-                        BORDER_WIDTH, 0,
-                        BORDER_WIDTH, BORDER_WIDTH,
+                        BORDER, 0,
+                        BORDER, BORDER,
                         ThemeManager.ACCENT_PRIMARY
                 ),
                 BorderFactory.createEmptyBorder(
@@ -83,8 +83,8 @@ public class OutputQualityPanel extends JPanel {
         pathPanel.setBackground(ThemeManager.CONSOLE_BG);
         pathPanel.setBorder(BorderFactory.createCompoundBorder(
                 new MatteBorder(
-                        BORDER_WIDTH, BORDER_WIDTH,
-                        BORDER_WIDTH, 0,
+                        BORDER, BORDER,
+                        BORDER, 0,
                         ThemeManager.ACCENT_PRIMARY
                 ),
                 BorderFactory.createEmptyBorder(

@@ -5,6 +5,7 @@ import pdfproject.Launcher;
 import pdfproject.window2.theme.ThemeManager;
 
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,9 +27,20 @@ public class ActionPanel extends JPanel {
     public ActionPanel(JComponent... panelsToDisable) {
         this.panelsToDisable = panelsToDisable;
 
-        setOpaque(true);
-        setLayout(new GridBagLayout());
-        setBackground(ThemeManager.CONSOLE_BG);
+        // 🔴 OUTER PANEL: stretches, no border
+        setOpaque(false);
+        setLayout(new GridBagLayout()); // perfect centering, no glue needed
+
+        // =====================================================
+        // INNER PANEL: content-wrapped, bordered
+        // =====================================================
+        JPanel content = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 12));
+        content.setOpaque(true);
+        content.setBackground(ThemeManager.CONSOLE_BG);
+        content.setBorder(new MatteBorder(
+                3, 1, 0, 1,
+                ThemeManager.ACCENT_PRIMARY
+        ));
 
         startButton = new JButton("Start");
         stopButton  = new JButton("Stop");
@@ -47,16 +59,16 @@ public class ActionPanel extends JPanel {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
 
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
-        row.setOpaque(false);
-        row.add(startButton);
-        row.add(stopButton);
+        content.add(startButton);
+        content.add(stopButton);
 
-        add(row);
+        // GridBag centers content both axes
+        add(content);
     }
 
-    // ---------- Logic ----------
-
+    // =====================================================
+    // Logic
+    // =====================================================
     private void start() {
         if (isRunning) return;
         if (!isInputValid()) return;
@@ -109,8 +121,9 @@ public class ActionPanel extends JPanel {
         }
     }
 
-    // ---------- Helpers ----------
-
+    // =====================================================
+    // Helpers
+    // =====================================================
     private boolean isInputValid() {
         return Config.inputPath != null && !Config.inputPath.trim().isEmpty();
     }
@@ -126,14 +139,10 @@ public class ActionPanel extends JPanel {
         }
     }
 
-    /**
-     * Recursively enables/disables a component and all its children.
-     */
-    private void setComponentTreeEnabled(Component component, boolean enabled) {
-        component.setEnabled(enabled);
-
-        if (component instanceof Container) {
-            for (Component child : ((Container) component).getComponents()) {
+    private void setComponentTreeEnabled(Component c, boolean enabled) {
+        c.setEnabled(enabled);
+        if (c instanceof Container container) {
+            for (Component child : container.getComponents()) {
                 setComponentTreeEnabled(child, enabled);
             }
         }
