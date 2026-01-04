@@ -1,6 +1,7 @@
-package pdfproject.window.components;
+package pdfproject.window.components.console;
 
-import pdfproject.window.stream.CustomOutputStream;
+import pdfproject.window.components.GradientHeaderPanel;
+import pdfproject.window.components.console.stream.CustomOutputStream;
 import pdfproject.window.theme.ThemeManager;
 
 import javax.swing.*;

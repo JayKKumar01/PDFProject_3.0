@@ -1,4 +1,4 @@
-package pdfproject.window.stream;
+package pdfproject.window.components.console.stream;
 
 import pdfproject.window.theme.ThemeManager;
 

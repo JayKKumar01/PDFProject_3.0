@@ -15,8 +15,18 @@ public class Documents4jWordPdfConverter implements WordPdfConverter {
     @Override
     public File convert(File wordFile) throws Exception {
 
-        File outputFile = File.createTempFile("converted_", ".pdf",
-                new File(AppPaths.TEMP_WORD_PDF));
+        // ❌ Fail fast if MS Word is not installed
+        if (!isMicrosoftWordInstalled()) {
+            throw new RuntimeException(
+                    "Microsoft Word is not installed.\n" +
+                            "documents4j requires MS Word on Windows to convert Word → PDF."
+            );
+        }
+
+        File outputFile = File.createTempFile(
+                "converted_", ".pdf",
+                new File(AppPaths.TEMP_WORD_PDF)
+        );
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         IConverter converter = LocalConverter.builder().build();
@@ -50,4 +60,27 @@ public class Documents4jWordPdfConverter implements WordPdfConverter {
 
         return outputFile;
     }
+
+    /**
+     * Checks whether Microsoft Word (winword.exe) is available on Windows.
+     */
+    private boolean isMicrosoftWordInstalled() {
+        try {
+            Process process = new ProcessBuilder(
+                    "powershell",
+                    "-command",
+                    "try { " +
+                            "  $w = New-Object -ComObject Word.Application; " +
+                            "  $w.Quit(); " +
+                            "  exit 0 " +
+                            "} catch { exit 1 }"
+            ).start();
+
+            return process.waitFor() == 0;
+
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

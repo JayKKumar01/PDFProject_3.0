@@ -1,4 +1,4 @@
-package pdfproject.window.stream;
+package pdfproject.window.components.console.stream;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
