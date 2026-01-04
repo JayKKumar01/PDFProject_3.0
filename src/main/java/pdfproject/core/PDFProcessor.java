@@ -2,13 +2,12 @@ package pdfproject.core;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
-import pdfproject.Config;
 import pdfproject.constants.FileTypes;
 import pdfproject.interfaces.StopListener;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.parsers.RangeParser;
-import pdfproject.utils.WordToPdfConverter;
+import pdfproject.utils.converter.WordToPdfConverter;
 import pdfproject.validators.AlignmentValidator;
 import pdfproject.validators.ContentValidator;
 

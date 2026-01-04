@@ -1,4 +1,4 @@
-package pdfproject.utils;
+package pdfproject.utils.converter;
 
 import com.documents4j.api.DocumentType;
 import com.documents4j.api.IConverter;
@@ -21,6 +21,18 @@ public class WordToPdfConverter {
     private static final File tempDir = new File(AppPaths.TEMP_WORD_PDF);
 
     public static File convertToPdf(String wordPath) throws Exception {
+        File inputFile = new File(wordPath);
+        if (!inputFile.exists())
+            throw new FileNotFoundException("Word file not found");
+
+        WordPdfConverter converter =
+                WordPdfConverterFactory.create();
+
+        return converter.convert(inputFile);
+    }
+
+
+    public static File convertToPdf1(String wordPath) throws Exception {
         File inputFile = new File(wordPath);
         if (!inputFile.exists()) throw new FileNotFoundException("Word file not found: " + wordPath);
 
