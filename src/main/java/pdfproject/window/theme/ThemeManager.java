@@ -1,4 +1,4 @@
-package pdfproject.window2.theme;
+package pdfproject.window.theme;
 
 import java.awt.*;
 

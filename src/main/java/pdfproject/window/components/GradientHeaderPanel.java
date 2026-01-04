@@ -1,4 +1,4 @@
-package pdfproject.window2.components;
+package pdfproject.window.components;
 
 import javax.swing.*;
 import java.awt.*;

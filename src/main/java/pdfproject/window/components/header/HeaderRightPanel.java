@@ -1,8 +1,8 @@
-package pdfproject.window2.components.header;
+package pdfproject.window.components.header;
 
 import pdfproject.Config;
 import pdfproject.utils.AppSettings;
-import pdfproject.window2.theme.ThemeManager;
+import pdfproject.window.theme.ThemeManager;
 
 import javax.swing.*;
 import java.awt.*;

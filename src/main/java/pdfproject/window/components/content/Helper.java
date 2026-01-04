@@ -1,4 +1,4 @@
-package pdfproject.window.components.body.right.color;
+package pdfproject.window.components.content;
 
 import pdfproject.constants.OperationColor;
 

@@ -1,12 +1,13 @@
 package pdfproject.window.stream;
 
-import pdfproject.window.core.Theme;
-import pdfproject.window.utils.ThemeManager;
+import pdfproject.window.theme.ThemeManager;
 
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -19,7 +20,7 @@ public final class CustomOutputStream extends OutputStream {
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream(256);
 
     // Error color is fixed (always uses ExperimentColors.CONSOLE_ERROR).
-    private static final Color ERROR_COLOR = Theme.CONSOLE_ERROR;
+    private static final Color ERROR_COLOR = ThemeManager.CONSOLE_ERROR;
 
     public CustomOutputStream(JTextPane textPane) {
         this.textPane = textPane;
@@ -102,7 +103,7 @@ public final class CustomOutputStream extends OutputStream {
         buffer.reset();
         if (text.isEmpty()) return;
 
-        final Color normalColor = ThemeManager.getTheme().consoleText;
+        final Color normalColor = ThemeManager.CONSOLE_TEXT;
         final Color runColor = asError ? ERROR_COLOR : normalColor;
 
         SwingUtilities.invokeLater(() -> {
@@ -116,36 +117,6 @@ public final class CustomOutputStream extends OutputStream {
                 textPane.setCaretPosition(doc.getLength());
             } catch (BadLocationException e) {
                 e.printStackTrace();
-            }
-        });
-    }
-
-    /**
-     * Recolor all existing non-error runs in the console to match the supplied theme's consoleText.
-     */
-    public void recolor(Theme theme) {
-        if (theme == null) return;
-
-        SwingUtilities.invokeLater(() -> {
-            StyledDocument doc = textPane.getStyledDocument();
-            int len = doc.getLength();
-            int pos = 0;
-
-            while (pos < len) {
-                Element elem = doc.getCharacterElement(pos);
-                AttributeSet attrs = elem.getAttributes();
-                boolean isError = Boolean.TRUE.equals(attrs.getAttribute("isError"));
-
-                int start = elem.getStartOffset();
-                int end = elem.getEndOffset();
-
-                if (!isError) {
-                    SimpleAttributeSet newAttrs = new SimpleAttributeSet();
-                    StyleConstants.setForeground(newAttrs, theme.consoleText);
-                    newAttrs.addAttribute("isError", Boolean.FALSE);
-                    doc.setCharacterAttributes(start, end - start, newAttrs, false);
-                }
-                pos = end;
             }
         });
     }

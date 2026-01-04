@@ -1,8 +1,8 @@
-package pdfproject.window2.components.content;
+package pdfproject.window.components.content;
 
 import pdfproject.Config;
 import pdfproject.Launcher;
-import pdfproject.window2.theme.ThemeManager;
+import pdfproject.window.theme.ThemeManager;
 
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
