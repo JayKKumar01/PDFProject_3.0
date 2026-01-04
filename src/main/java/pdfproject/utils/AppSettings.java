@@ -123,4 +123,20 @@ public class AppSettings {
         }
     }
 
+    private static String opColorKey(String op) {
+        return "opColor." + op;
+    }
+
+    public static void saveOperationColor(String op, String colorName) {
+        Properties props = loadAll();
+        props.setProperty(opColorKey(op), colorName);
+        store(props);
+    }
+
+    public static String loadOperationColor(String op, String defaultColorName) {
+        Properties props = loadAll();
+        return props.getProperty(opColorKey(op), defaultColorName);
+    }
+
+
 }

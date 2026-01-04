@@ -1,44 +1,39 @@
 package pdfproject.window2.components.content;
 
 import pdfproject.constants.OperationColor;
+import pdfproject.utils.AppSettings;
 import pdfproject.window2.theme.ThemeManager;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class AdvancedOptionsPanel extends JPanel {
 
-    private static final String[][] OPS = {
-            {"Deleted:", "Deleted"},
-            {"Added:", "Added"},
-            {"Font Name:", "Font Name"},
-            {"Font Size:", "Font Size"},
-            {"Font Style:", "Font Style"},
-            {"Multiple:", "Multiple"}
-    };
-
     private static final int COMBO_WIDTH = 140;
 
-    private final Map<String, Color> colorMap = Helper.getAllColorMap();
+    /** Order matters → LinkedHashMap */
+    private static final Map<String, String> OPS = new LinkedHashMap<>() {{
+        put("Deleted:", "Deleted");
+        put("Added:", "Added");
+        put("Font Name:", "Font Name");
+        put("Font Size:", "Font Size");
+        put("Font Style:", "Font Style");
+        put("Multiple:", "Multiple");
+    }};
+
     private final String[] colorNames = Helper.getAllColorNames();
 
-    private final List<JComboBox<String>> combos = new ArrayList<>(6);
-    private final List<JLabel> previews = new ArrayList<>(6);
-
     public AdvancedOptionsPanel() {
-        setOpaque(true);
         setLayout(new BorderLayout());
+        setOpaque(true);
         setBackground(ThemeManager.CONTENT_BG);
         setBorder(new EmptyBorder(8, 8, 8, 8));
 
         add(createTopBar(), BorderLayout.NORTH);
         add(createCenter(), BorderLayout.CENTER);
-
-        loadInitialState();
     }
 
     // =====================================================
@@ -56,7 +51,6 @@ public class AdvancedOptionsPanel extends JPanel {
         reset.setFocusable(false);
         reset.setBackground(ThemeManager.ACCENT_PRIMARY);
         reset.setForeground(Color.BLACK);
-
         reset.addActionListener(e -> resetColors());
 
         top.add(title, BorderLayout.WEST);
@@ -65,21 +59,19 @@ public class AdvancedOptionsPanel extends JPanel {
     }
 
     // =====================================================
-// Center grid (3 × 2)
-// =====================================================
+    // Center grid
+    // =====================================================
     private JComponent createCenter() {
         JPanel center = new JPanel(new GridLayout(2, 3, 150, 8));
         center.setOpaque(false);
 
-        for (String[] op : OPS) {
-            JPanel row = createRow(op[0], op[1]);
-            center.add(row);
-        }
-
+        OPS.forEach((label, opKey) -> center.add(createRow(label, opKey)));
         return center;
     }
 
-
+    // =====================================================
+    // Single row (self-contained)
+    // =====================================================
     private JPanel createRow(String labelText, String opKey) {
         JPanel row = new JPanel(new GridBagLayout());
         row.setOpaque(false);
@@ -88,54 +80,47 @@ public class AdvancedOptionsPanel extends JPanel {
         gbc.insets = new Insets(2, 2, 2, 2);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // ---- Label (LEFT) ----
+        // label
         JLabel label = new JLabel(labelText);
         label.setForeground(ThemeManager.CONTENT_TEXT);
-
         gbc.gridx = 0;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
         row.add(label, gbc);
 
-        // ---- Flexible spacer (pushes combo to the right) ----
+        // spacer
         gbc.gridx = 1;
-        gbc.weightx = 1;                 // 🔴 KEY LINE
+        gbc.weightx = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         row.add(Box.createHorizontalGlue(), gbc);
 
-        // ---- Combo (RIGHT, fixed width) ----
+        // combo
         JComboBox<String> combo = new JComboBox<>(colorNames);
         combo.setFocusable(false);
         combo.setBackground(ThemeManager.CONSOLE_BG);
         combo.setForeground(ThemeManager.HEADER_TEXT);
+        Dimension size = new Dimension(COMBO_WIDTH, combo.getPreferredSize().height);
+        combo.setPreferredSize(size);
 
-        Dimension comboSize = new Dimension(COMBO_WIDTH, combo.getPreferredSize().height);
-        combo.setPreferredSize(comboSize);
-        combo.setMinimumSize(comboSize);
-        combo.setMaximumSize(comboSize);
-
-        combo.addActionListener(e -> {
-            String selected = (String) combo.getSelectedItem();
-            if (selected == null) return;
-
-            Color c = Helper.getColorFromName(selected.toLowerCase());
-            Helper.setOperationColor(opKey, c);
-        });
-
-        combos.add(combo);
-
-        gbc.gridx = 2;
-        gbc.weightx = 0;
-        gbc.fill = GridBagConstraints.NONE;
-        row.add(combo, gbc);
-
-        // ---- Preview ----
+        // preview
         JLabel preview = new JLabel();
         preview.setOpaque(true);
         preview.setPreferredSize(new Dimension(22, 16));
         preview.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
 
-        previews.add(preview);
+        loadInitialColor(opKey, combo, preview);
+
+        combo.addActionListener(e -> {
+            String name = ((String) combo.getSelectedItem()).toLowerCase();
+            Color c = Helper.getColorFromName(name);
+
+            Helper.setOperationColor(opKey, c);
+            AppSettings.saveOperationColor(opKey, name);
+            preview.setBackground(c);
+        });
+
+        gbc.gridx = 2;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        row.add(combo, gbc);
 
         gbc.gridx = 3;
         row.add(preview, gbc);
@@ -143,46 +128,58 @@ public class AdvancedOptionsPanel extends JPanel {
         return row;
     }
 
+    // =====================================================
+    // Helpers
+    // =====================================================
+    private void loadInitialColor(String opKey, JComboBox<String> combo, JLabel preview) {
+        Color def = getCurrentColor(opKey);
+        String defName = Helper.capitalize(colorNameFor(def));
 
-    // =====================================================
-    // State helpers
-    // =====================================================
-    private void loadInitialState() {
-        for (int i = 0; i < OPS.length; i++) {
-            Color c = currentColorForOp(OPS[i][1]);
-            String name = colorNameForColor(c);
-            combos.get(i).setSelectedItem(Helper.capitalize(name));
-            previews.get(i).setBackground(c);
-        }
+        String saved = AppSettings.loadOperationColor(opKey, defName.toLowerCase());
+        Color c = Helper.getColorFromName(saved);
+
+        Helper.setOperationColor(opKey, c);
+        combo.setSelectedItem(Helper.capitalize(saved));
+        preview.setBackground(c);
     }
 
     private void resetColors() {
-        OperationColor.DELETED = OperationColor.DEF_DELETED;
-        OperationColor.ADDED = OperationColor.DEF_ADDED;
-        OperationColor.FONT_NAME = OperationColor.DEF_FONT_NAME;
-        OperationColor.FONT_SIZE = OperationColor.DEF_FONT_SIZE;
+        OperationColor.DELETED    = OperationColor.DEF_DELETED;
+        OperationColor.ADDED      = OperationColor.DEF_ADDED;
+        OperationColor.FONT_NAME  = OperationColor.DEF_FONT_NAME;
+        OperationColor.FONT_SIZE  = OperationColor.DEF_FONT_SIZE;
         OperationColor.FONT_STYLE = OperationColor.DEF_FONT_STYLE;
-        OperationColor.MULTIPLE = OperationColor.DEF_MULTIPLE;
+        OperationColor.MULTIPLE   = OperationColor.DEF_MULTIPLE;
 
-        loadInitialState();
+        OPS.forEach((k, op) -> {
+            Color c = getCurrentColor(op);
+            AppSettings.saveOperationColor(op, colorNameFor(c));
+        });
+
+        removeAll();
+        add(createTopBar(), BorderLayout.NORTH);
+        add(createCenter(), BorderLayout.CENTER);
+        revalidate();
+        repaint();
     }
 
-    private Color currentColorForOp(String op) {
+    private Color getCurrentColor(String op) {
         return switch (op) {
             case "Deleted" -> OperationColor.DELETED;
             case "Added" -> OperationColor.ADDED;
             case "Font Name" -> OperationColor.FONT_NAME;
             case "Font Size" -> OperationColor.FONT_SIZE;
             case "Font Style" -> OperationColor.FONT_STYLE;
-            case "Multiple" -> OperationColor.MULTIPLE;
             default -> OperationColor.MULTIPLE;
         };
     }
 
-    private String colorNameForColor(Color color) {
-        for (Map.Entry<String, Color> e : colorMap.entrySet()) {
-            if (e.getValue().equals(color)) return e.getKey();
-        }
-        return "black";
+    private String colorNameFor(Color color) {
+        return Helper.getAllColorMap().entrySet()
+                .stream()
+                .filter(e -> e.getValue().equals(color))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse("black");
     }
 }
