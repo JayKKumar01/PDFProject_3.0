@@ -29,7 +29,7 @@ public class HeaderLeftPanel extends JPanel {
         service.save(record);
 
         JLabel welcomeLabel = new JLabel("Welcome,");
-        welcomeLabel.setForeground(ThemeManager.ACCENT_SOFT);
+        welcomeLabel.setForeground(ThemeManager.ACCENT_PRIMARY);
         welcomeLabel.putClientProperty("FlatLaf.style", "font: 15");
 
         JLabel userLabel = new JLabel(record.getUsername());
@@ -42,7 +42,7 @@ public class HeaderLeftPanel extends JPanel {
         JLabel timeLabel = new JLabel(
                 record.getTimestamp().format(FORMATTER)
         );
-        timeLabel.setForeground(ThemeManager.CONTENT_TEXT);
+        timeLabel.setForeground(ThemeManager.ACCENT_SOFT);
         timeLabel.putClientProperty("FlatLaf.style", "font: 11");
 
         add(welcomeLabel);

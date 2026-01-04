@@ -44,7 +44,7 @@ public class AdvancedOptionsPanel extends JPanel {
         top.setOpaque(false);
 
         JLabel title = new JLabel("Color Options");
-        title.setForeground(ThemeManager.ACCENT_SOFT);
+        title.setForeground(ThemeManager.ACCENT_PRIMARY);
         title.setFont(title.getFont().deriveFont(Font.BOLD));
 
         JButton reset = new JButton("Reset");
@@ -82,7 +82,7 @@ public class AdvancedOptionsPanel extends JPanel {
 
         // label
         JLabel label = new JLabel(labelText);
-        label.setForeground(ThemeManager.CONTENT_TEXT);
+        label.setForeground(ThemeManager.ACCENT_SOFT);
         gbc.gridx = 0;
         row.add(label, gbc);
 
