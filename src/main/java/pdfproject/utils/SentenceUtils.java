@@ -16,19 +16,35 @@ public class SentenceUtils {
     public static List<Pair<String, String>> extractPairs(String jsonStr) {
         List<Pair<String, String>> result = new ArrayList<>();
 
-        JSONArray array = new JSONArray(jsonStr);
+        try {
+            // Find the first '[' and last ']'
+            int start = jsonStr.indexOf('[');
+            int end = jsonStr.lastIndexOf(']');
 
-        for (int i = 0; i < array.length(); i++) {
-            JSONObject obj = array.getJSONObject(i);
+            if (start == -1 || end == -1 || end <= start) {
+                return result; // No valid JSON array
+            }
 
-            String original = obj.getString("original");
-            String corrected = obj.getString("corrected");
+            String jsonArrayStr = jsonStr.substring(start, end + 1);
 
-            result.add(new Pair<>(original, corrected));
+            JSONArray array = new JSONArray(jsonArrayStr);
+
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject obj = array.getJSONObject(i);
+
+                String original = obj.getString("original");
+                String corrected = obj.getString("corrected");
+
+                result.add(new Pair<>(original, corrected));
+            }
+
+        } catch (Exception e) {
+            return new ArrayList<>(); // fail-safe
         }
 
         return result;
     }
+
 
     // Reads and returns JSON string from file
     public static String jsonString() {
