@@ -50,8 +50,8 @@ public class OutputQualityPanel extends JPanel {
                 )
         ));
 
-        JLabel qualityLabel = new JLabel("Image Quality:");
-        qualityLabel.setForeground(ThemeManager.CONTENT_TEXT);
+        JLabel qualityLabel = new JLabel("Image Quality:  ");
+        qualityLabel.setForeground(ThemeManager.ACCENT_SOFT);
 
         qualityCombo = new JComboBox<>(new String[]{"Low", "Medium", "High"});
         qualityCombo.setFocusable(false);
