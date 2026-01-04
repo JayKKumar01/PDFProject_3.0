@@ -5,10 +5,21 @@ import pdfproject.utils.AppSettings;
 import pdfproject.window2.theme.ThemeManager;
 
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.io.File;
 
 public class OutputQualityPanel extends JPanel {
+
+    // =====================================================
+    // Layout constants (single source of truth)
+    // =====================================================
+    private static final int ROOT_H_GAP     = 10;
+    private static final int SECTION_PAD_Y  = 8;
+    private static final int SECTION_PAD_X  = 12;
+    private static final int ROW_V_GAP      = 6;
+    private static final int INLINE_H_GAP   = 8;
+    private static final int BORDER_WIDTH  = 1;
 
     private static final int[] DPI_VALUES = {100, 150, 200};
 
@@ -16,18 +27,28 @@ public class OutputQualityPanel extends JPanel {
     private final JLabel pathLabel;
 
     public OutputQualityPanel() {
+        // Root paints CONTENT_BG so the horizontal gap is visible
         setOpaque(true);
-        setLayout(new BorderLayout(24, 0));
-        setBackground(ThemeManager.CONSOLE_BG);
+        setBackground(ThemeManager.CONTENT_BG);
+        setLayout(new BorderLayout(ROOT_H_GAP, 0));
 
         // =====================================================
-        // LEFT : Image Quality (unchanged)
+        // LEFT : Image Quality (CONSOLE_BG)
         // =====================================================
         JPanel qualityWrapper = new JPanel(new GridBagLayout());
-        qualityWrapper.setOpaque(false);
-
-        JPanel qualityPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        qualityPanel.setOpaque(false);
+        qualityWrapper.setOpaque(true);
+        qualityWrapper.setBackground(ThemeManager.CONSOLE_BG);
+        qualityWrapper.setBorder(BorderFactory.createCompoundBorder(
+                new MatteBorder(
+                        BORDER_WIDTH, 0,
+                        BORDER_WIDTH, BORDER_WIDTH,
+                        ThemeManager.ACCENT_PRIMARY
+                ),
+                BorderFactory.createEmptyBorder(
+                        SECTION_PAD_Y, SECTION_PAD_X,
+                        SECTION_PAD_Y, SECTION_PAD_X
+                )
+        ));
 
         JLabel qualityLabel = new JLabel("Image Quality:");
         qualityLabel.setForeground(ThemeManager.CONTENT_TEXT);
@@ -37,66 +58,48 @@ public class OutputQualityPanel extends JPanel {
         qualityCombo.setBackground(ThemeManager.CONSOLE_BG);
         qualityCombo.setForeground(ThemeManager.HEADER_TEXT);
 
-        // restore saved quality
         int savedIndex = AppSettings.loadImageQualityIndex(indexForDpi(Config.renderDpi));
         if (savedIndex >= 0 && savedIndex < DPI_VALUES.length) {
             qualityCombo.setSelectedIndex(savedIndex);
             Config.renderDpi = DPI_VALUES[savedIndex];
         }
 
-        // save on change
         qualityCombo.addActionListener(e -> {
             int i = qualityCombo.getSelectedIndex();
             if (i >= 0 && i < DPI_VALUES.length) {
                 Config.renderDpi = DPI_VALUES[i];
                 AppSettings.saveImageQualityIndex(i);
-
-                System.out.println(
-                        "Selected image quality: " +
-                                qualityCombo.getSelectedItem() +
-                                " -> renderDpi=" + Config.renderDpi
-                );
             }
         });
 
-
-        qualityPanel.add(qualityLabel);
-        qualityPanel.add(qualityCombo);
-        qualityWrapper.add(qualityPanel);
-
+        qualityWrapper.add(qualityLabel);
+        qualityWrapper.add(qualityCombo);
 
         // =====================================================
-        // RIGHT : Output Path (FULL WIDTH, CORRECT ALIGNMENT)
+        // RIGHT : Output Path (CONSOLE_BG)
         // =====================================================
-        JPanel pathPanel = new JPanel(new GridBagLayout());
-        pathPanel.setOpaque(false);
+        JPanel pathPanel = new JPanel(new BorderLayout(0, ROW_V_GAP));
+        pathPanel.setOpaque(true);
+        pathPanel.setBackground(ThemeManager.CONSOLE_BG);
+        pathPanel.setBorder(BorderFactory.createCompoundBorder(
+                new MatteBorder(
+                        BORDER_WIDTH, BORDER_WIDTH,
+                        BORDER_WIDTH, 0,
+                        ThemeManager.ACCENT_PRIMARY
+                ),
+                BorderFactory.createEmptyBorder(
+                        SECTION_PAD_Y, SECTION_PAD_X,
+                        SECTION_PAD_Y, SECTION_PAD_X
+                )
+        ));
 
-        GridBagConstraints outer = new GridBagConstraints();
-        outer.gridx = 0;
-        outer.gridy = 0;
-        outer.weightx = 1;                 // 🔴 TAKE FULL WIDTH
-        outer.weighty = 1;                 // 🔴 CENTER VERTICALLY
-        outer.fill = GridBagConstraints.HORIZONTAL;
-        outer.anchor = GridBagConstraints.CENTER;
-
-        JPanel pathContent = new JPanel(new GridBagLayout());
-        pathContent.setOpaque(false);
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.gridx = 0;
-        c.weightx = 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
-
-        // ---- Row 1: centered label ----
+        // ---- Title (centered) ----
         JLabel pathTitle = new JLabel("Output Image Path", SwingConstants.CENTER);
         pathTitle.setForeground(ThemeManager.ACCENT_PRIMARY);
         pathTitle.setFont(pathTitle.getFont().deriveFont(Font.BOLD));
 
-        c.gridy = 0;
-        pathContent.add(pathTitle, c);
-
-        // ---- Row 2: path LEFT, browse RIGHT ----
-        JPanel pathRow = new JPanel(new BorderLayout(8, 0));
+        // ---- Path row (LEFT path, RIGHT button) ----
+        JPanel pathRow = new JPanel(new BorderLayout(INLINE_H_GAP, 0));
         pathRow.setOpaque(false);
 
         pathLabel = new JLabel(ellipsize(Config.outputImagePath));
@@ -108,23 +111,13 @@ public class OutputQualityPanel extends JPanel {
         browseButton.setBackground(ThemeManager.ACCENT_PRIMARY);
         browseButton.setForeground(Color.BLACK);
         browseButton.setBorder(BorderFactory.createEmptyBorder(4, 10, 4, 10));
-
         browseButton.addActionListener(e -> openFolderDialog());
 
-// ---- Wrapper to provide RIGHT margin (true margin, not padding) ----
-        JPanel browseWrapper = new JPanel(new BorderLayout());
-        browseWrapper.setOpaque(false);
-        browseWrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 12)); // right margin
-        browseWrapper.add(browseButton, BorderLayout.CENTER);
-
         pathRow.add(pathLabel, BorderLayout.CENTER);
-        pathRow.add(browseWrapper, BorderLayout.EAST);
+        pathRow.add(browseButton, BorderLayout.EAST);
 
-
-        c.gridy = 1;
-        pathContent.add(pathRow, c);
-
-        pathPanel.add(pathContent, outer);
+        pathPanel.add(pathTitle, BorderLayout.NORTH);
+        pathPanel.add(pathRow, BorderLayout.CENTER);
 
         // =====================================================
         // Assemble
@@ -137,12 +130,8 @@ public class OutputQualityPanel extends JPanel {
     // Folder chooser
     // =====================================================
     private void openFolderDialog() {
-        if (!isEnabled()) return;
-
         JFileChooser chooser = new JFileChooser(Config.outputImagePath);
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setDialogTitle("Select Output Folder");
-        chooser.setAcceptAllFileFilterUsed(false);
 
         Window window = SwingUtilities.getWindowAncestor(this);
         if (chooser.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
