@@ -27,7 +27,7 @@ public class Main {
 
             int height = Math.max(480, (int) (usable.height * 0.75));
             new Window(height);
-            testConsole();
+//            testConsole();
         });
     }
     private static void testConsole() {

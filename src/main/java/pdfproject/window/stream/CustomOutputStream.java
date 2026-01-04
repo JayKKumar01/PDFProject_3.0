@@ -98,10 +98,38 @@ public final class CustomOutputStream extends OutputStream {
         flushBuffer(false);
     }
 
+    private boolean shouldSuppress(String text) {
+        String t = text.trim();
+
+        // SLF4J startup / binding warnings
+        if (t.startsWith("SLF4J(")) return true;
+        if (t.contains("org.slf4j")) return true;
+        if (t.contains("slf4j.org")) return true;
+
+        // Log4j provider / initialization warnings
+        if (t.contains("Log4j")) return true;
+        if (t.contains("log4j")) return true;
+        if (t.contains("org.apache.logging.log4j")) return true;
+
+        return false;
+    }
+
+
+
     private void flushBuffer(boolean asError) {
+        if (ConsolePrintController.isPaused()) {
+            buffer.reset();   // discard output
+            return;
+        }
         final String text = buffer.toString(StandardCharsets.UTF_8);
         buffer.reset();
         if (text.isEmpty()) return;
+
+        // 🚫 Suppress unwanted logging framework noise
+        if (shouldSuppress(text)) return;
+
+
+
 
         final Color normalColor = ThemeManager.CONSOLE_TEXT;
         final Color runColor = asError ? ERROR_COLOR : normalColor;
