@@ -23,9 +23,12 @@ public class Documents4jWordPdfConverter implements WordPdfConverter {
             );
         }
 
+        File outDir = new File(AppPaths.TEMP_WORD_PDF);
+        outDir.mkdirs();
+
         File outputFile = File.createTempFile(
                 "converted_", ".pdf",
-                new File(AppPaths.TEMP_WORD_PDF)
+                outDir
         );
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
