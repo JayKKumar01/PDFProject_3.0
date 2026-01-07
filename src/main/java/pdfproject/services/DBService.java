@@ -51,11 +51,11 @@ public final class DBService {
     }
 
     /**
-     * Save validation data (success or partial success).
+     * Save validation data (privacy-safe).
      */
     public static void saveValidationData(
-            String path1,
-            String path2,
+            String docType1,
+            String docType2,
             boolean isProdigyValidation,
             boolean isTotalSuccess
     ) {
@@ -72,14 +72,15 @@ public final class DBService {
 
         // ---- FUTURE DATABASE SAVE POINT ----
         // INSERT INTO validation_run
-        // (session_id, validated_at_utc, path1, path2, prodigy_used, total_success)
+        // (session_id, validated_at_utc, doc_type_1, doc_type_2,
+        //  prodigy_used, total_success)
         // -----------------------------------
 
         System.out.println("DB SAVE (VALIDATION DATA)");
         System.out.println("Session ID    : " + sessionId);
         System.out.println("Validated UTC : " + validatedAtUtc);
-        System.out.println("Path 1        : " + path1);
-        System.out.println("Path 2        : " + path2);
+        System.out.println("Doc Type 1    : " + docType1);
+        System.out.println("Doc Type 2    : " + docType2);
         System.out.println("Prodigy used  : " + isProdigyValidation);
         System.out.println("Total success : " + isTotalSuccess);
     }

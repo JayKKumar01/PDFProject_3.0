@@ -112,13 +112,22 @@ public class PDFProcessor {
                     itemIndex + 1
             );
 
+            String docType1 = data.getPath1().toLowerCase().endsWith(FileTypes.PDF_EXTENSION)
+                    ? "PDF"
+                    : "WORD";
+
+            String docType2 = data.getPath2().toLowerCase().endsWith(FileTypes.PDF_EXTENSION)
+                    ? "PDF"
+                    : "WORD";
+
             // ✅ SAVE RESULT (TOTAL OR PARTIAL)
             DBService.saveValidationData(
-                    data.getPath1(),
-                    data.getPath2(),
+                    docType1,
+                    docType2,
                     Config.isProdigyValidation,
                     isTotalSuccess
             );
+
         }
     }
 
