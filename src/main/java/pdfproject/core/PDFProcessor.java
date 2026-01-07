@@ -3,11 +3,13 @@ package pdfproject.core;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import pdfproject.Config;
 import pdfproject.constants.FileTypes;
 import pdfproject.interfaces.StopListener;
 import pdfproject.models.InputData;
 import pdfproject.models.MapModel;
 import pdfproject.parsers.RangeParser;
+import pdfproject.services.DBService;
 import pdfproject.utils.converter.WordToPdfConverter;
 import pdfproject.validators.AlignmentValidator;
 import pdfproject.validators.ContentValidator;
@@ -30,6 +32,8 @@ public class PDFProcessor {
 
         File pdf1 = ensurePdf(data.getPath1());
         File pdf2 = ensurePdf(data.getPath2());
+
+        boolean isTotalSuccess = true; // 👈 NEW FLAG
 
         try (PDDocument doc1 = Loader.loadPDF(pdf1);
              PDDocument doc2 = Loader.loadPDF(pdf2)) {
@@ -92,7 +96,9 @@ public class PDFProcessor {
                             "✅ Item %d | Page %d: Validation complete.%n",
                             itemIndex + 1, i + 1
                     );
+
                 } catch (Exception e) {
+                    isTotalSuccess = false; // 👈 MARK PARTIAL FAILURE
                     System.err.printf(
                             "❌ Item %d | Page %d: Validation failed - %s%n",
                             itemIndex + 1, i + 1, e.getMessage()
@@ -104,6 +110,14 @@ public class PDFProcessor {
             System.out.printf(
                     "✔️  Item %d: Validation for all pages completed.%n",
                     itemIndex + 1
+            );
+
+            // ✅ SAVE RESULT (TOTAL OR PARTIAL)
+            DBService.saveValidationData(
+                    data.getPath1(),
+                    data.getPath2(),
+                    Config.isProdigyValidation,
+                    isTotalSuccess
             );
         }
     }

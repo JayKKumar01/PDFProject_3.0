@@ -1,7 +1,7 @@
 package pdfproject.window.components.header;
 
 import pdfproject.models.UserTimeRecord;
-import pdfproject.services.UserTimeRecordService;
+import pdfproject.services.DBService;
 import pdfproject.window.theme.ThemeManager;
 
 import javax.swing.*;
@@ -25,8 +25,7 @@ public class HeaderLeftPanel extends JPanel {
         );
 
         // Future DB save point
-        UserTimeRecordService service = new UserTimeRecordService();
-        service.save(record);
+        DBService.init(record);
 
         JLabel welcomeLabel = new JLabel("Welcome,");
         welcomeLabel.setForeground(ThemeManager.ACCENT_PRIMARY);
