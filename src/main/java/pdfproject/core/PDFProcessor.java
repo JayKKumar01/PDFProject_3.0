@@ -121,7 +121,7 @@ public class PDFProcessor {
                     : "WORD";
 
             // ✅ SAVE RESULT (TOTAL OR PARTIAL)
-            DBService.saveValidationData(
+            DBService.saveUserActivity(
                     docType1,
                     docType2,
                     Config.isProdigyValidation,
